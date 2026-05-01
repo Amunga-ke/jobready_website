@@ -21,6 +21,49 @@ const JobModalContext = createContext<JobModalContextType>({
   selectedJob: null,
 });
 
+/**
+ * Check whether a job listing should get an AI-predicted salary.
+ * Returns true when the job has no disclosed salary and is a job-type listing.
+ */
+function needsSalaryPrediction(job: Job): boolean {
+  // Skip if salary is already disclosed
+  if (job.salaryCurrency && job.salary !== 'Competitive') return false;
+  // Skip non-job types
+  const code = job.listingTypeCode;
+  if (
+    ['SCHOLARSHIP', 'BURSARY', 'FELLOWSHIP', 'GRANT', 'VOLUNTEER', 'BOOTCAMP',
+     'TRAINING', 'WORKSHOP', 'MENTORSHIP', 'CONFERENCE', 'APPRENTICESHIP'].includes(code)
+  ) return false;
+  // Skip casual
+  if (job.isCasual) return false;
+  return true;
+}
+
+/**
+ * Fetch an AI-predicted salary range for the given job.
+ * Silently fails — predicted salary is a nice-to-have, not critical.
+ */
+async function fetchPredictedSalary(job: Job): Promise<Job['predictedSalary'] | undefined> {
+  try {
+    const res = await fetch('/api/salary/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: job.title,
+        category: job.category,
+        level: job.level,
+        location: job.location,
+        listingType: job.listingTypeCode,
+      }),
+    });
+    if (!res.ok) return undefined;
+    const data = await res.json();
+    return data.predicted || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function JobModalProvider({ children }: { children: React.ReactNode }) {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -43,8 +86,19 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
         if (!res.ok) throw new Error('Job not found');
         return res.json();
       })
-      .then((data) => {
-        if (data.job) setSelectedJob(data.job);
+      .then(async (data) => {
+        if (data.job) {
+          const job = data.job as Job;
+          setSelectedJob(job);
+
+          // If no salary is disclosed, predict it in the background
+          if (needsSalaryPrediction(job)) {
+            const predicted = await fetchPredictedSalary(job);
+            if (predicted) {
+              setSelectedJob((prev) => (prev ? { ...prev, predictedSalary: predicted } : prev));
+            }
+          }
+        }
       })
       .catch((err) => {
         console.error('[openJobById] Failed to fetch job:', err);

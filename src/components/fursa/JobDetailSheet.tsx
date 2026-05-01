@@ -356,13 +356,7 @@ export default function JobDetailSheet() {
                   <MetaChip icon={Clock} label="" value={job.deadline} accent={job.urgent} />
                 </>
               )}
-              {/* Salary */}
-              {hasSalary && (
-                <>
-                  <Dot />
-                  <MetaChip icon={Briefcase} label="" value={`${job.salaryCurrency} ${job.salary}${job.salaryPeriod ?? ''}`} />
-                </>
-              )}
+
             </div>
           </div>
 
@@ -381,15 +375,34 @@ export default function JobDetailSheet() {
             <DescriptionBlock description={job.description} />
           </div>
 
-          {/* ── Compensation (subtle) ── */}
-          {hasSalary && (
-            <div className="px-6 py-3 border-b border-subtle">
-              <span className="text-[13px] text-muted">
-                {job.salaryCurrency} {job.salary}
-                {job.salaryPeriod && (
-                  <span className="text-[11px]"> {job.salaryPeriod}</span>
-                )}
-              </span>
+          {/* ── Compensation / Salary ── */}
+          {(hasSalary || job.predictedSalary) && (
+            <div className="px-6 py-4 border-b border-subtle bg-emerald-50/60">
+              <h3 className="font-heading text-[11px] font-bold uppercase tracking-wider text-ink/50 mb-2">
+                Compensation / Salary
+              </h3>
+              {hasSalary ? (
+                <>
+                  <p className="text-sm font-medium text-ink/80">
+                    {job.salaryCurrency} {job.salary}
+                    {job.salaryPeriod && (
+                      <span className="text-[12px] font-normal text-ink/50"> {job.salaryPeriod}</span>
+                    )}
+                  </p>
+                </>
+              ) : job.predictedSalary ? (
+                <>
+                  <p className="text-sm font-medium text-ink/80">
+                    {job.predictedSalary.currency}{' '}
+                    {job.predictedSalary.min.toLocaleString('en-KE')} –{' '}
+                    {job.predictedSalary.max.toLocaleString('en-KE')}
+                    <span className="text-[12px] font-normal text-ink/50"> /{job.predictedSalary.period}</span>
+                  </p>
+                  <p className="text-[11px] text-ink/40 mt-1 italic">
+                    Estimated range based on similar roles in Kenya
+                  </p>
+                </>
+              ) : null}
             </div>
           )}
 

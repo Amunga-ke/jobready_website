@@ -22,7 +22,7 @@ export default function Featured() {
         </div>
 
         <div
-          className="border-l-2 border-accent pl-6 sm:pl-8 mb-10 group cursor-pointer"
+          className="border-l-2 border-accent pl-6 sm:pl-8 mb-10 group cursor-pointer active:scale-[0.98] transition-transform"
           onClick={() => openJobById('safaricom-senior-pm')}
         >
           <p className="font-mono text-[10px] text-muted uppercase tracking-[0.15em] mb-3">
@@ -50,7 +50,7 @@ export default function Featured() {
             <div
               key={job.id}
               onClick={() => openJobById(job.id)}
-              className="flex items-center gap-3 py-3.5 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
+              className="flex items-center gap-3 py-3.5 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors active:scale-[0.98] transition-transform"
             >
               <div className="w-10 h-10 border border-divider rounded-lg flex items-center justify-center shrink-0 font-heading font-bold text-sm text-muted">
                 {job.letter}

@@ -31,7 +31,7 @@ export default function Government() {
                 <div
                   key={job.id}
                   onClick={() => openJobById(job.id)}
-                  className="py-3 group cursor-pointer"
+                  className="py-3 group cursor-pointer active:scale-[0.98] transition-transform rounded-lg"
                 >
                   <p className="text-sm font-medium group-hover:text-accent transition-colors">{job.title}</p>
                   <div className="flex items-center gap-2 mt-1">
@@ -53,7 +53,7 @@ export default function Government() {
                 <div
                   key={job.id}
                   onClick={() => openJobById(job.id)}
-                  className="py-3 group cursor-pointer"
+                  className="py-3 group cursor-pointer active:scale-[0.98] transition-transform rounded-lg"
                 >
                   <p className="text-sm font-medium group-hover:text-accent transition-colors">{job.title}</p>
                   <span className="font-mono text-[11px] text-muted tabular-nums mt-1 block">{job.deadline}</span>

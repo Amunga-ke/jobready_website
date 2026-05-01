@@ -57,7 +57,7 @@ export default function Hero() {
               {recentJobs.map((job, i) => (
                 <div key={job.id}>
                   <div
-                    className="group cursor-pointer"
+                    className="group cursor-pointer active:scale-[0.98] transition-transform rounded-lg"
                     onClick={() => openJobById(job.id)}
                   >
                     <p className="text-sm font-medium group-hover:text-accent transition-colors">{job.title}</p>

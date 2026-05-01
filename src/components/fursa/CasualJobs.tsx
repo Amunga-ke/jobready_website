@@ -26,7 +26,7 @@ export default function CasualJobs() {
               <div
                 key={job.id}
                 onClick={() => openJobById(job.id)}
-                className={`group cursor-pointer ${i < casualJobs.length - 1 ? 'border-b border-subtle pb-1' : ''}`}
+                className={`group cursor-pointer active:scale-[0.98] transition-transform rounded ${i < casualJobs.length - 1 ? 'border-b border-subtle pb-1' : ''}`}
               >
                 <span className="text-ink group-hover:text-accent transition-colors">{job.title}</span>
                 <span className="text-muted/40"> — {job.location} — </span>
