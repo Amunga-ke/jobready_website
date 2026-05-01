@@ -47,7 +47,8 @@ function workModeLabel(mode?: string): string | null {
 // Sub-section components
 // ---------------------------------------------------------------------------
 
-function MetaPill({
+/** A single compact meta chip: icon + label · value */
+function MetaChip({
   icon: Icon,
   label,
   value,
@@ -59,14 +60,17 @@ function MetaPill({
   accent?: boolean;
 }) {
   return (
-    <div className="bg-surface rounded-lg p-3">
-      <div className="flex items-center gap-1.5 text-[10px] text-muted uppercase tracking-wider mb-1">
-        <Icon className="w-3 h-3" />
-        {label}
-      </div>
-      <p className={`text-sm font-medium ${accent ? 'text-accent' : ''}`}>{value}</p>
-    </div>
+    <span className={`inline-flex items-center gap-1 text-[12px] whitespace-nowrap ${accent ? 'text-accent font-medium' : 'text-muted'}`}>
+      <Icon className="w-3 h-3 shrink-0" />
+      <span className="text-subtle">{label}</span>
+      <span className="font-sans">{value}</span>
+    </span>
   );
+}
+
+/** Divider dot between inline meta chips */
+function Dot() {
+  return <span className="w-1 h-1 rounded-full bg-subtle shrink-0" />;
 }
 
 function DescriptionBlock({ description }: { description: string }) {
@@ -249,48 +253,64 @@ export default function JobDetailSheet() {
               </div>
             </div>
 
-            {/* ── Key details grid ── */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Employment type / listing type */}
+            {/* ── Quick meta row ── */}
+            <div className="flex items-center gap-2 flex-wrap text-[12px]">
+              {/* Type */}
               {hasJobDetails && (
-                <MetaPill icon={Briefcase} label="Type" value={job.type} />
+                <>
+                  <MetaChip icon={Briefcase} label="" value={job.type} />
+                  <Dot />
+                </>
               )}
-              {/* Level (for jobs) */}
+              {/* Level */}
               {hasJobDetails && job.level !== 'Any' && (
-                <MetaPill icon={Building2} label="Level" value={job.level} />
+                <>
+                  <MetaChip icon={Building2} label="" value={job.level} />
+                  <Dot />
+                </>
               )}
               {/* Work mode */}
               {wMode && (
-                <MetaPill
-                  icon={Wifi}
-                  label="Work mode"
-                  value={wMode}
-                  accent={wMode === 'Remote'}
-                />
+                <>
+                  <MetaChip icon={Wifi} label="" value={wMode} accent={wMode === 'Remote'} />
+                  <Dot />
+                </>
               )}
               {/* Location */}
-              <MetaPill icon={MapPin} label="Location" value={job.location} />
+              <MetaChip icon={MapPin} label="" value={job.location} />
               {/* Education */}
               {job.educationLevel && (
-                <MetaPill icon={GraduationCap} label="Education" value={job.educationLevel} />
+                <>
+                  <Dot />
+                  <MetaChip icon={GraduationCap} label="" value={job.educationLevel} />
+                </>
               )}
               {/* Vacancies */}
               {job.vacancies != null && job.vacancies > 0 && (
-                <MetaPill icon={Users} label="Vacancies" value={`${job.vacancies} positions`} />
+                <>
+                  <Dot />
+                  <MetaChip icon={Users} label="" value={`${job.vacancies} vac`} />
+                </>
               )}
-              {/* Contract duration */}
+              {/* Duration */}
               {job.contractDuration && (
-                <MetaPill icon={Clock} label="Duration" value={job.contractDuration} />
+                <>
+                  <Dot />
+                  <MetaChip icon={Clock} label="" value={job.contractDuration} />
+                </>
               )}
               {/* Posted */}
-              <MetaPill icon={Clock} label="Posted" value={`${job.posted} ago`} />
+              <>
+                <Dot />
+                <MetaChip icon={Clock} label="" value={job.posted + ' ago'} />
+              </>
               {/* Deadline */}
-              <MetaPill
-                icon={Clock}
-                label="Deadline"
-                value={job.deadline || 'Open'}
-                accent={job.urgent}
-              />
+              {job.deadline && (
+                <>
+                  <Dot />
+                  <MetaChip icon={Clock} label="" value={job.deadline} accent={job.urgent} />
+                </>
+              )}
             </div>
           </div>
 
