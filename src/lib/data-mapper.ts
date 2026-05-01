@@ -173,6 +173,17 @@ function formatSalary(min: number | null | undefined, max: number | null | undef
   return `Up to ${fmt(max!)}`;
 }
 
+function formatSalaryPeriod(period: string | null | undefined): string | undefined {
+  if (!period) return undefined;
+  const map: Record<string, string> = {
+    MONTHLY: '/month',
+    DAILY: '/day',
+    HOURLY: '/hour',
+    ANNUAL: '/year',
+  };
+  return map[period] ?? undefined;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -260,30 +271,70 @@ export function mapJobToView(listing: PrismaListingRow): Job {
     : null;
   const isGov = isGovernmentListing(listing);
   const isCasual = listing.listingType?.code === 'CASUAL';
+  const jd = listing.jobDetail;
 
   return {
+    // Identity
     id: listing.slug,
     title: listing.title,
     company: companyName,
     companyInitial: companyName.charAt(0).toUpperCase(),
+
+    // Classification
     category: (listing.category?.name as JobCategory) || 'Other',
     type: resolveListingType(listing),
     level: resolveExperienceLevel(listing),
+    listingTypeCode: listing.listingType?.code ?? 'JOB',
+    listingType: listing.listingType?.name ?? 'Job',
+
+    // Organization
+    organizationType: listing.organization?.organizationType?.name,
+    industry: listing.organization?.industry?.name,
+    companyWebsite: listing.organization?.websiteUrl ?? undefined,
+    isVerified: listing.organization?.isVerified ?? listing.isVerified,
+
+    // Geography
     location: listing.location?.name ?? 'Remote',
-    salary: formatSalary(
-      listing.jobDetail?.salaryMin,
-      listing.jobDetail?.salaryMax,
-    ),
-    salaryCurrency: listing.jobDetail?.currency?.symbol ?? '',
+    isRemote: isRemoteListing(listing),
+    workMode: jd?.workMode as Job['workMode'],
+
+    // Compensation
+    salary: formatSalary(jd?.salaryMin, jd?.salaryMax),
+    salaryCurrency: jd?.currency?.symbol ?? '',
+    salaryDisplay: jd?.salaryDisplay,
+    salaryPeriod: formatSalaryPeriod(jd?.salaryPeriod),
+
+    // Education & Requirements
+    educationLevel: jd?.educationLevel?.name,
+    contractDuration: jd?.contractDuration ?? undefined,
+    vacancies: jd?.vacanciesCount,
+
+    // Timing
     posted: relativeTime(new Date(listing.postedAt)),
     deadline: deadline?.text,
     urgent: deadline?.urgent ?? false,
+
+    // Content
+    summary: listing.summary ?? undefined,
     description: listing.description,
-    requirements: [], // requirements are embedded in description now
     tags: safeParseJson<string[]>(listing.tags, []),
-    isRemote: isRemoteListing(listing),
+
+    // Application
+    applicationUrl: listing.applicationUrl,
+    applicationEmail: listing.applicationEmail,
+    applicationInstructions: listing.applicationInstructions,
+    sourceUrl: listing.sourceUrl,
+
+    // Engagement
+    viewsCount: listing.viewsCount,
+    applicationsCount: listing.applicationsCount,
+
+    // Flags
     isGovernment: isGov || undefined,
     isCasual: isCasual || undefined,
+    isFeatured: listing.isFeatured || undefined,
+
+    // Casual-specific
     casualRate: isCasual ? (extractCasualRate(listing) || 'Negotiable') : undefined,
     casualNote: isCasual ? (extractCasualNote(listing) || '') : undefined,
   };

@@ -250,10 +250,10 @@ export type OpportunityTabKey = 'e' | 'i' | 's';
 // -----------------------------------------------------------------------------
 
 /**
- * Job — The canonical job listing entity.
+ * Job — The canonical listing entity (unified for jobs, internships, scholarships, etc.).
  *
  * This is the richest schema and the foundation for every section that
- * displays job data. Components that only need a subset of fields should
+ * displays listing data. Components that only need a subset of fields should
  * still reference this type (via Pick/Omit) so that a single `Job` object
  * can be passed through without duplication.
  */
@@ -261,32 +261,60 @@ export interface Job {
   // ---- Identity ----
   /** Slug-style unique identifier, e.g. "safaricom-senior-accountant" */
   id: string;
-  /** Job title, e.g. "Senior Accountant" */
+  /** Listing title, e.g. "Senior Accountant" */
   title: string;
-  /** Employer / company name */
+  /** Employer / organization name */
   company: string;
-  /** Single uppercase letter derived from company name (used as avatar placeholder) */
+  /** Single uppercase letter derived from organization name (used as avatar placeholder) */
   companyInitial: string;
 
   // ---- Classification ----
-  /** Primary job category */
+  /** Primary category */
   category: JobCategory;
-  /** Employment arrangement */
+  /** Employment arrangement (for jobs) or listing type name (for scholarships etc.) */
   type: JobType;
-  /** Seniority level */
+  /** Seniority level (for jobs) */
   level: JobLevel;
+  /** Listing type code, e.g. JOB, INTERNSHIP, SCHOLARSHIP, CASUAL */
+  listingTypeCode: string;
+  /** Human-readable listing type label, e.g. "Job", "Internship", "Scholarship" */
+  listingType: string;
+
+  // ---- Organization ----
+  /** Organization type name, e.g. "Private Sector Companies", "County Government" */
+  organizationType?: string;
+  /** Industry name, e.g. "Telecommunications", "Banking" */
+  industry?: string;
+  /** Organization website URL */
+  companyWebsite?: string;
+  /** Whether the organization is verified */
+  isVerified?: boolean;
 
   // ---- Geography ----
   /** City / area / "Nationwide" / "Remote" */
   location: string;
   /** Whether the role offers remote work */
   isRemote: boolean;
+  /** Work mode: ONSITE, HYBRID, or REMOTE */
+  workMode?: 'ONSITE' | 'HYBRID' | 'REMOTE';
 
   // ---- Compensation ----
   /** Human-readable salary range, e.g. "180,000 - 250,000" */
   salary: string;
   /** Currency symbol/code, e.g. "Ksh". Empty string for scholarships. */
   salaryCurrency: string;
+  /** Salary display type: RANGE, EXACT, COMPETITIVE, HIDDEN */
+  salaryDisplay?: string;
+  /** Salary period: MONTHLY, DAILY, HOURLY, ANNUAL */
+  salaryPeriod?: string;
+
+  // ---- Education & Requirements ----
+  /** Required education level, e.g. "Bachelor's Degree", "Diploma" */
+  educationLevel?: string;
+  /** Contract duration, e.g. "6 months" */
+  contractDuration?: string;
+  /** Number of vacancies */
+  vacancies?: number | null;
 
   // ---- Timing ----
   /** Relative post time, e.g. "2m", "5d", "1w" */
@@ -297,12 +325,28 @@ export interface Job {
   urgent?: boolean;
 
   // ---- Content ----
-  /** Full job description (2-4 sentences) */
+  /** Summary (short, 1-2 sentences) */
+  summary?: string;
+  /** Full description */
   description: string;
-  /** Ordered list of requirements */
-  requirements: string[];
   /** Keyword tags for search / filtering */
   tags: string[];
+
+  // ---- Application ----
+  /** External application URL (if any) */
+  applicationUrl?: string | null;
+  /** Application email (if any) */
+  applicationEmail?: string | null;
+  /** Application instructions (if any) */
+  applicationInstructions?: string | null;
+  /** Source URL (original listing) */
+  sourceUrl?: string | null;
+
+  // ---- Engagement ----
+  /** Total views count */
+  viewsCount?: number;
+  /** Total applications count */
+  applicationsCount?: number;
 
   // ---- Flags ----
   /** Government / public-sector position */
@@ -311,6 +355,8 @@ export interface Job {
   isGazette?: boolean;
   /** Casual / daily-wage listing */
   isCasual?: boolean;
+  /** Featured listing */
+  isFeatured?: boolean;
 
   // ---- Casual-specific fields ----
   /** Pay rate for casual roles, e.g. "Ksh 500/day" */
