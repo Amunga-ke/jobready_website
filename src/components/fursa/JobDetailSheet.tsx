@@ -373,17 +373,9 @@ export default function JobDetailSheet() {
           {/* ── Tags ── */}
           {job.tags.length > 0 && (
             <div className="px-6 py-5 border-b border-subtle">
-              <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-3">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {job.tags.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="text-[11px] text-muted bg-surface border border-subtle rounded-md px-2.5 py-1"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <p className="text-[12px] text-muted leading-relaxed">
+                {job.tags.map((tag) => `#${tag}`).join(' ')}
+              </p>
             </div>
           )}
 
