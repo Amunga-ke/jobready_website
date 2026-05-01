@@ -9,6 +9,136 @@
 // Enums & Literal Unions
 // -----------------------------------------------------------------------------
 
+// ---- Organization ----
+
+/** Organization type (PRIVATE, NGO, GOVERNMENT, etc.) */
+export type OrganizationType =
+  | 'PRIVATE'
+  | 'SMALL_BUSINESS'
+  | 'STARTUP'
+  | 'NGO'
+  | 'INTERNATIONAL_ORG'
+  | 'NATIONAL_GOV'
+  | 'COUNTY_GOV'
+  | 'STATE_CORPORATION'
+  | 'EDUCATION'
+  | 'FOUNDATION'
+  | 'RELIGIOUS_ORG';
+
+/** Organization industry sector */
+export type Industry =
+  | 'AGRICULTURE'
+  | 'AUTOMOTIVE'
+  | 'AVIATION'
+  | 'BANKING'
+  | 'CONSTRUCTION'
+  | 'CONSULTING'
+  | 'CONSUMER_GOODS'
+  | 'EDUCATION'
+  | 'ENERGY'
+  | 'ENVIRONMENT'
+  | 'FINTECH'
+  | 'FOOD_BEVERAGE'
+  | 'GOVERNMENT_PUBLIC_ADMIN'
+  | 'HEALTHCARE'
+  | 'HOSPITALITY_TOURISM'
+  | 'HUMAN_RESOURCES'
+  | 'INFORMATION_TECHNOLOGY'
+  | 'INSURANCE'
+  | 'INTERNATIONAL_DEVELOPMENT'
+  | 'LEGAL'
+  | 'LOGISTICS_SUPPLY_CHAIN'
+  | 'MANUFACTURING'
+  | 'MARKETING_ADVERTISING'
+  | 'MEDIA_ENTERTAINMENT'
+  | 'MINING'
+  | 'NON_PROFIT'
+  | 'PHARMACEUTICAL'
+  | 'REAL_ESTATE'
+  | 'RESEARCH'
+  | 'RETAIL'
+  | 'SECURITY_DEFENSE'
+  | 'SPORTS'
+  | 'TELECOMMUNICATIONS'
+  | 'TEXTILES_APPAREL'
+  | 'WATER_SANITATION';
+
+// ---- Job Categories (DB enum values) ----
+
+/** Database-level job category slug (maps to the `value` field in enums) */
+export type JobCategoryValue =
+  | 'TECHNOLOGY'
+  | 'FINANCE_ACCOUNTING'
+  | 'SALES_BUSINESS'
+  | 'MARKETING_COMMUNICATIONS'
+  | 'HUMAN_RESOURCES'
+  | 'ENGINEERING'
+  | 'HEALTHCARE'
+  | 'EDUCATION'
+  | 'OPERATIONS_ADMIN'
+  | 'SUPPLY_CHAIN'
+  | 'HOSPITALITY'
+  | 'SPECIALISED_SERVICES'
+  | 'AGRICULTURE'
+  | 'LEGAL'
+  | 'CREATIVE_DESIGN'
+  | 'ARCHITECTURE_CONSTRUCTION'
+  | 'SCIENCE_RESEARCH'
+  | 'CUSTOMER_SERVICE'
+  | 'SKILLED_TRADES'
+  | 'MEDIA_PUBLISHING'
+  | 'NONPROFIT'
+  | 'REAL_ESTATE'
+  | 'FITNESS_WELLNESS'
+  | 'GOVERNMENT_PUBLIC_SECTOR'
+  | 'CONSULTING'
+  | 'INSURANCE'
+  | 'TRANSPORTATION'
+  | 'SECURITY_DEFENSE'
+  | 'ENTERTAINMENT'
+  | 'ENERGY_UTILITIES'
+  | 'SPORTS_RECREATION'
+  | 'TELECOMMUNICATIONS'
+  | 'AEROSPACE';
+
+/** Display-level job category (human-readable labels used in the UI) */
+export type JobCategory =
+  | 'Technology & IT'
+  | 'Finance & Accounting'
+  | 'Sales & Business Dev'
+  | 'Marketing & Comms'
+  | 'Human Resources'
+  | 'Engineering'
+  | 'Healthcare & Medical'
+  | 'Education & Training'
+  | 'Operations & Admin'
+  | 'Logistics & Supply Chain'
+  | 'Hospitality & Tourism'
+  | 'Legal & Compliance'
+  | 'Creative Arts & Design'
+  | 'Government & Public'
+  | 'Specialised Services'
+  | 'Agriculture & Agribusiness'
+  | 'Architecture & Construction'
+  | 'Science & Research'
+  | 'Customer Service'
+  | 'Skilled Trades & Manual Work'
+  | 'Media & Publishing'
+  | 'Nonprofit & Social Services'
+  | 'Real Estate'
+  | 'Fitness & Wellness'
+  | 'Consulting'
+  | 'Insurance'
+  | 'Transportation'
+  | 'Security & Defense'
+  | 'Entertainment & Gaming'
+  | 'Energy & Utilities'
+  | 'Sports & Recreation'
+  | 'Telecommunications'
+  | 'Aerospace & Aviation';
+
+// ---- Employment & Experience ----
+
 /** Employment type of a job listing */
 export type JobType =
   | 'Full-time'
@@ -26,6 +156,85 @@ export type JobLevel =
   | 'Executive'
   | 'Intern'
   | 'Any';
+
+/** Database-level experience level enum */
+export type ExperienceLevel =
+  | 'ENTRY_LEVEL'
+  | 'INTERNSHIP'
+  | 'MID_LEVEL'
+  | 'SENIOR'
+  | 'LEAD'
+  | 'MANAGER'
+  | 'DIRECTOR'
+  | 'EXECUTIVE';
+
+/** Database-level employment type enum */
+export type EmploymentType =
+  | 'FULL_TIME'
+  | 'PART_TIME'
+  | 'CONTRACT'
+  | 'TEMPORARY'
+  | 'INTERNSHIP'
+  | 'VOLUNTEER';
+
+/** Opportunity / listing type (internships, scholarships, etc.) */
+export type OpportunityType =
+  | 'INTERNSHIP'
+  | 'SPONSORSHIP'
+  | 'BURSARY'
+  | 'SCHOLARSHIP'
+  | 'UNIVERSITY_ADMISSION'
+  | 'VOLUNTEER'
+  | 'TRAINING'
+  | 'GRANT'
+  | 'CERTIFICATION'
+  | 'FUNDING'
+  | 'FELLOWSHIP'
+  | 'APPRENTICESHIP'
+  | 'WORKSHOP'
+  | 'CONFERENCE'
+  | 'COMPETITION'
+  | 'AWARD'
+  | 'RESIDENCY'
+  | 'MENTORSHIP'
+  | 'ACCELERATOR'
+  | 'INCUBATOR'
+  | 'BOOTCAMP'
+  | 'EXCHANGE'
+  | 'RESEARCH';
+
+// ---- Status & Currency ----
+
+/** Job listing status */
+export type JobStatus =
+  | 'DRAFT'
+  | 'PENDING_REVIEW'
+  | 'PUBLISHED'
+  | 'CLOSED'
+  | 'EXPIRED'
+  | 'ON_HOLD';
+
+/** Application status */
+export type ApplicationStatus =
+  | 'PENDING'
+  | 'REVIEWING'
+  | 'SHORTLISTED'
+  | 'INTERVIEW_SCHEDULED'
+  | 'INTERVIEWED'
+  | 'OFFERED'
+  | 'ACCEPTED'
+  | 'REJECTED'
+  | 'WITHDRAWN';
+
+/** Supported currency codes */
+export type Currency =
+  | 'KES' | 'USD' | 'EUR' | 'GBP' | 'UGX' | 'TZS'
+  | 'RWF' | 'ZAR' | 'NGN' | 'CAD' | 'AUD' | 'INR' | 'CNY';
+
+/** User role */
+export type UserRole = 'SEEKER' | 'EMPLOYER' | 'ADMIN';
+
+// ---- Other ----
 
 /** Government tier */
 export type GovernmentTier = 'National' | 'County';
@@ -126,23 +335,6 @@ export interface JobCategoryEntry {
   /** Whether this card gets the dark (ink) treatment in the UI */
   dark?: boolean;
 }
-
-/** All valid job category names */
-export type JobCategory =
-  | 'Technology & IT'
-  | 'Finance & Accounting'
-  | 'Sales & Business Dev'
-  | 'Marketing & Comms'
-  | 'Human Resources'
-  | 'Engineering'
-  | 'Healthcare & Medical'
-  | 'Education & Training'
-  | 'Operations & Admin'
-  | 'Logistics & Supply Chain'
-  | 'Hospitality & Tourism'
-  | 'Legal & Compliance'
-  | 'Creative Arts & Design'
-  | 'Government & Public';
 
 // -----------------------------------------------------------------------------
 // Location / Geography

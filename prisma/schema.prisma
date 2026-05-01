@@ -8,6 +8,158 @@ datasource db {
 }
 
 // ──────────────────────────────────────────────
+//  ENUMS
+// ──────────────────────────────────────────────
+
+enum UserRole {
+  SEEKER
+  EMPLOYER
+  ADMIN
+}
+
+enum OrganizationType {
+  PRIVATE
+  SMALL_BUSINESS
+  STARTUP
+  NGO
+  INTERNATIONAL_ORG
+  NATIONAL_GOV
+  COUNTY_GOV
+  STATE_CORPORATION
+  EDUCATION
+  FOUNDATION
+  RELIGIOUS_ORG
+}
+
+enum Industry {
+  AGRICULTURE
+  AUTOMOTIVE
+  AVIATION
+  BANKING
+  CONSTRUCTION
+  CONSULTING
+  CONSUMER_GOODS
+  EDUCATION
+  ENERGY
+  ENVIRONMENT
+  FINTECH
+  FOOD_BEVERAGE
+  GOVERNMENT_PUBLIC_ADMIN
+  HEALTHCARE
+  HOSPITALITY_TOURISM
+  HUMAN_RESOURCES
+  INFORMATION_TECHNOLOGY
+  INSURANCE
+  INTERNATIONAL_DEVELOPMENT
+  LEGAL
+  LOGISTICS_SUPPLY_CHAIN
+  MANUFACTURING
+  MARKETING_ADVERTISING
+  MEDIA_ENTERTAINMENT
+  MINING
+  NON_PROFIT
+  PHARMACEUTICAL
+  REAL_ESTATE
+  RESEARCH
+  RETAIL
+  SECURITY_DEFENSE
+  SPORTS
+  TELECOMMUNICATIONS
+  TEXTILES_APPAREL
+  WATER_SANITATION
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  TEMPORARY
+  INTERNSHIP
+  VOLUNTEER
+}
+
+enum ExperienceLevel {
+  ENTRY_LEVEL
+  INTERNSHIP
+  MID_LEVEL
+  SENIOR
+  LEAD
+  MANAGER
+  DIRECTOR
+  EXECUTIVE
+}
+
+enum JobStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  CLOSED
+  EXPIRED
+  ON_HOLD
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  SHORTLISTED
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  OFFERED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum Currency {
+  KES
+  USD
+  EUR
+  GBP
+  UGX
+  TZS
+  RWF
+  ZAR
+  NGN
+  CAD
+  AUD
+  INR
+  CNY
+}
+
+enum OpportunityType {
+  INTERNSHIP
+  SPONSORSHIP
+  BURSARY
+  SCHOLARSHIP
+  UNIVERSITY_ADMISSION
+  VOLUNTEER
+  TRAINING
+  GRANT
+  CERTIFICATION
+  FUNDING
+  FELLOWSHIP
+  APPRENTICESHIP
+  WORKSHOP
+  CONFERENCE
+  COMPETITION
+  AWARD
+  RESIDENCY
+  MENTORSHIP
+  ACCELERATOR
+  INCUBATOR
+  BOOTCAMP
+  EXCHANGE
+  RESEARCH
+}
+
+enum LocationType {
+  COUNTRY
+  COUNTY
+  AREA
+  REMOTE
+}
+
+// ──────────────────────────────────────────────
 //  AUTHENTICATION & USERS
 // ──────────────────────────────────────────────
 
@@ -18,7 +170,7 @@ model User {
   name          String?   @db.VarChar(191)
   phone         String?   @map("phone") @db.VarChar(20)
   avatarUrl     String?   @map("avatar_url") @db.VarChar(500)
-  role          String    @default("SEEKER") @db.VarChar(20) // SEEKER | EMPLOYER | ADMIN
+  role          UserRole  @default(SEEKER)
   isActive      Boolean   @default(true) @map("is_active")
 
   // Job seeker fields
@@ -48,71 +200,103 @@ model User {
 // ──────────────────────────────────────────────
 
 model Company {
-  id            String    @id @default(cuid()) @db.VarChar(30)
-  name          String    @db.VarChar(191)
-  slug          String    @unique @db.VarChar(191)
-  description   String?   @db.Text
-  logoUrl       String?   @map("logo_url") @db.VarChar(500)
-  website       String?   @db.VarChar(255)
-  industry      String?   @db.VarChar(100)
-  employeeCount String?   @map("employee_count") @db.VarChar(50)
-  hqLocation    String?   @map("hq_location") @db.VarChar(100)
-  isVerified    Boolean   @default(false) @map("is_verified")
-  isGovernment  Boolean   @default(false) @map("is_government")
+  id              String           @id @default(cuid()) @db.VarChar(30)
+  name            String           @db.VarChar(191)
+  slug            String           @unique @db.VarChar(191)
+  description     String?          @db.Text
+  logoUrl         String?          @map("logo_url") @db.VarChar(500)
+  website         String?          @db.VarChar(255)
+  industry        Industry?
+  orgType         OrganizationType @map("org_type") @default(PRIVATE)
+  employeeCount   String?          @map("employee_count") @db.VarChar(50)
+  hqLocation      String?          @map("hq_location") @db.VarChar(100)
+  isVerified      Boolean          @default(false) @map("is_verified")
+  isGovernment    Boolean          @default(false) @map("is_government")
 
   // Ownership
-  ownerId       String?   @unique @map("owner_id") @db.VarChar(30)
-  owner         User?     @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerId         String?          @unique @map("owner_id") @db.VarChar(30)
+  owner           User?            @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
   // Relationships
-  jobs          Job[]
+  jobs            Job[]
 
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  @@index([industry])
+  @@index([orgType])
 
   @@map("companies")
 }
 
 // ──────────────────────────────────────────────
-//  JOB CATEGORIES
+//  JOB CATEGORIES & SUBCATEGORIES
 // ──────────────────────────────────────────────
 
 model Category {
-  id          String  @id @default(cuid()) @db.VarChar(30)
-  name        String  @unique @db.VarChar(100)
-  slug        String  @unique @db.VarChar(100)
-  description String? @db.Text
-  icon        String? @db.VarChar(100)
-  jobCount    Int     @default(0) @map("job_count")
+  id            String        @id @default(cuid()) @db.VarChar(30)
+  name          String        @unique @db.VarChar(100)
+  slug          String        @unique @db.VarChar(100)
+  description   String?       @db.Text
+  icon          String?       @db.VarChar(100)
+  jobCount      Int           @default(0) @map("job_count")
 
   // Relationships
-  jobs         Job[]
-  salaryRecords SalaryRecord[] @relation("CategorySalary")
+  jobs           Job[]
+  subcategories  Subcategory[]
+  salaryRecords  SalaryRecord[] @relation("CategorySalary")
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
 
   @@map("categories")
 }
 
-// ──────────────────────────────────────────────
-//  LOCATIONS
-// ──────────────────────────────────────────────
+model Subcategory {
+  id          String   @id @default(cuid()) @db.VarChar(30)
+  name        String   @db.VarChar(191)
+  slug        String   @unique @db.VarChar(191)
 
-model Location {
-  id          String  @id @default(cuid()) @db.VarChar(30)
-  name        String  @db.VarChar(100)
-  slug        String  @unique @db.VarChar(100)
-  type        String  @default("COUNTY") @db.VarChar(20) // COUNTY | AREA | REMOTE
-  parentLocationId String? @map("parent_location_id") @db.VarChar(30)
-  parentLocation Location? @relation("LocationHierarchy", fields: [parentLocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  childLocations  Location[] @relation("LocationHierarchy")
+  // Foreign key
+  categoryId  String   @map("category_id") @db.VarChar(30)
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   // Relationships
   jobs        Job[]
 
   createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([categoryId])
+
+  @@map("subcategories")
+}
+
+// ──────────────────────────────────────────────
+//  LOCATIONS  (Country > County/City > Area)
+// ──────────────────────────────────────────────
+
+model Location {
+  id              String      @id @default(cuid()) @db.VarChar(30)
+  name            String      @db.VarChar(100)
+  slug            String      @unique @db.VarChar(100)
+  type            LocationType @default(COUNTY)
+  countryCode     String?     @map("country_code") @db.VarChar(5)
+  dialCode        String?     @map("dial_code") @db.VarChar(5)
+
+  // Hierarchy
+  parentLocationId String?    @map("parent_location_id") @db.VarChar(30)
+  parentLocation  Location?   @relation("LocationHierarchy", fields: [parentLocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  childLocations   Location[] @relation("LocationHierarchy")
+
+  // Relationships
+  jobs            Job[]
+
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@index([type])
+  @@index([countryCode])
+  @@index([parentLocationId])
 
   @@map("locations")
 }
@@ -122,55 +306,57 @@ model Location {
 // ──────────────────────────────────────────────
 
 model Job {
-  id            String    @id @default(cuid()) @db.VarChar(30)
-  slug          String    @unique @db.VarChar(191)
+  id            String           @id @default(cuid()) @db.VarChar(30)
+  slug          String           @unique @db.VarChar(191)
 
   // Core info
-  title         String    @db.VarChar(255)
-  description   String    @db.Text
-  requirements  String    @db.Text // JSON array
+  title         String           @db.VarChar(255)
+  description   String           @db.Text
+  requirements  String           @db.Text // JSON array
 
   // Employment details
-  type          String    @default("Full-time") @db.VarChar(20)
-  level         String    @default("Entry Level") @db.VarChar(30)
+  type          EmploymentType   @default(FULL_TIME)
+  level         ExperienceLevel  @default(ENTRY_LEVEL)
   salaryMin     Int?
   salaryMax     Int?
-  salaryCurrency String   @default("Ksh") @map("salary_currency") @db.VarChar(10)
-  salaryNote    String?   @map("salary_note") @db.VarChar(100)
+  salaryCurrency Currency         @default(KES) @map("salary_currency")
+  salaryNote    String?          @map("salary_note") @db.VarChar(100)
 
   // Casual job fields
-  casualRate    String?   @map("casual_rate") @db.VarChar(50)
-  casualNote    String?   @map("casual_note") @db.VarChar(100)
-  isCasual      Boolean   @default(false) @map("is_casual")
+  casualRate    String?          @map("casual_rate") @db.VarChar(50)
+  casualNote    String?          @map("casual_note") @db.VarChar(100)
+  isCasual      Boolean          @default(false) @map("is_casual")
 
   // Government fields
-  isGovernment  Boolean   @default(false) @map("is_government")
-  isGazette     Boolean   @default(false) @map("is_gazette")
-  gazetteRef    String?   @map("gazette_ref") @db.VarChar(100)
+  isGovernment  Boolean          @default(false) @map("is_government")
+  isGazette     Boolean          @default(false) @map("is_gazette")
+  gazetteRef    String?          @map("gazette_ref") @db.VarChar(100)
 
   // Status & visibility
-  status        String    @default("ACTIVE") @db.VarChar(20)
-  isFeatured    Boolean   @default(false) @map("is_featured")
-  isUrgent      Boolean   @default(false) @map("is_urgent")
-  isRemote      Boolean   @default(false) @map("is_remote")
+  status        JobStatus        @default(PUBLISHED)
+  isFeatured    Boolean          @default(false) @map("is_featured")
+  isUrgent      Boolean          @default(false) @map("is_urgent")
+  isRemote      Boolean          @default(false) @map("is_remote")
 
   // Counts
-  viewCount     Int       @default(0) @map("view_count")
-  applicationCount Int    @default(0) @map("application_count")
+  viewCount     Int              @default(0) @map("view_count")
+  applicationCount Int           @default(0) @map("application_count")
 
   // Dates
-  postedAt      DateTime  @default(now()) @map("posted_at")
-  deadlineAt    DateTime? @map("deadline_at")
-  featuredAt    DateTime? @map("featured_at")
-  closedAt      DateTime? @map("closed_at")
+  postedAt      DateTime         @default(now()) @map("posted_at")
+  deadlineAt    DateTime?        @map("deadline_at")
+  featuredAt    DateTime?        @map("featured_at")
+  closedAt      DateTime?        @map("closed_at")
 
   // Foreign keys
-  companyId     String    @db.VarChar(30)
-  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  categoryId    String    @db.VarChar(30)
-  category      Category  @relation(fields: [categoryId], references: [id])
-  locationId    String    @db.VarChar(30)
-  location      Location  @relation(fields: [locationId], references: [id])
+  companyId     String           @db.VarChar(30)
+  company       Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  categoryId    String           @db.VarChar(30)
+  category      Category         @relation(fields: [categoryId], references: [id])
+  subcategoryId String?          @map("subcategory_id") @db.VarChar(30)
+  subcategory   Subcategory?     @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  locationId    String           @db.VarChar(30)
+  location      Location         @relation(fields: [locationId], references: [id])
 
   // Relationships
   applications  Application[]
@@ -178,15 +364,19 @@ model Job {
   tags          JobTag[]
   updates       JobUpdate[]
 
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
 
   @@index([companyId])
   @@index([categoryId])
+  @@index([subcategoryId])
   @@index([locationId])
   @@index([status])
+  @@index([type])
+  @@index([level])
   @@index([isFeatured])
   @@index([isUrgent])
+  @@index([isRemote])
   @@index([deadlineAt])
   @@index([postedAt])
 
@@ -225,35 +415,36 @@ model JobTag {
 // ──────────────────────────────────────────────
 
 model Application {
-  id            String    @id @default(cuid()) @db.VarChar(30)
+  id            String            @id @default(cuid()) @db.VarChar(30)
 
   // Status tracking
-  status        String    @default("PENDING") @db.VarChar(20)
+  status        ApplicationStatus @default(PENDING)
 
   // Applicant info
-  coverLetter   String?   @map("cover_letter") @db.Text
-  resumeUrl     String?   @map("resume_url") @db.VarChar(500)
+  coverLetter   String?           @map("cover_letter") @db.Text
+  resumeUrl     String?           @map("resume_url") @db.VarChar(500)
 
   // Employer notes
-  employerNotes String?   @map("employer_notes") @db.Text
+  employerNotes String?           @map("employer_notes") @db.Text
   rating        Int?
 
   // Foreign keys
-  userId        String    @map("user_id") @db.VarChar(30)
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobId         String    @map("job_id") @db.VarChar(30)
-  job           Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId        String            @map("user_id") @db.VarChar(30)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId         String            @map("job_id") @db.VarChar(30)
+  job           Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   // Dates
-  appliedAt     DateTime  @default(now()) @map("applied_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  shortlistedAt DateTime? @map("shortlisted_at")
-  interviewAt   DateTime? @map("interview_at")
-  respondedAt   DateTime? @map("responded_at")
+  appliedAt     DateTime          @default(now()) @map("applied_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+  shortlistedAt DateTime?         @map("shortlisted_at")
+  interviewAt   DateTime?         @map("interview_at")
+  respondedAt   DateTime?         @map("responded_at")
 
   @@unique([userId, jobId])
   @@index([jobId, status])
   @@index([userId])
+  @@index([status])
 
   @@map("applications")
 }
@@ -323,17 +514,17 @@ model NewsletterSubscription {
 // ──────────────────────────────────────────────
 
 model SalaryRecord {
-  id          String  @id @default(cuid()) @db.VarChar(30)
-  title       String  @db.VarChar(191)
-  level       String  @db.VarChar(30)
-  location    String  @db.VarChar(100)
+  id          String   @id @default(cuid()) @db.VarChar(30)
+  title       String   @db.VarChar(191)
+  level       ExperienceLevel
+  location    String   @db.VarChar(100)
   salaryMin   Int
   salaryMax   Int
-  currency    String  @default("Ksh") @db.VarChar(10)
-  source      String? @db.VarChar(50)
-  reportCount Int     @default(1) @map("report_count")
+  currency    Currency  @default(KES)
+  source      String?  @db.VarChar(50)
+  reportCount Int      @default(1) @map("report_count")
 
-  categoryId  String? @map("category_id") @db.VarChar(30)
+  categoryId  String?  @map("category_id") @db.VarChar(30)
   category    Category? @relation("CategorySalary", fields: [categoryId], references: [id], onDelete: SetNull)
 
   createdAt   DateTime @default(now()) @map("created_at")
