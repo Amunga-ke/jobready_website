@@ -67,3 +67,20 @@ Stage Summary:
 - Seed data: 11 org types, 36 industries, 9 currencies, 21 listing types, 7 employment types, 8 experience levels, 6 education levels, 131 locations, 46 categories, 14 organizations, 32 listings, 21 job details
 - Database is fully operational with the new schema
 - API endpoints serve data from the new unified Listing model
+
+---
+Task ID: 1
+Agent: main
+Task: Fix "Job not found" console error in JobModalContext
+
+Work Log:
+- Diagnosed error: `Cannot read properties of undefined (reading 'findUnique')` on `db.listing`
+- Root cause: Prisma client was generated with OLD schema (models: `job`, `company`, `tag`) instead of current v2 schema (models: `listing`, `organization`, etc.)
+- The system-level env `DATABASE_URL=file:/home/z/my-project/db/custom.db` was interfering with `prisma generate`
+- Fix: Regenerated Prisma client with correct DATABASE_URL explicitly set, cleared `.next` cache
+- Secondary issue: `categories` table had invalid datetime values (`0000-00-00 00:00:00`) causing Prisma P2020 errors
+- Fix: Ran UPDATE queries to fix all invalid dates across categories, locations, organizations, listings, listing_job_details tables
+
+Stage Summary:
+- All API endpoints verified working: /api/jobs/[slug], /api/jobs?type=featured, /api/categories, /api/locations
+- "Job not found" error resolved — the issue was a stale Prisma client, not a missing job
