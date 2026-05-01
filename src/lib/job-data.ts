@@ -1,27 +1,4 @@
-export interface Job {
-  id: string;
-  title: string;
-  company: string;
-  companyInitial: string;
-  location: string;
-  type: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | 'Temporary' | 'Casual';
-  level: 'Entry Level' | 'Mid Level' | 'Senior' | 'Executive' | 'Intern' | 'Any';
-  salary: string;
-  salaryCurrency: string;
-  posted: string;
-  deadline?: string;
-  urgent?: boolean;
-  description: string;
-  requirements: string[];
-  tags: string[];
-  category: string;
-  isRemote: boolean;
-  isGovernment?: boolean;
-  isGazette?: boolean;
-  isCasual?: boolean;
-  casualRate?: string;
-  casualNote?: string;
-}
+import type { Job } from '@/types';
 
 export const jobs: Job[] = [
   {

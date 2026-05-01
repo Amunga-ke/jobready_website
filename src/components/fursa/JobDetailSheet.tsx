@@ -2,7 +2,7 @@
 
 import { useJobModal } from './JobModalContext';
 import { X, MapPin, Clock, Briefcase, Building2, Bookmark, Share2, ExternalLink } from 'lucide-react';
-import type { Job } from '@/lib/job-data';
+import type { Job } from '@/types';
 
 export default function JobDetailSheet() {
   const { isOpen, selectedJob, closeJob } = useJobModal();
