@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { Job } from '@/lib/job-data';
+import type { Job } from '@/types';
 
 interface JobModalContextType {
   openJob: (job: Job) => void;
