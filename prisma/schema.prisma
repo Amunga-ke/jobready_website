@@ -1,3 +1,10 @@
+// =============================================================================
+// Jobnet — Database Schema v2
+// =============================================================================
+// Architecture: lookup tables (not enums), unified listings, SEO-first,
+// flexible enough for jobs + internships + scholarships + government ops.
+// =============================================================================
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,89 +14,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ──────────────────────────────────────────────
-//  ENUMS
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  SYSTEM ENUMS (internal / rarely change — kept as DB enums for safety)
+// ─────────────────────────────────────────────────────────────────────────────
 
 enum UserRole {
   SEEKER
   EMPLOYER
   ADMIN
+  EDITOR
 }
 
-enum OrganizationType {
-  PRIVATE
-  SMALL_BUSINESS
-  STARTUP
-  NGO
-  INTERNATIONAL_ORG
-  NATIONAL_GOV
-  COUNTY_GOV
-  STATE_CORPORATION
-  EDUCATION
-  FOUNDATION
-  RELIGIOUS_ORG
-}
-
-enum Industry {
-  AGRICULTURE
-  AUTOMOTIVE
-  AVIATION
-  BANKING
-  CONSTRUCTION
-  CONSULTING
-  CONSUMER_GOODS
-  EDUCATION
-  ENERGY
-  ENVIRONMENT
-  FINTECH
-  FOOD_BEVERAGE
-  GOVERNMENT_PUBLIC_ADMIN
-  HEALTHCARE
-  HOSPITALITY_TOURISM
-  HUMAN_RESOURCES
-  INFORMATION_TECHNOLOGY
-  INSURANCE
-  INTERNATIONAL_DEVELOPMENT
-  LEGAL
-  LOGISTICS_SUPPLY_CHAIN
-  MANUFACTURING
-  MARKETING_ADVERTISING
-  MEDIA_ENTERTAINMENT
-  MINING
-  NON_PROFIT
-  PHARMACEUTICAL
-  REAL_ESTATE
-  RESEARCH
-  RETAIL
-  SECURITY_DEFENSE
-  SPORTS
-  TELECOMMUNICATIONS
-  TEXTILES_APPAREL
-  WATER_SANITATION
-}
-
-enum EmploymentType {
-  FULL_TIME
-  PART_TIME
-  CONTRACT
-  TEMPORARY
-  INTERNSHIP
-  VOLUNTEER
-}
-
-enum ExperienceLevel {
-  ENTRY_LEVEL
-  INTERNSHIP
-  MID_LEVEL
-  SENIOR
-  LEAD
-  MANAGER
-  DIRECTOR
-  EXECUTIVE
-}
-
-enum JobStatus {
+enum ListingStatus {
   DRAFT
   PENDING_REVIEW
   PUBLISHED
@@ -99,468 +35,669 @@ enum JobStatus {
 }
 
 enum ApplicationStatus {
-  PENDING
-  REVIEWING
+  SUBMITTED
+  VIEWED
   SHORTLISTED
-  INTERVIEW_SCHEDULED
-  INTERVIEWED
-  OFFERED
-  ACCEPTED
   REJECTED
+  HIRED
   WITHDRAWN
 }
 
-enum Currency {
-  KES
-  USD
-  EUR
-  GBP
-  UGX
-  TZS
-  RWF
-  ZAR
-  NGN
-  CAD
-  AUD
-  INR
-  CNY
+enum WorkMode {
+  ONSITE
+  HYBRID
+  REMOTE
 }
 
-enum OpportunityType {
-  INTERNSHIP
-  SPONSORSHIP
-  BURSARY
-  SCHOLARSHIP
-  UNIVERSITY_ADMISSION
-  VOLUNTEER
-  TRAINING
-  GRANT
-  CERTIFICATION
-  FUNDING
-  FELLOWSHIP
-  APPRENTICESHIP
-  WORKSHOP
-  CONFERENCE
-  COMPETITION
-  AWARD
-  RESIDENCY
-  MENTORSHIP
-  ACCELERATOR
-  INCUBATOR
-  BOOTCAMP
-  EXCHANGE
-  RESEARCH
+enum SalaryDisplay {
+  HIDDEN
+  RANGE
+  EXACT
+  COMPETITIVE
+}
+
+enum SalaryPeriod {
+  MONTHLY
+  DAILY
+  HOURLY
+  ANNUAL
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum RedirectType {
+  PERMANENT  // 301
+  TEMPORARY  // 302
+}
+
+enum OrgMemberRole {
+  OWNER
+  ADMIN
+  RECRUITER
+  VIEWER
 }
 
 enum LocationType {
   COUNTRY
   COUNTY
+  CITY
+  TOWN
   AREA
-  REMOTE
 }
 
-// ──────────────────────────────────────────────
-//  AUTHENTICATION & USERS
-// ──────────────────────────────────────────────
-
-model User {
-  id            String    @id @default(cuid()) @db.VarChar(30)
-  email         String    @unique @db.VarChar(191)
-  passwordHash  String    @map("password_hash") @db.VarChar(255)
-  name          String?   @db.VarChar(191)
-  phone         String?   @map("phone") @db.VarChar(20)
-  avatarUrl     String?   @map("avatar_url") @db.VarChar(500)
-  role          UserRole  @default(SEEKER)
-  isActive      Boolean   @default(true) @map("is_active")
-
-  // Job seeker fields
-  county        String?   @db.VarChar(100)
-  bio           String?   @db.Text
-  resumeUrl     String?   @map("resume_url") @db.VarChar(500)
-  linkedInUrl   String?   @map("linkedin_url") @db.VarChar(255)
-  skills        String    @default("[]") @db.VarChar(2000) // JSON array of skill strings
-
-  // Employer fields (linked via Company)
-  company       Company?  @relation("CompanyOwner")
-
-  // Relationships
-  applications  Application[]
-  savedJobs     SavedJob[]
-  subscriptions NewsletterSubscription[]
-  articles      Article[]
-
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  @@map("users")
+enum CategoryType {
+  JOB
+  ARTICLE
+  OPPORTUNITY
 }
 
-// ──────────────────────────────────────────────
-//  COMPANIES / EMPLOYERS
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  LOOKUP TABLES (domain values — manageable from admin, not hardcoded enums)
+// ─────────────────────────────────────────────────────────────────────────────
 
-model Company {
-  id              String           @id @default(cuid()) @db.VarChar(30)
-  name            String           @db.VarChar(191)
-  slug            String           @unique @db.VarChar(191)
-  description     String?          @db.Text
-  logoUrl         String?          @map("logo_url") @db.VarChar(500)
-  website         String?          @db.VarChar(255)
-  industry        Industry?
-  orgType         OrganizationType @map("org_type") @default(PRIVATE)
-  employeeCount   String?          @map("employee_count") @db.VarChar(50)
-  hqLocation      String?          @map("hq_location") @db.VarChar(100)
-  isVerified      Boolean          @default(false) @map("is_verified")
-  isGovernment    Boolean          @default(false) @map("is_government")
+model OrganizationType {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  code      String   @unique @db.VarChar(50)
+  name      String   @db.VarChar(191)
+  slug      String   @unique @db.VarChar(100)
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
 
-  // Ownership
-  ownerId         String?          @unique @map("owner_id") @db.VarChar(30)
-  owner           User?            @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  organizations Organization[]
 
-  // Relationships
-  jobs            Job[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-
-  @@index([industry])
-  @@index([orgType])
-
-  @@map("companies")
+  @@map("organization_types")
 }
 
-// ──────────────────────────────────────────────
-//  JOB CATEGORIES & SUBCATEGORIES
-// ──────────────────────────────────────────────
+model Industry {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  code      String   @unique @db.VarChar(50)
+  name      String   @db.VarChar(191)
+  slug      String   @unique @db.VarChar(100)
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
 
-model Category {
-  id            String        @id @default(cuid()) @db.VarChar(30)
-  name          String        @unique @db.VarChar(100)
-  slug          String        @unique @db.VarChar(100)
-  description   String?       @db.Text
-  icon          String?       @db.VarChar(100)
-  jobCount      Int           @default(0) @map("job_count")
+  organizations Organization[]
 
-  // Relationships
-  jobs           Job[]
-  subcategories  Subcategory[]
-  salaryRecords  SalaryRecord[] @relation("CategorySalary")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-
-  @@map("categories")
+  @@map("industries")
 }
 
-model Subcategory {
-  id          String   @id @default(cuid()) @db.VarChar(30)
-  name        String   @db.VarChar(191)
-  slug        String   @unique @db.VarChar(191)
+model Currency {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  code      String   @unique @db.VarChar(10)   // KES, USD, GBP
+  name      String   @db.VarChar(100)           // Kenyan Shilling
+  symbol    String   @db.VarChar(10)            // Ksh, $, £
+  isActive  Boolean  @default(true) @map("is_active")
 
-  // Foreign key
-  categoryId  String   @map("category_id") @db.VarChar(30)
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  jobDetails ListingJobDetail[]
 
-  // Relationships
-  jobs        Job[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  @@index([categoryId])
-
-  @@map("subcategories")
+  @@map("currencies")
 }
 
-// ──────────────────────────────────────────────
-//  LOCATIONS  (Country > County/City > Area)
-// ──────────────────────────────────────────────
+model ListingType {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  code      String   @unique @db.VarChar(50)   // JOB, INTERNSHIP, SCHOLARSHIP
+  name      String   @db.VarChar(100)           // Job, Internship, Scholarship
+  slug      String   @unique @db.VarChar(100)
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+
+  listings Listing[]
+  alerts   ListingAlert[] @relation("AlertListingType")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("listing_types")
+}
+
+model EmploymentType {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  code      String   @unique @db.VarChar(50)   // FULL_TIME, PART_TIME, CONTRACT
+  name      String   @db.VarChar(100)           // Full-time, Part-time, Contract
+  slug      String   @unique @db.VarChar(100)
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+
+  jobDetails ListingJobDetail[]
+  alerts    ListingAlert[] @relation("AlertEmploymentType")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("employment_types")
+}
+
+model ExperienceLevel {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  code      String   @unique @db.VarChar(50)   // ENTRY_LEVEL, MID_LEVEL, SENIOR
+  name      String   @db.VarChar(100)           // Entry Level, Mid Level, Senior
+  slug      String   @unique @db.VarChar(100)
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+
+  jobDetails ListingJobDetail[]
+  alerts    ListingAlert[] @relation("AlertExperienceLevel")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("experience_levels")
+}
+
+model EducationLevel {
+  id        String   @id @default(cuid()) @db.VarChar(30)
+  code      String   @unique @db.VarChar(50)   // HIGH_SCHOOL, DIPLOMA, BACHELORS
+  name      String   @db.VarChar(100)
+  slug      String   @unique @db.VarChar(100)
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+
+  jobDetails ListingJobDetail[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("education_levels")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LOCATIONS (hierarchical — Country > County > City > Town > Area)
+// ─────────────────────────────────────────────────────────────────────────────
 
 model Location {
-  id              String      @id @default(cuid()) @db.VarChar(30)
-  name            String      @db.VarChar(100)
-  slug            String      @unique @db.VarChar(100)
-  type            LocationType @default(COUNTY)
-  countryCode     String?     @map("country_code") @db.VarChar(5)
-  dialCode        String?     @map("dial_code") @db.VarChar(5)
+  id          String       @id @default(cuid()) @db.VarChar(30)
+  parentId    String?      @map("parent_id") @db.VarChar(30)
+  parent      Location?    @relation("LocationTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Location[]   @relation("LocationTree")
 
-  // Hierarchy
-  parentLocationId String?    @map("parent_location_id") @db.VarChar(30)
-  parentLocation  Location?   @relation("LocationHierarchy", fields: [parentLocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  childLocations   Location[] @relation("LocationHierarchy")
+  name        String       @db.VarChar(100)
+  slug        String       @db.VarChar(100)
+  type        LocationType @default(CITY)
+  countryCode String?      @map("country_code") @db.VarChar(5)
+  dialCode    String?      @map("dial_code") @db.VarChar(5)
+  flag        String?      @db.VarChar(10)
+  depth       Int          @default(0)
+  sortOrder   Int          @default(0) @map("sort_order")
+  isActive    Boolean      @default(true) @map("is_active")
 
   // Relationships
-  jobs            Job[]
+  organizations Organization[]
+  listings      Listing[]
 
-  createdAt       DateTime    @default(now()) @map("created_at")
-  updatedAt       DateTime    @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([parentId, slug])
   @@index([type])
   @@index([countryCode])
-  @@index([parentLocationId])
+  @@index([isActive])
 
   @@map("locations")
 }
 
-// ──────────────────────────────────────────────
-//  JOB LISTINGS
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  CATEGORIES (hierarchical — supports JOB, ARTICLE, OPPORTUNITY types)
+// ─────────────────────────────────────────────────────────────────────────────
 
-model Job {
-  id            String           @id @default(cuid()) @db.VarChar(30)
-  slug          String           @unique @db.VarChar(191)
+model Category {
+  id            String       @id @default(cuid()) @db.VarChar(30)
+  parentId      String?      @map("parent_id") @db.VarChar(30)
+  parent        Category?    @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children      Category[]   @relation("CategoryTree")
 
-  // Core info
-  title         String           @db.VarChar(255)
-  description   String           @db.Text
-  requirements  String           @db.Text // JSON array
+  name          String       @db.VarChar(191)
+  slug          String       @db.VarChar(100)
+  type          CategoryType @default(JOB)
+  description   String?      @db.Text
 
-  // Employment details
-  type          EmploymentType   @default(FULL_TIME)
-  level         ExperienceLevel  @default(ENTRY_LEVEL)
-  salaryMin     Int?
-  salaryMax     Int?
-  salaryCurrency Currency         @default(KES) @map("salary_currency")
-  salaryNote    String?          @map("salary_note") @db.VarChar(100)
+  // SEO
+  metaTitle       String?    @map("meta_title") @db.VarChar(255)
+  metaDescription String?    @map("meta_description") @db.VarChar(500)
 
-  // Casual job fields
-  casualRate    String?          @map("casual_rate") @db.VarChar(50)
-  casualNote    String?          @map("casual_note") @db.VarChar(100)
-  isCasual      Boolean          @default(false) @map("is_casual")
+  sortOrder   Int          @default(0) @map("sort_order")
+  isActive    Boolean      @default(true) @map("is_active")
 
-  // Government fields
-  isGovernment  Boolean          @default(false) @map("is_government")
-  isGazette     Boolean          @default(false) @map("is_gazette")
-  gazetteRef    String?          @map("gazette_ref") @db.VarChar(100)
+  // Cached counter (updated via triggers or application logic)
+  listingCount Int          @default(0) @map("listing_count")
+
+  // Relationships
+  listings Listing[]
+  articles Article[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([parentId, slug])
+  @@index([type])
+  @@index([isActive])
+
+  @@map("categories")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  USERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id                 String             @id @default(cuid()) @db.VarChar(30)
+  name               String?            @db.VarChar(191)
+  email              String             @unique @db.VarChar(191)
+  phone              String?            @db.VarChar(20)
+  passwordHash       String             @map("password_hash") @db.VarChar(255)
+
+  role               UserRole           @default(SEEKER)
+  avatarUrl          String?            @map("avatar_url") @db.VarChar(500)
+  isEmailVerified    Boolean            @default(false) @map("is_email_verified")
+  profileVisibility  ProfileVisibility  @default(PUBLIC) @map("profile_visibility")
+
+  // Job seeker fields
+  resumeUrl          String?            @map("resume_url") @db.VarChar(500)
+  bio                String?            @db.Text
+
+  // Relationships
+  organizationMemberships OrganizationUser[]
+  applications        ListingApplication[]
+  savedListings       SavedListing[]
+  alerts              ListingAlert[]
+  articles            Article[]
+  newsletterSubscriptions NewsletterSubscription[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([role])
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ORGANIZATIONS (employers, NGOs, universities, gov bodies, foundations)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Organization {
+  id                  String   @id @default(cuid()) @db.VarChar(30)
+  name                String   @db.VarChar(191)
+  slug                String   @unique @db.VarChar(191)
+
+  organizationTypeId  String   @map("organization_type_id") @db.VarChar(30)
+  organizationType    OrganizationType @relation(fields: [organizationTypeId], references: [id])
+
+  industryId          String?  @map("industry_id") @db.VarChar(30)
+  industry            Industry? @relation(fields: [industryId], references: [id], onDelete: SetNull)
+
+  locationId          String?  @map("location_id") @db.VarChar(30)
+  location            Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  logoUrl             String?  @map("logo_url") @db.VarChar(500)
+  coverImageUrl       String?  @map("cover_image_url") @db.VarChar(500)
+  websiteUrl          String?  @map("website_url") @db.VarChar(255)
+  email               String?  @db.VarChar(191)
+  phone               String?  @db.VarChar(20)
+  description         String?  @db.Text
+
+  // Verification
+  isVerified          Boolean  @default(false) @map("is_verified")
+  verifiedAt          DateTime? @map("verified_at")
+  verificationNote    String?  @map("verification_note") @db.VarChar(500)
+
+  // Employee count (stored as string for flexibility)
+  employeeCount       String?  @map("employee_count") @db.VarChar(50)
+
+  // SEO
+  metaTitle           String?  @map("meta_title") @db.VarChar(255)
+  metaDescription     String?  @map("meta_description") @db.VarChar(500)
+
+  // Relationships
+  members             OrganizationUser[]
+  listings            Listing[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([organizationTypeId])
+  @@index([industryId])
+  @@index([isVerified])
+
+  @@map("organizations")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ORGANIZATION USERS (many-to-many join with roles)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model OrganizationUser {
+  id              String       @id @default(cuid()) @db.VarChar(30)
+  organizationId  String       @map("organization_id") @db.VarChar(30)
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId          String       @map("user_id") @db.VarChar(30)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            OrgMemberRole @default(RECRUITER)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+
+  @@map("organization_users")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LISTINGS (unified table for ALL opportunity types)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+//  Powers: jobs, internships, scholarships, bursaries, bootcamps, fellowships,
+//  university admissions, casual work, grants, government opportunities, etc.
+//
+//  Homepage sections fed by this table:
+//    Just posted, Closing soon, Featured, Government, Internships,
+//    Scholarships, Casual & Part-time, By location, By category
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Listing {
+  id                    String        @id @default(cuid()) @db.VarChar(30)
+
+  // Foreign keys
+  organizationId        String?       @map("organization_id") @db.VarChar(30)
+  organization          Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  categoryId            String?       @map("category_id") @db.VarChar(30)
+  category              Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  locationId            String?       @map("location_id") @db.VarChar(30)
+  location              Location?     @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  listingTypeId        String        @map("listing_type_id") @db.VarChar(30)
+  listingType          ListingType   @relation(fields: [listingTypeId], references: [id])
+
+  // Core content
+  title                 String        @db.VarChar(255)
+  slug                  String        @unique @db.VarChar(191)
+  summary               String?       @db.VarChar(500)
+  description           String        @db.Text
+  tags                  String        @db.Text  // JSON array of strings
 
   // Status & visibility
-  status        JobStatus        @default(PUBLISHED)
-  isFeatured    Boolean          @default(false) @map("is_featured")
-  isUrgent      Boolean          @default(false) @map("is_urgent")
-  isRemote      Boolean          @default(false) @map("is_remote")
+  status                ListingStatus @default(DRAFT)
+  isVerified            Boolean       @default(false) @map("is_verified")
+  isFeatured            Boolean       @default(false) @map("is_featured")
+  featuredUntil         DateTime?     @map("featured_until")
 
-  // Counts
-  viewCount     Int              @default(0) @map("view_count")
-  applicationCount Int           @default(0) @map("application_count")
+  // Application details
+  sourceUrl             String?       @map("source_url") @db.VarChar(500)
+  applicationUrl        String?       @map("application_url") @db.VarChar(500)
+  applicationEmail      String?       @map("application_email") @db.VarChar(191)
+  applicationInstructions String?     @map("application_instructions") @db.Text
 
   // Dates
-  postedAt      DateTime         @default(now()) @map("posted_at")
-  deadlineAt    DateTime?        @map("deadline_at")
-  featuredAt    DateTime?        @map("featured_at")
-  closedAt      DateTime?        @map("closed_at")
+  postedAt              DateTime      @default(now()) @map("posted_at")
+  deadlineDate          DateTime?     @map("deadline_date")
+  closedAt              DateTime?     @map("closed_at")
 
-  // Foreign keys
-  companyId     String           @db.VarChar(30)
-  company       Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  categoryId    String           @db.VarChar(30)
-  category      Category         @relation(fields: [categoryId], references: [id])
-  subcategoryId String?          @map("subcategory_id") @db.VarChar(30)
-  subcategory   Subcategory?     @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
-  locationId    String           @db.VarChar(30)
-  location      Location         @relation(fields: [locationId], references: [id])
+  // SEO
+  metaTitle             String?       @map("meta_title") @db.VarChar(255)
+  metaDescription       String?       @map("meta_description") @db.VarChar(500)
+  canonicalUrl          String?       @map("canonical_url") @db.VarChar(500)
+
+  // Counts (cached for speed)
+  viewsCount            Int           @default(0) @map("views_count")
+  applicationsCount     Int           @default(0) @map("applications_count")
 
   // Relationships
-  applications  Application[]
-  savedBy       SavedJob[]
-  tags          JobTag[]
-  updates       JobUpdate[]
+  jobDetail             ListingJobDetail?
+  updates               ListingUpdate[]
+  applications          ListingApplication[]
+  savedBy               SavedListing[]
 
-  createdAt     DateTime         @default(now()) @map("created_at")
-  updatedAt     DateTime         @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  @@index([companyId])
+  @@index([organizationId])
   @@index([categoryId])
-  @@index([subcategoryId])
   @@index([locationId])
+  @@index([listingTypeId])
   @@index([status])
-  @@index([type])
-  @@index([level])
   @@index([isFeatured])
-  @@index([isUrgent])
-  @@index([isRemote])
-  @@index([deadlineAt])
+  @@index([isVerified])
   @@index([postedAt])
+  @@index([deadlineDate])
+  @@index([status, postedAt])
 
-  @@map("jobs")
+  @@map("listings")
 }
 
-// ──────────────────────────────────────────────
-//  JOB TAGS (many-to-many via join table)
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  LISTING JOB DETAILS (1:1 — extra fields only for job-type listings)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+//  This is where Google Jobs structured data comes from.
+//  Generate JSON-LD from: listings + organizations + locations + this table.
+// ─────────────────────────────────────────────────────────────────────────────
 
-model Tag {
-  id        String    @id @default(cuid()) @db.VarChar(30)
-  name      String    @unique @db.VarChar(100)
-  slug      String    @unique @db.VarChar(100)
+model ListingJobDetail {
+  id                String           @id @default(cuid()) @db.VarChar(30)
+  listingId         String           @unique @map("listing_id") @db.VarChar(30)
+  listing           Listing          @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
-  // Relationships
-  jobs      JobTag[]
+  employmentTypeId  String?          @map("employment_type_id") @db.VarChar(30)
+  employmentType    EmploymentType?  @relation(fields: [employmentTypeId], references: [id], onDelete: SetNull)
 
-  createdAt DateTime  @default(now()) @map("created_at")
+  experienceLevelId String?          @map("experience_level_id") @db.VarChar(30)
+  experienceLevel   ExperienceLevel? @relation(fields: [experienceLevelId], references: [id], onDelete: SetNull)
 
-  @@map("tags")
+  educationLevelId  String?          @map("education_level_id") @db.VarChar(30)
+  educationLevel    EducationLevel?  @relation(fields: [educationLevelId], references: [id], onDelete: SetNull)
+
+  workMode          WorkMode         @default(ONSITE)
+  salaryMin         Int?
+  salaryMax         Int?
+  currencyId        String?          @map("currency_id") @db.VarChar(30)
+  currency          Currency?        @relation(fields: [currencyId], references: [id], onDelete: SetNull)
+  salaryDisplay     SalaryDisplay    @default(RANGE)
+  salaryPeriod      SalaryPeriod     @default(MONTHLY)
+
+  vacanciesCount    Int?             @map("vacancies_count")
+  startDate         DateTime?        @map("start_date")
+  contractDuration  String?          @map("contract_duration") @db.VarChar(100)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("listing_job_details")
 }
 
-model JobTag {
-  jobId     String    @db.VarChar(30)
-  jobIdRef  Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  tagId     String    @db.VarChar(30)
-  tagIdRef  Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+// ─────────────────────────────────────────────────────────────────────────────
+//  LISTING UPDATES (timeline feed — flexible, no enums)
+// ─────────────────────────────────────────────────────────────────────────────
 
-  @@id([jobId, tagId])
-  @@map("job_tags")
+model ListingUpdate {
+  id          String   @id @default(cuid()) @db.VarChar(30)
+  listingId   String   @map("listing_id") @db.VarChar(30)
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  metadata    String?  @db.Text  // JSON — flexible key-value pairs
+  isPublic    Boolean  @default(true) @map("is_public")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([listingId, createdAt])
+
+  @@map("listing_updates")
 }
 
-// ──────────────────────────────────────────────
-//  JOB APPLICATIONS
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  LISTING APPLICATIONS
+// ─────────────────────────────────────────────────────────────────────────────
 
-model Application {
-  id            String            @id @default(cuid()) @db.VarChar(30)
+model ListingApplication {
+  id              String            @id @default(cuid()) @db.VarChar(30)
+  listingId       String            @map("listing_id") @db.VarChar(30)
+  listing         Listing           @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId          String?           @map("user_id") @db.VarChar(30)
+  user            User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organizationId  String?           @map("organization_id") @db.VarChar(30)
 
-  // Status tracking
-  status        ApplicationStatus @default(PENDING)
+  applicantName   String            @map("applicant_name") @db.VarChar(191)
+  applicantEmail  String            @map("applicant_email") @db.VarChar(191)
+  applicantPhone  String?           @map("applicant_phone") @db.VarChar(20)
+  coverLetter     String?           @map("cover_letter") @db.Text
+  cvUrl           String?           @map("cv_url") @db.VarChar(500)
 
-  // Applicant info
-  coverLetter   String?           @map("cover_letter") @db.Text
-  resumeUrl     String?           @map("resume_url") @db.VarChar(500)
+  status          ApplicationStatus @default(SUBMITTED)
 
-  // Employer notes
-  employerNotes String?           @map("employer_notes") @db.Text
-  rating        Int?
+  submittedAt     DateTime          @default(now()) @map("submitted_at")
+  viewedAt        DateTime?         @map("viewed_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
 
-  // Foreign keys
-  userId        String            @map("user_id") @db.VarChar(30)
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobId         String            @map("job_id") @db.VarChar(30)
-  job           Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
-
-  // Dates
-  appliedAt     DateTime          @default(now()) @map("applied_at")
-  updatedAt     DateTime          @updatedAt @map("updated_at")
-  shortlistedAt DateTime?         @map("shortlisted_at")
-  interviewAt   DateTime?         @map("interview_at")
-  respondedAt   DateTime?         @map("responded_at")
-
-  @@unique([userId, jobId])
-  @@index([jobId, status])
+  @@index([listingId, status])
   @@index([userId])
-  @@index([status])
+  @@index([applicantEmail])
 
-  @@map("applications")
+  @@map("listing_applications")
 }
 
-// ──────────────────────────────────────────────
-//  SAVED / BOOKMARKED JOBS
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  SAVED LISTINGS (bookmarks)
+// ─────────────────────────────────────────────────────────────────────────────
 
-model SavedJob {
+model SavedListing {
   id        String   @id @default(cuid()) @db.VarChar(30)
   userId    String   @map("user_id") @db.VarChar(30)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobId     String   @map("job_id") @db.VarChar(30)
-  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  listingId String   @map("listing_id") @db.VarChar(30)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  note      String?  @db.VarChar(500)
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@unique([userId, jobId])
+  @@unique([userId, listingId])
   @@index([userId])
 
-  @@map("saved_jobs")
+  @@map("saved_listings")
 }
 
-// ──────────────────────────────────────────────
-//  JOB UPDATES (timeline feed items)
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  LISTING ALERTS (matched jobs every morning)
+// ─────────────────────────────────────────────────────────────────────────────
 
-model JobUpdate {
-  id        String   @id @default(cuid()) @db.VarChar(30)
-  content   String   @db.VarChar(500)
-  isActive  Boolean  @default(true) @map("is_active")
+model ListingAlert {
+  id                String  @id @default(cuid()) @db.VarChar(30)
+  userId            String  @map("user_id") @db.VarChar(30)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email             String  @db.VarChar(191)
 
-  // Foreign key
-  jobId     String   @map("job_id") @db.VarChar(30)
-  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  keyword           String? @db.VarChar(255)
+
+  categoryId        String? @map("category_id") @db.VarChar(30)
+  locationId        String? @map("location_id") @db.VarChar(30)
+
+  listingTypeId     String? @map("listing_type_id") @db.VarChar(30)
+  listingType       ListingType? @relation("AlertListingType", fields: [listingTypeId], references: [id], onDelete: SetNull)
+
+  employmentTypeId  String? @map("employment_type_id") @db.VarChar(30)
+  employmentType    EmploymentType? @relation("AlertEmploymentType", fields: [employmentTypeId], references: [id], onDelete: SetNull)
+
+  experienceLevelId String? @map("experience_level_id") @db.VarChar(30)
+  experienceLevel   ExperienceLevel? @relation("AlertExperienceLevel", fields: [experienceLevelId], references: [id], onDelete: SetNull)
+
+  workMode          WorkMode?
+  frequency         String  @default("DAILY") @db.VarChar(20)  // DAILY, WEEKLY
+  isActive          Boolean @default(true) @map("is_active")
+  lastSentAt        DateTime? @map("last_sent_at")
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([jobId, createdAt])
+  @@index([userId, isActive])
 
-  @@map("job_updates")
+  @@map("listing_alerts")
 }
 
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  ARTICLES (career resources / blog content)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+//  Powers: /resources, /resources/interview-tips, etc.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Article {
+  id                String   @id @default(cuid()) @db.VarChar(30)
+
+  authorId          String?  @map("author_id") @db.VarChar(30)
+  author            User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  categoryId        String?  @map("category_id") @db.VarChar(30)
+  category          Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  title             String   @db.VarChar(255)
+  slug              String   @unique @db.VarChar(191)
+  excerpt           String?  @db.Text
+  content           String?  @db.LongText
+  featuredImageUrl  String?  @map("featured_image_url") @db.VarChar(500)
+
+  status            String   @default("DRAFT") @db.VarChar(20)  // DRAFT, PUBLISHED, ARCHIVED
+  publishedAt       DateTime? @map("published_at")
+
+  readTime          String?  @map("read_time") @db.VarChar(20)  // "3 min read"
+
+  // SEO
+  metaTitle         String?  @map("meta_title") @db.VarChar(255)
+  metaDescription   String?  @map("meta_description") @db.VarChar(500)
+
+  viewsCount        Int      @default(0) @map("views_count")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([status, publishedAt])
+
+  @@map("articles")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SEO REDIRECTS (handles slug changes — do NOT store history in listing rows)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model SeoRedirect {
+  id           String       @id @default(cuid()) @db.VarChar(30)
+  oldPath      String       @unique @map("old_path") @db.VarChar(191)
+  newPath      String       @map("new_path") @db.VarChar(191)
+  redirectType RedirectType @default(PERMANENT)
+
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  @@map("seo_redirects")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  NEWSLETTER SUBSCRIPTIONS
-// ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 
 model NewsletterSubscription {
-  id        String   @id @default(cuid()) @db.VarChar(30)
-  email     String   @unique @db.VarChar(191)
-  isActive  Boolean  @default(true) @map("is_active")
+  id             String   @id @default(cuid()) @db.VarChar(30)
+  email          String   @unique @db.VarChar(191)
+  isActive       Boolean  @default(true) @map("is_active")
 
-  // Foreign key (optional)
-  userId    String?  @unique @map("user_id") @db.VarChar(30)
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId         String?  @unique @map("user_id") @db.VarChar(30)
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  subscribedAt DateTime @default(now()) @map("subscribed_at")
+  subscribedAt   DateTime @default(now()) @map("subscribed_at")
   unsubscribedAt DateTime? @map("unsubscribed_at")
 
   @@index([email])
 
   @@map("newsletter_subscriptions")
-}
-
-// ──────────────────────────────────────────────
-//  SALARY RECORDS
-// ──────────────────────────────────────────────
-
-model SalaryRecord {
-  id          String   @id @default(cuid()) @db.VarChar(30)
-  title       String   @db.VarChar(191)
-  level       ExperienceLevel
-  location    String   @db.VarChar(100)
-  salaryMin   Int
-  salaryMax   Int
-  currency    Currency  @default(KES)
-  source      String?  @db.VarChar(50)
-  reportCount Int      @default(1) @map("report_count")
-
-  categoryId  String?  @map("category_id") @db.VarChar(30)
-  category    Category? @relation("CategorySalary", fields: [categoryId], references: [id], onDelete: SetNull)
-
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  @@index([title])
-  @@index([categoryId])
-  @@index([location])
-
-  @@map("salary_records")
-}
-
-// ──────────────────────────────────────────────
-//  CAREER RESOURCES / ARTICLES
-// ──────────────────────────────────────────────
-
-model Article {
-  id          String   @id @default(cuid()) @db.VarChar(30)
-  title       String   @db.VarChar(255)
-  slug        String   @unique @db.VarChar(191)
-  excerpt     String?  @db.Text
-  content     String?  @db.LongText
-  coverUrl    String?  @map("cover_url") @db.VarChar(500)
-  category    String?  @db.VarChar(100)
-  readTime    String?  @map("read_time") @db.VarChar(20)
-  authorId    String?  @map("author_id") @db.VarChar(30)
-  author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
-
-  isPublished Boolean  @default(false) @map("is_published")
-  viewCount   Int      @default(0) @map("view_count")
-
-  publishedAt DateTime? @map("published_at")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  @@index([isPublished, publishedAt])
-
-  @@map("articles")
 }

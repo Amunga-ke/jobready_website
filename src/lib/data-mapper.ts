@@ -4,6 +4,8 @@
 // Transforms database query results into the flat, display-level types that
 // the UI components expect.  Centralised here so every API route stays thin.
 // =============================================================================
+// v2 — adapted for the unified Listing + lookup-table schema.
+// =============================================================================
 
 import type {
   Job,
@@ -19,51 +21,106 @@ import type {
   OpportunityTabEntry,
   CityLocation,
   Locality,
-  Currency,
 } from '@/types';
 
 // ---------------------------------------------------------------------------
-// Enum mappers
+// Prisma query result shape
 // ---------------------------------------------------------------------------
 
-/** Maps a DB EmploymentType enum to a display JobType string */
-const EMPLOYMENT_TYPE_MAP: Record<string, JobType> = {
-  FULL_TIME: 'Full-time',
-  PART_TIME: 'Part-time',
-  CONTRACT: 'Contract',
-  TEMPORARY: 'Temporary',
-  INTERNSHIP: 'Internship',
-  VOLUNTEER: 'Volunteer',
-};
+/**
+ * Shape of a Prisma `Listing` query result when the full include is used
+ * (organization → organizationType, listingType, category, location,
+ *  jobDetail → employmentType / experienceLevel / educationLevel / currency).
+ */
+export interface PrismaListingRow {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  description: string;
+  tags: string; // JSON array of strings
+  status: string;
+  isVerified: boolean;
+  isFeatured: boolean;
+  postedAt: Date;
+  deadlineDate: Date | null;
+  sourceUrl: string | null;
+  applicationUrl: string | null;
 
-/** Maps a DB ExperienceLevel enum to a display JobLevel string */
-const EXPERIENCE_LEVEL_MAP: Record<string, JobLevel> = {
-  ENTRY_LEVEL: 'Entry Level',
-  INTERNSHIP: 'Intern',
-  MID_LEVEL: 'Mid Level',
-  SENIOR: 'Senior',
-  LEAD: 'Senior',
-  MANAGER: 'Senior',
-  DIRECTOR: 'Executive',
-  EXECUTIVE: 'Executive',
-};
+  // FK relations
+  organization: {
+    id: string;
+    name: string;
+    slug: string;
+    organizationType: {
+      id: string;
+      code: string;
+      name: string;
+    };
+    industry: {
+      id: string;
+      code: string;
+      name: string;
+    } | null;
+    location: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
 
-/** Maps a DB Currency enum to a display symbol */
-const CURRENCY_SYMBOL_MAP: Record<string, string> = {
-  KES: 'Ksh',
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  UGX: 'UGX',
-  TZS: 'TZS',
-  RWF: 'RWF',
-  ZAR: 'ZAR',
-  NGN: 'NGN',
-  CAD: 'C$',
-  AUD: 'A$',
-  INR: '₹',
-  CNY: '¥',
-};
+  listingType: {
+    id: string;
+    code: string;
+    name: string;
+  };
+
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    type: string;
+  } | null;
+
+  location: {
+    id: string;
+    name: string;
+    slug: string;
+    type: string;
+  } | null;
+
+  jobDetail: {
+    id: string;
+    workMode: string;
+    salaryMin: number | null;
+    salaryMax: number | null;
+    salaryDisplay: string;
+    salaryPeriod: string;
+    employmentType: {
+      id: string;
+      code: string;
+      name: string;
+    } | null;
+    experienceLevel: {
+      id: string;
+      code: string;
+      name: string;
+    } | null;
+    educationLevel: {
+      id: string;
+      code: string;
+      name: string;
+    } | null;
+    currency: {
+      id: string;
+      code: string;
+      name: string;
+      symbol: string;
+    } | null;
+    vacanciesCount: number | null;
+    startDate: Date | null;
+    contractDuration: string | null;
+  } | null;
+}
 
 // ---------------------------------------------------------------------------
 // Time helpers
@@ -117,213 +174,6 @@ function formatSalary(min: number | null | undefined, max: number | null | undef
 }
 
 // ---------------------------------------------------------------------------
-// Prisma include payload type (what the queries return)
-// ---------------------------------------------------------------------------
-
-/**
- * Shape of a Prisma Job query result when `include` is used for
- * company, category, location, and tags.
- */
-export interface PrismaJobRow {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  requirements: string; // JSON string
-  type: string;
-  level: string;
-  salaryMin: number | null;
-  salaryMax: number | null;
-  salaryCurrency: string;
-  casualRate: string | null;
-  casualNote: string | null;
-  isCasual: boolean;
-  isGovernment: boolean;
-  isGazette: boolean;
-  isFeatured: boolean;
-  isUrgent: boolean;
-  isRemote: boolean;
-  postedAt: Date;
-  deadlineAt: Date | null;
-  companyId: string;
-  category: { id: string; name: string; slug: string };
-  subcategory: { id: string; name: string; slug: string } | null;
-  location: { id: string; name: string; slug: string; type: string };
-  company: { id: string; name: string; slug: string; logoUrl: string | null; isGovernment: boolean };
-  tags: Array<{ tagId: string; jobId: string; tagIdRef: { id: string; name: string; slug: string } }>;
-}
-
-// ---------------------------------------------------------------------------
-// Core mapper
-// ---------------------------------------------------------------------------
-
-/** Maps a Prisma Job row to the frontend `Job` type. */
-export function mapJobToView(job: PrismaJobRow): Job {
-  const deadline = job.deadlineAt ? deadlineText(new Date(job.deadlineAt)) : null;
-  return {
-    id: job.slug,
-    title: job.title,
-    company: job.company.name,
-    companyInitial: job.company.name.charAt(0).toUpperCase(),
-    category: (job.category.name as JobCategory) || 'Other',
-    type: EMPLOYMENT_TYPE_MAP[job.type] || job.type,
-    level: EXPERIENCE_LEVEL_MAP[job.level] || job.level,
-    location: job.location.name,
-    salary: formatSalary(job.salaryMin, job.salaryMax),
-    salaryCurrency: CURRENCY_SYMBOL_MAP[job.salaryCurrency] || job.salaryCurrency,
-    posted: relativeTime(new Date(job.postedAt)),
-    deadline: deadline?.text,
-    urgent: deadline?.urgent ?? (job.deadlineAt
-      ? (new Date(job.deadlineAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24) <= 3
-      : false),
-    description: job.description,
-    requirements: safeParseJson(job.requirements, []),
-    tags: (job.tags || []).map((t) => t.tagIdRef?.name || ''),
-    isRemote: job.isRemote,
-    isGovernment: job.isGovernment,
-    isGazette: job.isGazette,
-    isCasual: job.isCasual,
-    casualRate: job.casualRate || undefined,
-    casualNote: job.casualNote || undefined,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Section-specific mappers
-// ---------------------------------------------------------------------------
-
-/** Maps Prisma Jobs to ClosingSoonEntry[] for the "Closing Soon" table. */
-export function mapToClosingSoon(jobs: PrismaJobRow[]): ClosingSoonEntry[] {
-  return jobs.map((job) => {
-    const deadline = job.deadlineAt
-      ? deadlineText(new Date(job.deadlineAt))
-      : { text: 'No deadline', urgent: false };
-    return {
-      id: job.slug,
-      position: job.title,
-      company: job.company.name,
-      deadline: deadline.text,
-      urgent: deadline.urgent,
-    };
-  });
-}
-
-/** Maps Prisma Jobs to RecentJobEntry[] for the Hero sidebar. */
-export function mapToRecent(jobs: PrismaJobRow[]): RecentJobEntry[] {
-  return jobs.map((job) => ({
-    id: job.slug,
-    title: job.title,
-    company: job.company.name,
-    location: job.location.name,
-    time: relativeTime(new Date(job.postedAt)),
-  }));
-}
-
-/** Maps Prisma Jobs to FeaturedEntry[] for the Featured section. */
-export function mapToFeatured(jobs: PrismaJobRow[]): FeaturedEntry[] {
-  return jobs.map((job) => ({
-    id: job.slug,
-    letter: job.company.name.charAt(0).toUpperCase(),
-    title: job.title,
-    company: `${job.company.name} · ${job.location.name}`,
-  }));
-}
-
-/** Maps Prisma Jobs to GovernmentJobEntry[] for the Government section. */
-export function mapToGovernment(jobs: PrismaJobRow[]): GovernmentJobEntry[] {
-  return jobs.map((job) => {
-    const deadline = job.deadlineAt
-      ? deadlineText(new Date(job.deadlineAt))
-      : { text: 'Open', urgent: false };
-    return {
-      id: job.slug,
-      title: job.title,
-      deadline: deadline.text,
-      gazette: job.isGazette || undefined,
-    };
-  });
-}
-
-/** Maps Prisma Jobs to CasualJobEntry[] for the Casual section. */
-export function mapToCasual(jobs: PrismaJobRow[]): CasualJobEntry[] {
-  return jobs.map((job) => ({
-    id: job.slug,
-    title: job.title,
-    location: job.location.name,
-    rate: job.casualRate || 'Negotiable',
-    note: job.casualNote || '',
-  }));
-}
-
-/** Maps Prisma Jobs to OpportunityTabEntry[] for Opportunities tabs. */
-export function mapToOpportunities(jobs: PrismaJobRow[]): OpportunityTabEntry[] {
-  return jobs.map((job) => {
-    const deadline = job.deadlineAt ? deadlineText(new Date(job.deadlineAt)) : null;
-    return {
-      id: job.slug,
-      title: job.title,
-      company: `${job.company.name} · ${job.location.name}`,
-      type: EMPLOYMENT_TYPE_MAP[job.type] || job.type,
-      accent: deadline?.urgent ?? false,
-    };
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Category / Location mappers
-// ---------------------------------------------------------------------------
-
-interface PrismaCategoryRow {
-  id: string;
-  name: string;
-  slug: string;
-  icon: string | null;
-  jobCount: number;
-}
-
-/** Maps Prisma Categories to JobCategoryEntry[] for the Categories section. */
-export function mapToCategories(categories: PrismaCategoryRow[]): JobCategoryEntry[] {
-  const darkSlugs = ['GOVERNMENT_PUBLIC_SECTOR', 'HEALTHCARE', 'ENGINEERING', 'TECHNOLOGY'];
-  return categories.map((cat) => ({
-    name: cat.name as JobCategory,
-    count: cat.jobCount.toLocaleString('en-KE') + ' jobs',
-    dark: darkSlugs.includes(cat.slug),
-  }));
-}
-
-interface PrismaLocationRow {
-  id: string;
-  name: string;
-  slug: string;
-  type: string;
-  childLocations: PrismaLocationRow[];
-  _count: { jobs: number };
-}
-
-/** Maps Prisma Locations to CityLocation[] for the By Location section. */
-export function mapToLocations(locations: PrismaLocationRow[]): CityLocation[] {
-  return locations
-    .filter((loc) => loc._count.jobs > 0)
-    .map((loc) => {
-      const areas: Locality[] | undefined =
-        loc.childLocations && loc.childLocations.length > 0
-          ? loc.childLocations
-              .filter((child) => child._count?.jobs > 0)
-              .map((child) => ({
-                name: child.name,
-                count: (child._count?.jobs || 0).toLocaleString('en-KE') + ' jobs',
-              }))
-          : undefined;
-
-      return {
-        city: loc.name,
-        count: loc._count.jobs.toLocaleString('en-KE') + ' jobs',
-        areas,
-      };
-    });
-}
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -334,4 +184,263 @@ function safeParseJson<T>(str: string, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+/** Derive the employment type string for the frontend `Job.type` field */
+function resolveListingType(listing: PrismaListingRow): JobType {
+  // If the listing type itself maps to a known JobType, use it directly
+  const code = listing.listingType?.code;
+  if (code === 'CASUAL') return 'Casual';
+  if (code === 'INTERNSHIP') return 'Internship';
+
+  // For job-type listings, prefer the employmentType from jobDetail
+  const empName = listing.jobDetail?.employmentType?.name;
+  if (empName) return empName as JobType;
+
+  // Fall back to the listing type name
+  const ltName = listing.listingType?.name;
+  if (ltName) return ltName as JobType;
+
+  return 'Full-time';
+}
+
+/** Derive the experience level string for the frontend `Job.level` field */
+function resolveExperienceLevel(listing: PrismaListingRow): JobLevel {
+  const name = listing.jobDetail?.experienceLevel?.name;
+  if (name) return name as JobLevel;
+  return 'Any';
+}
+
+/** Detect whether this listing is a government position */
+function isGovernmentListing(listing: PrismaListingRow): boolean {
+  const orgCode = listing.organization?.organizationType?.code;
+  return orgCode === 'NATIONAL_GOV' || orgCode === 'COUNTY_GOV';
+}
+
+/** Detect whether this listing is remote */
+function isRemoteListing(listing: PrismaListingRow): boolean {
+  if (listing.jobDetail?.workMode === 'REMOTE') return true;
+  if (listing.location === null) return true;
+  return false;
+}
+
+/** Extract casual rate from tags or summary */
+function extractCasualRate(listing: PrismaListingRow): string | undefined {
+  const parsedTags = safeParseJson<string[]>(listing.tags, []);
+  // Look for a tag like "Ksh 500/day" or "500/day"
+  const rateTag = parsedTags.find(
+    (t) => /(?:Ksh\s*)?[\d,]+\/(?:day|hr|hour)/i.test(t),
+  );
+  if (rateTag) return rateTag;
+  return undefined;
+}
+
+/** Extract casual note from tags or summary */
+function extractCasualNote(listing: PrismaListingRow): string | undefined {
+  const parsedTags = safeParseJson<string[]>(listing.tags, []);
+  // Look for contextual tags like "Immediate start", "Own tools", etc.
+  const noteTag = parsedTags.find(
+    (t) =>
+      /immediate|urgent|own\s+(tools|bike|car)|flexible|weekend/i.test(t),
+  );
+  if (noteTag) return noteTag;
+  // Fall back to summary if present
+  return listing.summary || undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Core mapper
+// ---------------------------------------------------------------------------
+
+/** Maps a Prisma Listing row (with full include) to the frontend `Job` type. */
+export function mapJobToView(listing: PrismaListingRow): Job {
+  const companyName = listing.organization?.name ?? 'Various';
+  const deadline = listing.deadlineDate
+    ? deadlineText(new Date(listing.deadlineDate))
+    : null;
+  const isGov = isGovernmentListing(listing);
+  const isCasual = listing.listingType?.code === 'CASUAL';
+
+  return {
+    id: listing.slug,
+    title: listing.title,
+    company: companyName,
+    companyInitial: companyName.charAt(0).toUpperCase(),
+    category: (listing.category?.name as JobCategory) || 'Other',
+    type: resolveListingType(listing),
+    level: resolveExperienceLevel(listing),
+    location: listing.location?.name ?? 'Remote',
+    salary: formatSalary(
+      listing.jobDetail?.salaryMin,
+      listing.jobDetail?.salaryMax,
+    ),
+    salaryCurrency: listing.jobDetail?.currency?.symbol ?? '',
+    posted: relativeTime(new Date(listing.postedAt)),
+    deadline: deadline?.text,
+    urgent: deadline?.urgent ?? false,
+    description: listing.description,
+    requirements: [], // requirements are embedded in description now
+    tags: safeParseJson<string[]>(listing.tags, []),
+    isRemote: isRemoteListing(listing),
+    isGovernment: isGov || undefined,
+    isCasual: isCasual || undefined,
+    casualRate: isCasual ? (extractCasualRate(listing) || 'Negotiable') : undefined,
+    casualNote: isCasual ? (extractCasualNote(listing) || '') : undefined,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Section-specific mappers
+// ---------------------------------------------------------------------------
+
+/** Maps Prisma Listings to ClosingSoonEntry[] for the "Closing Soon" table. */
+export function mapToClosingSoon(listings: PrismaListingRow[]): ClosingSoonEntry[] {
+  return listings.map((listing) => {
+    const deadline = listing.deadlineDate
+      ? deadlineText(new Date(listing.deadlineDate))
+      : { text: 'No deadline', urgent: false };
+    return {
+      id: listing.slug,
+      position: listing.title,
+      company: listing.organization?.name ?? 'Various',
+      deadline: deadline.text,
+      urgent: deadline.urgent,
+    };
+  });
+}
+
+/** Maps Prisma Listings to RecentJobEntry[] for the Hero sidebar. */
+export function mapToRecent(listings: PrismaListingRow[]): RecentJobEntry[] {
+  return listings.map((listing) => ({
+    id: listing.slug,
+    title: listing.title,
+    company: listing.organization?.name ?? 'Various',
+    location: listing.location?.name ?? 'Remote',
+    time: relativeTime(new Date(listing.postedAt)),
+  }));
+}
+
+/** Maps Prisma Listings to FeaturedEntry[] for the Featured section. */
+export function mapToFeatured(listings: PrismaListingRow[]): FeaturedEntry[] {
+  return listings.map((listing) => {
+    const companyName = listing.organization?.name ?? 'Various';
+    return {
+      id: listing.slug,
+      letter: companyName.charAt(0).toUpperCase(),
+      title: listing.title,
+      company: `${companyName} · ${listing.location?.name ?? 'Remote'}`,
+    };
+  });
+}
+
+/** Maps Prisma Listings to GovernmentJobEntry[] for the Government section. */
+export function mapToGovernment(listings: PrismaListingRow[]): GovernmentJobEntry[] {
+  return listings.map((listing) => {
+    const deadline = listing.deadlineDate
+      ? deadlineText(new Date(listing.deadlineDate))
+      : { text: 'Open', urgent: false };
+    return {
+      id: listing.slug,
+      title: listing.title,
+      deadline: deadline.text,
+    };
+  });
+}
+
+/** Maps Prisma Listings to CasualJobEntry[] for the Casual section. */
+export function mapToCasual(listings: PrismaListingRow[]): CasualJobEntry[] {
+  return listings.map((listing) => ({
+    id: listing.slug,
+    title: listing.title,
+    location: listing.location?.name ?? 'Remote',
+    rate: extractCasualRate(listing) || 'Negotiable',
+    note: extractCasualNote(listing) || '',
+  }));
+}
+
+/** Maps Prisma Listings to OpportunityTabEntry[] for Opportunities tabs. */
+export function mapToOpportunities(listings: PrismaListingRow[]): OpportunityTabEntry[] {
+  return listings.map((listing) => {
+    const deadline = listing.deadlineDate
+      ? deadlineText(new Date(listing.deadlineDate))
+      : null;
+    const companyName = listing.organization?.name ?? 'Various';
+    return {
+      id: listing.slug,
+      title: listing.title,
+      company: `${companyName} · ${listing.location?.name ?? 'Remote'}`,
+      type: resolveListingType(listing),
+      accent: deadline?.urgent ?? false,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Category mapper
+// ---------------------------------------------------------------------------
+
+interface PrismaCategoryRow {
+  id: string;
+  name: string;
+  slug: string;
+  listingCount: number;
+  children?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    listingCount: number;
+  }>;
+}
+
+/** Maps Prisma Categories to JobCategoryEntry[] for the Categories section. */
+export function mapToCategories(categories: PrismaCategoryRow[]): JobCategoryEntry[] {
+  const darkSlugs = [
+    'government-public-sector',
+    'healthcare',
+    'engineering',
+    'technology',
+  ];
+  return categories
+    .filter((cat) => cat.listingCount > 0)
+    .map((cat) => ({
+      name: cat.name as JobCategory,
+      count: cat.listingCount.toLocaleString('en-KE') + ' jobs',
+      dark: darkSlugs.includes(cat.slug.toLowerCase()),
+    }));
+}
+
+// ---------------------------------------------------------------------------
+// Location mapper
+// ---------------------------------------------------------------------------
+
+interface PrismaLocationRow {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+  children: PrismaLocationRow[];
+  _count: { listings: number };
+}
+
+/** Maps Prisma Locations to CityLocation[] for the By Location section. */
+export function mapToLocations(locations: PrismaLocationRow[]): CityLocation[] {
+  return locations
+    .filter((loc) => loc._count.listings > 0)
+    .map((loc) => {
+      const areas: Locality[] | undefined =
+        loc.children && loc.children.length > 0
+          ? loc.children
+              .filter((child) => child._count?.listings > 0)
+              .map((child) => ({
+                name: child.name,
+                count: (child._count?.listings || 0).toLocaleString('en-KE') + ' jobs',
+              }))
+          : undefined;
+
+      return {
+        city: loc.name,
+        count: loc._count.listings.toLocaleString('en-KE') + ' jobs',
+        areas,
+      };
+    });
 }
