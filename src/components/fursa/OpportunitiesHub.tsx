@@ -25,7 +25,7 @@ export default function OpportunitiesHub() {
               {internships.map((job) => (
                 <p
                   key={job.id}
-                  className="text-[13px] text-ink hover:text-accent-dark transition-colors cursor-pointer"
+                  className="text-[13px] text-ink hover:text-accent-dark transition-colors cursor-pointer active:scale-[0.98] transition-transform inline-block rounded"
                   onClick={() => openJobById(job.id)}
                 >
                   {job.title}
@@ -39,7 +39,7 @@ export default function OpportunitiesHub() {
 
           {/* Scholarships Card */}
           <div
-            className="snap-start shrink-0 w-64 border border-divider rounded-xl p-4 hover:border-ink/20 transition-colors cursor-pointer"
+            className="snap-start shrink-0 w-64 border border-divider rounded-xl p-4 hover:border-ink/20 transition-colors cursor-pointer active:scale-[0.98] transition-transform"
             onClick={() => openJobById('mastercard-scholars')}
           >
             <div className="font-mono text-[10px] text-accent uppercase tracking-widest mb-4">02 — Scholarships</div>

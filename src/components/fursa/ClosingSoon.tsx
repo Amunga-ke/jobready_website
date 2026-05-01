@@ -34,7 +34,7 @@ export default function ClosingSoon() {
             <div
               key={job.id}
               onClick={() => openJobById(job.id)}
-              className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
+              className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors active:scale-[0.98] transition-transform"
             >
               <div className="col-span-7 sm:col-span-5 text-sm font-medium truncate group-hover:text-accent transition-colors">
                 {job.position}

@@ -72,7 +72,7 @@ export default function OpportunitiesTabs() {
               <div
                 key={`${activeTab}-${job.id}`}
                 onClick={() => openJobById(job.id)}
-                className="flex items-center justify-between py-3 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
+                className="flex items-center justify-between py-3 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors active:scale-[0.98] transition-transform"
               >
                 <div>
                   <p className="text-sm font-medium group-hover:text-accent transition-colors">{job.title}</p>

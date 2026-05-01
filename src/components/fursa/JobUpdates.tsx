@@ -23,7 +23,7 @@ function TimelineColumn({ updates }: { updates: typeof leftUpdates }) {
       <div className="absolute left-[5px] top-2 bottom-2 w-px bg-divider rounded-full" />
       <div className="space-y-5">
         {updates.map((update, i) => (
-          <div key={i} className="flex gap-4 group cursor-pointer" onClick={() => openJobById(update.jobId)}>
+          <div key={i} className="flex gap-4 group cursor-pointer active:scale-[0.98] transition-transform rounded-lg -mx-1 px-1" onClick={() => openJobById(update.jobId)}>
             <div
               className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${
                 update.active ? 'bg-accent ring-4 ring-accent/10' : 'bg-subtle'

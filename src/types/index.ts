@@ -358,6 +358,16 @@ export interface Job {
   /** Featured listing */
   isFeatured?: boolean;
 
+  // ---- AI-predicted salary ----
+  /** AI-predicted salary range for roles that don't disclose compensation */
+  predictedSalary?: {
+    min: number;
+    max: number;
+    currency: string;
+    period: string;
+    note: string;
+  };
+
   // ---- Casual-specific fields ----
   /** Pay rate for casual roles, e.g. "Ksh 500/day" */
   casualRate?: string;
