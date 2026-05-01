@@ -36,11 +36,20 @@ const LISTING_INCLUDE = {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
-    const type = searchParams.get('type'); // featured | government | casual | closing | scholarship | internship
+    const type = searchParams.get('type'); // featured | government | casual | closing | scholarship | internship | browse
     const categorySlug = searchParams.get('category');
+    const locationSlug = searchParams.get('location');
+    const workMode = searchParams.get('workMode');
+    const levelCode = searchParams.get('level');
+    const employmentType = searchParams.get('employmentType');
+    const listingTypeCode = searchParams.get('listingType');
+    const q = searchParams.get('q');
     const limitParam = searchParams.get('limit');
+    const pageParam = searchParams.get('page');
     const statusParam = searchParams.get('status');
-    const limit = limitParam ? parseInt(limitParam, 10) : 20;
+    const limit = Math.min(limitParam ? parseInt(limitParam, 10) : 20, 100);
+    const page = pageParam ? parseInt(pageParam, 10) : 1;
+    const skip = (page - 1) * limit;
 
     // Build the where clause
     const where: Prisma.ListingWhereInput = {};
@@ -52,7 +61,17 @@ export async function GET(request: NextRequest) {
       where.status = 'PUBLISHED';
     }
 
-    // Type-based filters
+    // Text search
+    if (q) {
+      where.OR = [
+        { title: { contains: q, mode: 'insensitive' } },
+        { summary: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { tags: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    // Type-based filters (legacy homepage sections)
     if (type === 'featured') {
       where.isFeatured = true;
     } else if (type === 'government') {
@@ -71,17 +90,42 @@ export async function GET(request: NextRequest) {
       where.listingType = { code: 'INTERNSHIP' };
     }
 
-    // Category filter
+    // Structured filters (for browse/listing pages)
+    if (listingTypeCode) {
+      where.listingType = { code: listingTypeCode };
+    }
     if (categorySlug) {
       where.category = { slug: categorySlug };
     }
+    if (locationSlug) {
+      where.location = { slug: locationSlug };
+    }
+    if (workMode) {
+      where.jobDetail = { ...(where.jobDetail as any), workMode: workMode as any };
+    }
+    if (levelCode) {
+      where.jobDetail = {
+        ...(where.jobDetail as any),
+        experienceLevel: { code: levelCode as any },
+      };
+    }
+    if (employmentType) {
+      where.jobDetail = {
+        ...(where.jobDetail as any),
+        employmentType: { code: employmentType as any },
+      };
+    }
 
-    // Fetch
+    // Count total matching records (for pagination)
+    const total = await db.listing.count({ where });
+
+    // Fetch with pagination
     const listings = await db.listing.findMany({
       where,
       include: LISTING_INCLUDE,
       orderBy: { postedAt: 'desc' },
       take: limit,
+      skip: type === 'browse' ? skip : 0,
     });
 
     // Map based on the `type` query param — default returns full Job objects
@@ -104,9 +148,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ jobs: mapToOpportunities(listings as any) });
     }
 
-    // Default: return full Job objects
+    // Default / browse: return full Job objects with pagination metadata
+    const hasMore = skip + listings.length < total;
     return NextResponse.json({
       jobs: listings.map((l) => mapJobToView(l as any)),
+      total,
+      page,
+      limit,
+      hasMore,
     });
   } catch (error) {
     console.error('[GET /api/jobs] Error:', error);
