@@ -311,6 +311,13 @@ export default function JobDetailSheet() {
                   <MetaChip icon={Clock} label="" value={job.deadline} accent={job.urgent} />
                 </>
               )}
+              {/* Salary */}
+              {hasSalary && (
+                <>
+                  <Dot />
+                  <MetaChip icon={Briefcase} label="" value={`${job.salaryCurrency} ${job.salary}${job.salaryPeriod ?? ''}`} />
+                </>
+              )}
             </div>
           </div>
 
@@ -328,24 +335,6 @@ export default function JobDetailSheet() {
             </h3>
             <DescriptionBlock description={job.description} />
           </div>
-
-          {/* ── Compensation ── */}
-          {hasSalary && (
-            <div className="px-6 py-5 border-b border-subtle bg-accent-bg">
-              <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-2">
-                Compensation
-              </h3>
-              <p className="text-lg font-heading font-bold text-ink">
-                {job.salaryCurrency} {job.salary}
-                {job.salaryPeriod && (
-                  <span className="text-[12px] text-muted font-normal font-sans">
-                    {' '}
-                    {job.salaryPeriod}
-                  </span>
-                )}
-              </p>
-            </div>
-          )}
 
           {/* ── Casual rate ── */}
           {job.isCasual && (
