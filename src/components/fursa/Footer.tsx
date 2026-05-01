@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2 md:col-span-1">
             <a href="#" className="font-heading font-bold text-lg tracking-tight">
-              FURSA<span className="text-accent">KE</span>
+              JOB<span className="text-accent">NET</span>
             </a>
             <p className="text-[12px] text-muted mt-3 leading-relaxed">
               Kenya&apos;s most trusted job board. Real jobs from verified employers.
@@ -51,7 +51,7 @@ export default function Footer() {
         </div>
         <div className="h-px bg-divider my-10"></div>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="font-mono text-[11px] text-muted/40">© 2025 FursaKE</p>
+          <p className="font-mono text-[11px] text-muted/40">© 2025 Jobnet</p>
           <div className="flex items-center gap-4">
             <a href="#" className="text-muted/30 hover:text-ink transition-colors">
               <svg className="text-base" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
