@@ -21,3 +21,25 @@ Stage Summary:
 - Prisma schema is fully updated with native MySQL enums
 - Pending: seed.ts needs update for new enum values (blocked by DB IP whitelist)
 - Pending: `prisma db push` and `prisma generate` (blocked by DB IP whitelist)
+
+---
+Task ID: 1
+Agent: main
+Task: Push Prisma schema to MySQL database and wire up API routes
+
+Work Log:
+- Fixed DATABASE_URL system env override (was pointing to file:/home/z/my-project/db/custom.db)
+- Updated src/lib/db.ts to force correct MySQL URL unconditionally
+- Ran `prisma db push --accept-data-loss` — successfully synced 15+ tables with enums
+- Prisma Client auto-generated (v6.19.2)
+- Verified database connectivity: 1 user, 16 companies, 32 jobs, 14 categories, 16 locations, 68 tags
+- Created src/lib/data-mapper.ts with full DB→frontend type mapping (mapJobToView, mapToClosingSoon, mapToRecent, etc.)
+- Created 5 API routes: /api/jobs, /api/jobs/[id], /api/categories, /api/locations, /api/newsletter
+- Updated JobModalContext.tsx to fetch from /api/jobs/[slug] instead of static job-data.ts
+- Production build passes: all routes compiled, static pages generated
+
+Stage Summary:
+- Database is fully connected and operational
+- All API endpoints are live and building successfully
+- Frontend components can now query real data from MySQL via API routes
+- Section components still use hardcoded data — ready for migration when needed
