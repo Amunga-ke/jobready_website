@@ -132,7 +132,52 @@ function DescriptionBlock({ description }: { description: string }) {
 // ---------------------------------------------------------------------------
 
 export default function JobDetailSheet() {
-  const { isOpen, selectedJob, closeJob } = useJobModal();
+  const { isOpen, isLoading, selectedJob, closeJob } = useJobModal();
+
+  // ─── Loading skeleton ───
+  if (isOpen && (isLoading || !selectedJob)) {
+    return (
+      <>
+        <div
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300"
+          onClick={closeJob}
+        />
+        <div className="fixed top-0 right-0 z-50 h-full w-full sm:w-[500px] lg:w-[560px] bg-white shadow-2xl transition-transform duration-300 ease-out flex flex-col translate-x-0">
+          <div className="border-b border-divider px-6 py-4 flex items-start justify-between shrink-0">
+            <div className="flex-1 min-w-0 pr-4 space-y-2">
+              <div className="h-4 w-20 bg-surface rounded animate-pulse" />
+              <div className="h-5 w-3/4 bg-surface rounded animate-pulse" />
+              <div className="h-4 w-32 bg-surface rounded animate-pulse" />
+            </div>
+            <button onClick={closeJob} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface text-muted hover:text-ink shrink-0 mt-1" aria-label="Close">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 px-6 py-5 space-y-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-surface rounded-xl animate-pulse shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-40 bg-surface rounded animate-pulse" />
+                <div className="h-3 w-56 bg-surface rounded animate-pulse" />
+              </div>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-4 w-16 bg-surface rounded animate-pulse" />
+              ))}
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 w-full bg-surface rounded animate-pulse" />
+              <div className="h-3 w-5/6 bg-surface rounded animate-pulse" />
+              <div className="h-3 w-4/6 bg-surface rounded animate-pulse" />
+              <div className="h-3 w-full bg-surface rounded animate-pulse" />
+              <div className="h-3 w-3/4 bg-surface rounded animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   if (!isOpen || !selectedJob) return null;
 
@@ -335,6 +380,18 @@ export default function JobDetailSheet() {
             </h3>
             <DescriptionBlock description={job.description} />
           </div>
+
+          {/* ── Compensation (subtle) ── */}
+          {hasSalary && (
+            <div className="px-6 py-3 border-b border-subtle">
+              <span className="text-[13px] text-muted">
+                {job.salaryCurrency} {job.salary}
+                {job.salaryPeriod && (
+                  <span className="text-[11px]"> {job.salaryPeriod}</span>
+                )}
+              </span>
+            </div>
+          )}
 
           {/* ── Casual rate ── */}
           {job.isCasual && (
