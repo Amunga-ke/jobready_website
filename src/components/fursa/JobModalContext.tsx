@@ -30,15 +30,22 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openJobById = useCallback((id: string) => {
-    // Dynamic import to avoid circular dependency
-    import('@/lib/job-data').then(({ getJobById }) => {
-      const job = getJobById(id);
-      if (job) {
-        setSelectedJob(job);
-        setIsOpen(true);
-        document.body.style.overflow = 'hidden';
-      }
-    });
+    // Fetch job details from the API by slug
+    fetch(`/api/jobs/${encodeURIComponent(id)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Job not found');
+        return res.json();
+      })
+      .then((data) => {
+        if (data.job) {
+          setSelectedJob(data.job);
+          setIsOpen(true);
+          document.body.style.overflow = 'hidden';
+        }
+      })
+      .catch((err) => {
+        console.error('[openJobById] Failed to fetch job:', err);
+      });
   }, []);
 
   const closeJob = useCallback(() => {
