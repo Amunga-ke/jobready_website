@@ -8,6 +8,7 @@ interface JobModalContextType {
   openJobById: (id: string) => void;
   closeJob: () => void;
   isOpen: boolean;
+  isLoading: boolean;
   selectedJob: Job | null;
 }
 
@@ -16,12 +17,14 @@ const JobModalContext = createContext<JobModalContextType>({
   openJobById: () => {},
   closeJob: () => {},
   isOpen: false,
+  isLoading: false,
   selectedJob: null,
 });
 
 export function JobModalProvider({ children }: { children: React.ReactNode }) {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const openJob = useCallback((job: Job) => {
     setSelectedJob(job);
@@ -30,33 +33,36 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const openJobById = useCallback((id: string) => {
-    // Fetch job details from the API by slug
+    // Open immediately with loading state — no waiting for the fetch
+    setIsOpen(true);
+    setIsLoading(true);
+    document.body.style.overflow = 'hidden';
+
     fetch(`/api/jobs/${encodeURIComponent(id)}`)
       .then((res) => {
         if (!res.ok) throw new Error('Job not found');
         return res.json();
       })
       .then((data) => {
-        if (data.job) {
-          setSelectedJob(data.job);
-          setIsOpen(true);
-          document.body.style.overflow = 'hidden';
-        }
+        if (data.job) setSelectedJob(data.job);
       })
       .catch((err) => {
         console.error('[openJobById] Failed to fetch job:', err);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
 
   const closeJob = useCallback(() => {
     setIsOpen(false);
+    setIsLoading(false);
     document.body.style.overflow = '';
-    // Delay clearing the job for animation
     setTimeout(() => setSelectedJob(null), 300);
   }, []);
 
   return (
-    <JobModalContext.Provider value={{ openJob, openJobById, closeJob, isOpen, selectedJob }}>
+    <JobModalContext.Provider value={{ openJob, openJobById, closeJob, isOpen, isLoading, selectedJob }}>
       {children}
     </JobModalContext.Provider>
   );
