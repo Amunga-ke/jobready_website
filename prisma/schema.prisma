@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,20 +7,369 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ──────────────────────────────────────────────
+//  AUTHENTICATION & USERS
+// ──────────────────────────────────────────────
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  name          String?
+  phone         String?   // e.g. +254712345678
+  avatarUrl     String?   @map("avatar_url")
+  role          String    @default("SEEKER") // SEEKER | EMPLOYER | ADMIN
+  isActive      Boolean   @default(true) @map("is_active")
+
+  // Job seeker fields
+  county        String?   // Home county (e.g. "Nairobi", "Mombasa")
+  bio           String?
+  resumeUrl     String?   @map("resume_url")
+  linkedInUrl   String?   @map("linkedin_url")
+  skills        String    @default("[]") // JSON array of skill strings
+
+  // Employer fields (linked via Company)
+  company       Company?  @relation("CompanyOwner")
+
+  // Relationships
+  applications  Application[]
+  savedJobs     SavedJob[]
+  subscriptions NewsletterSubscription[]
+  articles      Article[]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
 }
 
-model Post {
+// ──────────────────────────────────────────────
+//  COMPANIES / EMPLOYERS
+// ──────────────────────────────────────────────
+
+model Company {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique // URL-friendly e.g. "safaricom"
+  description   String?
+  logoUrl       String?   @map("logo_url")
+  website       String?
+  industry      String?   // e.g. "Telecommunications", "Banking"
+  employeeCount String?   @map("employee_count") // e.g. "1000-5000"
+  hqLocation    String?   @map("hq_location")
+  isVerified    Boolean   @default(false) @map("is_verified") // Verified employer badge
+  isGovernment  Boolean   @default(false) @map("is_government")
+
+  // Ownership
+  ownerId       String?   @unique @map("owner_id")
+  owner         User?     @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  // Relationships
+  jobs          Job[]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("companies")
+}
+
+// ──────────────────────────────────────────────
+//  JOB CATEGORIES
+// ──────────────────────────────────────────────
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique // e.g. "Technology & IT"
+  slug        String  @unique // e.g. "technology-it"
+  description String?
+  icon        String? // icon name or emoji
+  jobCount    Int     @default(0) @map("job_count") // Denormalized count
+
+  // Relationships
+  jobs        Job[]
+  salaryRecords SalaryRecord[] @relation("CategorySalary")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+// ──────────────────────────────────────────────
+//  LOCATIONS
+// ──────────────────────────────────────────────
+
+model Location {
+  id          String  @id @default(cuid())
+  name        String  // e.g. "Nairobi", "Mombasa", "CBD", "Westlands"
+  slug        String  @unique
+  type        String  @default("COUNTY") // COUNTY | AREA | REMOTE
+  parentLocationId String? @map("parent_location_id") // e.g. "Westlands" → "Nairobi"
+  parentLocation Location? @relation("LocationHierarchy", fields: [parentLocationId], references: [id], onDelete: SetNull)
+  childLocations  Location[] @relation("LocationHierarchy")
+
+  // Relationships
+  jobs        Job[]
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("locations")
+}
+
+// ──────────────────────────────────────────────
+//  JOB LISTINGS
+// ──────────────────────────────────────────────
+
+model Job {
+  id            String    @id @default(cuid())
+  slug          String    @unique // URL-friendly e.g. "senior-accountant-safaricom"
+
+  // Core info
+  title         String
+  description   String    // Full job description (markdown supported)
+  requirements  String    // JSON array of requirement strings
+
+  // Employment details
+  type          String    @default("Full-time") // Full-time | Part-time | Contract | Internship | Casual | Temporary
+  level         String    @default("Entry Level") // Entry Level | Mid Level | Senior | Executive | Intern | Any
+  salaryMin     Int?      @map("salary_min") // e.g. 80000 (in Ksh)
+  salaryMax     Int?      @map("salary_max") // e.g. 120000 (in Ksh)
+  salaryCurrency String   @default("Ksh") @map("salary_currency")
+  salaryNote    String?   @map("salary_note") // e.g. "Negotiable", "Commission-based"
+
+  // Casual job fields
+  casualRate    String?   @map("casual_rate") // e.g. "Ksh 500/day"
+  casualNote    String?   @map("casual_note") // e.g. "Immediate", "Own bike", "Accom. provided"
+  isCasual      Boolean   @default(false) @map("is_casual")
+
+  // Government fields
+  isGovernment  Boolean   @default(false) @map("is_government")
+  isGazette     Boolean   @default(false) @map("is_gazette") // Published in Kenya Gazette
+  gazetteRef    String?   @map("gazette_ref") // Gazette notice reference number
+
+  // Status & visibility
+  status        String    @default("ACTIVE") // DRAFT | ACTIVE | CLOSED | EXPIRED | PAUSED
+  isFeatured    Boolean   @default(false) @map("is_featured") // Sponsored/featured listing
+  isUrgent      Boolean   @default(false) @map("is_urgent") // Closing soon highlight
+  isRemote      Boolean   @default(false) @map("is_remote")
+
+  // Counts (denormalized)
+  viewCount     Int       @default(0) @map("view_count")
+  applicationCount Int    @default(0) @map("application_count")
+
+  // Dates
+  postedAt      DateTime  @default(now()) @map("posted_at")
+  deadlineAt    DateTime? @map("deadline_at") // Application deadline
+  featuredAt    DateTime? @map("featured_at") // When featured started (for sorting)
+  closedAt      DateTime? @map("closed_at")
+
+  // Foreign keys
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  locationId    String
+  location      Location  @relation(fields: [locationId], references: [id])
+
+  // Relationships
+  applications  Application[]
+  savedBy       SavedJob[]
+  tags          JobTag[]
+  updates       JobUpdate[]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([companyId])
+  @@index([categoryId])
+  @@index([locationId])
+  @@index([status])
+  @@index([isFeatured])
+  @@index([isUrgent])
+  @@index([deadlineAt])
+  @@index([postedAt])
+
+  @@map("jobs")
+}
+
+// ──────────────────────────────────────────────
+//  JOB TAGS (many-to-many via join table)
+// ──────────────────────────────────────────────
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique // e.g. "Python", "Remote", "CPA"
+  slug      String    @unique
+
+  // Relationships
+  jobs      JobTag[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("tags")
+}
+
+model JobTag {
+  jobId     String
+  jobIdRef  Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  tagId     String
+  tagIdRef  Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, tagId])
+  @@map("job_tags")
+}
+
+// ──────────────────────────────────────────────
+//  JOB APPLICATIONS
+// ──────────────────────────────────────────────
+
+model Application {
+  id            String    @id @default(cuid())
+
+  // Status tracking
+  status        String    @default("PENDING") // PENDING | SHORTLISTED | INTERVIEW | REJECTED | WITHDRAWN | HIRED
+
+  // Applicant info (snapshot, not FK — user may change profile)
+  coverLetter   String?   @map("cover_letter") // Optional cover note
+  resumeUrl     String?   @map("resume_url") // Resume at time of application
+
+  // Employer notes (internal)
+  employerNotes String?   @map("employer_notes")
+  rating        Int?      // 1-5 employer rating of candidate
+
+  // Foreign keys
+  userId        String    @map("user_id")
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId         String    @map("job_id")
+  job           Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  // Dates
+  appliedAt     DateTime  @default(now()) @map("applied_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  shortlistedAt DateTime? @map("shortlisted_at")
+  interviewAt   DateTime? @map("interview_at")
+  respondedAt   DateTime? @map("responded_at")
+
+  @@unique([userId, jobId]) // One application per user per job
+  @@index([jobId, status])
+  @@index([userId])
+
+  @@map("applications")
+}
+
+// ──────────────────────────────────────────────
+//  SAVED / BOOKMARKED JOBS
+// ──────────────────────────────────────────────
+
+model SavedJob {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String   @map("job_id")
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, jobId])
+  @@index([userId])
+
+  @@map("saved_jobs")
+}
+
+// ──────────────────────────────────────────────
+//  JOB UPDATES (timeline feed items)
+// ──────────────────────────────────────────────
+
+model JobUpdate {
+  id        String   @id @default(cuid())
+  content   String   // e.g. "42 candidates shortlisted"
+  isActive  Boolean  @default(true) @map("is_active") // Green dot vs grey dot
+
+  // Foreign key
+  jobId     String   @map("job_id")
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([jobId, createdAt])
+
+  @@map("job_updates")
+}
+
+// ──────────────────────────────────────────────
+//  NEWSLETTER SUBSCRIPTIONS
+// ──────────────────────────────────────────────
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+
+  // Foreign key (optional — can subscribe without account)
+  userId    String?  @unique @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  subscribedAt DateTime @default(now()) @map("subscribed_at")
+  unsubscribedAt DateTime? @map("unsubscribed_at")
+
+  @@index([email])
+
+  @@map("newsletter_subscriptions")
+}
+
+// ──────────────────────────────────────────────
+//  SALARY RECORDS (for Salary Guide feature)
+// ──────────────────────────────────────────────
+
+model SalaryRecord {
+  id          String  @id @default(cuid())
+  title       String  // e.g. "Software Engineer"
+  level       String  // e.g. "Mid Level"
+  location    String  // e.g. "Nairobi"
+  salaryMin   Int     @map("salary_min") // in Ksh
+  salaryMax   Int     @map("salary_max") // in Ksh
+  currency    String  @default("Ksh")
+  source      String? // e.g. "User Report", "Employer"
+  reportCount Int     @default(1) @map("report_count") // Number of data points
+
+  categoryId  String? @map("category_id")
+  category    Category? @relation("CategorySalary", fields: [categoryId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([title])
+  @@index([categoryId])
+  @@index([location])
+
+  @@map("salary_records")
+}
+
+// ──────────────────────────────────────────────
+//  CAREER RESOURCES / ARTICLES
+// ──────────────────────────────────────────────
+
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?  // Short description for cards
+  content     String?  // Full article body (markdown)
+  coverUrl    String?  @map("cover_url") // Hero image
+  category    String?  // e.g. "Interview Tips", "CV Writing"
+  readTime    String?  @map("read_time") // e.g. "5 min read"
+  authorId    String?  @map("author_id")
+  author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  isPublished Boolean  @default(false) @map("is_published")
+  viewCount   Int      @default(0) @map("view_count")
+
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isPublished, publishedAt])
+
+  @@map("articles")
 }
