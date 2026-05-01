@@ -1,12 +1,17 @@
+'use client';
+
+import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
 const featuredJobs = [
-  { letter: 'E', title: 'Financial Analyst', company: 'Equity Bank · Nairobi' },
-  { letter: 'K', title: 'Software Engineer', company: 'KCB Bank · Remote' },
-  { letter: 'N', title: 'Graduate Trainee', company: 'NCBA Group · Nairobi' },
+  { id: 'equity-financial-analyst', letter: 'E', title: 'Financial Analyst', company: 'Equity Bank · Nairobi' },
+  { id: 'kcb-software-engineer', letter: 'K', title: 'Software Engineer', company: 'KCB Bank · Remote' },
+  { id: 'ncba-graduate-trainee', letter: 'N', title: 'Graduate Trainee', company: 'NCBA Group · Nairobi' },
 ];
 
 export default function Featured() {
+  const { openJobById } = useJobModal();
+
   return (
     <section className="py-14 border-t border-divider relative overflow-hidden">
       <SectionNumber num="03" />
@@ -16,7 +21,10 @@ export default function Featured() {
           <span className="text-[10px] font-mono text-muted/50 uppercase tracking-widest">Sponsored</span>
         </div>
 
-        <div className="border-l-2 border-accent pl-6 sm:pl-8 mb-10 group cursor-pointer">
+        <div
+          className="border-l-2 border-accent pl-6 sm:pl-8 mb-10 group cursor-pointer"
+          onClick={() => openJobById('safaricom-senior-pm')}
+        >
           <p className="font-mono text-[10px] text-muted uppercase tracking-[0.15em] mb-3">
             Safaricom PLC · Telecommunications
           </p>
@@ -38,9 +46,10 @@ export default function Featured() {
         </div>
 
         <div className="divide-y divide-divider">
-          {featuredJobs.map((job, i) => (
+          {featuredJobs.map((job) => (
             <div
-              key={i}
+              key={job.id}
+              onClick={() => openJobById(job.id)}
               className="flex items-center gap-3 py-3.5 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
             >
               <div className="w-10 h-10 border border-divider rounded-lg flex items-center justify-center shrink-0 font-heading font-bold text-sm text-muted">

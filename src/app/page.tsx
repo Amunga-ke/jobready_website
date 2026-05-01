@@ -1,3 +1,5 @@
+import { JobModalProvider } from '@/components/fursa/JobModalContext';
+import JobDetailSheet from '@/components/fursa/JobDetailSheet';
 import Navbar from '@/components/fursa/Navbar';
 import Hero from '@/components/fursa/Hero';
 import TrustedBy from '@/components/fursa/TrustedBy';
@@ -19,26 +21,29 @@ import StickyNewsletter from '@/components/fursa/StickyNewsletter';
 
 export default function Home() {
   return (
-    <>
+    <JobModalProvider>
       <Navbar />
-      <Hero />
-      <TrustedBy />
-      <JobUpdates />
-      <ClosingSoon />
-      <Featured />
-      <TrendingMarquee />
-      <Categories />
-      <OpportunitiesHub />
-      <OpportunitiesTabs />
-      <ByLocation />
-      <Government />
-      <CVBanner variant="light" />
-      <CasualJobs />
-      <CareerResources />
-      <CVBanner variant="dark" />
-      <Newsletter />
+      <main>
+        <Hero />
+        <TrustedBy />
+        <JobUpdates />
+        <ClosingSoon />
+        <Featured />
+        <TrendingMarquee />
+        <Categories />
+        <OpportunitiesHub />
+        <OpportunitiesTabs />
+        <ByLocation />
+        <Government />
+        <CVBanner variant="light" />
+        <CasualJobs />
+        <CareerResources />
+        <CVBanner variant="dark" />
+        <Newsletter />
+      </main>
       <Footer />
       <StickyNewsletter />
-    </>
+      <JobDetailSheet />
+    </JobModalProvider>
   );
 }

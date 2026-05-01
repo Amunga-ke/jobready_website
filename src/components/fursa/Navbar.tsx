@@ -3,7 +3,7 @@ export default function Navbar() {
     <nav className="pt-5 pb-5">
       <div className="max-w-6xl mx-auto px-5 flex items-center justify-between">
         <a href="#" className="font-heading font-bold text-lg tracking-tight">
-          FURSA<span className="text-accent">KE</span>
+          JOB<span className="text-accent">NET</span>
         </a>
         <div className="hidden md:flex items-center gap-7">
           <a href="#" className="text-[13px] font-medium text-muted hover:text-ink transition-colors">Jobs</a>

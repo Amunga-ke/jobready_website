@@ -1,14 +1,19 @@
+'use client';
+
+import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
 const jobs = [
-  { position: 'Marketing Intern', company: 'NCBA Group', deadline: '1d left', urgent: true },
-  { position: 'Senior Accountant', company: 'Safaricom', deadline: '2d left', urgent: false },
-  { position: 'HR Manager', company: 'Equity Bank', deadline: '3d left', urgent: false },
-  { position: 'Junior Developer', company: 'KCB Bank', deadline: '5d left', urgent: false },
-  { position: 'Data Analyst', company: 'KRA', deadline: '5d left', urgent: false },
+  { id: 'ncba-marketing-intern', position: 'Marketing Intern', company: 'NCBA Group', deadline: '1d left', urgent: true },
+  { id: 'safaricom-senior-accountant', position: 'Senior Accountant', company: 'Safaricom', deadline: '2d left', urgent: false },
+  { id: 'equity-hr-manager', position: 'HR Manager', company: 'Equity Bank', deadline: '3d left', urgent: false },
+  { id: 'kcb-junior-developer', position: 'Junior Developer', company: 'KCB Bank', deadline: '5d left', urgent: false },
+  { id: 'kra-data-analyst', position: 'Data Analyst', company: 'KRA', deadline: '5d left', urgent: false },
 ];
 
 export default function ClosingSoon() {
+  const { openJobById } = useJobModal();
+
   return (
     <section className="py-14 border-t border-divider bg-white relative overflow-hidden">
       <SectionNumber num="02" />
@@ -27,7 +32,8 @@ export default function ClosingSoon() {
         <div className="divide-y divide-subtle">
           {jobs.map((job, i) => (
             <div
-              key={i}
+              key={job.id}
+              onClick={() => openJobById(job.id)}
               className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
             >
               <div className="col-span-7 sm:col-span-5 text-sm font-medium truncate group-hover:text-accent transition-colors">

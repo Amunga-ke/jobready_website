@@ -1,25 +1,26 @@
 'use client';
 
 import { useState } from 'react';
+import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
 type TabKey = 'e' | 'i' | 's';
 
 const entryLevelJobs = [
-  { title: 'Junior Accountant', company: 'Co-operative Bank · Nairobi', type: 'Full-time' },
-  { title: 'Customer Service Representative', company: 'Safaricom · Nairobi', type: 'Full-time' },
-  { title: 'Data Entry Clerk', company: 'KRA · Nairobi', type: 'Contract' },
-  { title: 'Marketing Assistant', company: 'EABL · Nairobi', type: 'Full-time' },
+  { id: 'co-op-junior-accountant', title: 'Junior Accountant', company: 'Co-operative Bank · Nairobi', type: 'Full-time' },
+  { id: 'safaricom-customer-service', title: 'Customer Service Representative', company: 'Safaricom · Nairobi', type: 'Full-time' },
+  { id: 'kra-data-entry', title: 'Data Entry Clerk', company: 'KRA · Nairobi', type: 'Contract' },
+  { id: 'eabl-marketing-assistant', title: 'Marketing Assistant', company: 'EABL · Nairobi', type: 'Full-time' },
 ];
 
 const internshipJobs = [
-  { title: 'Finance Intern', company: 'Equity Bank · Nairobi', type: '3 months' },
-  { title: 'Software Engineering Intern', company: 'Safaricom · Nairobi', type: '6 months' },
+  { id: 'equity-finance-intern', title: 'Finance Intern', company: 'Equity Bank · Nairobi', type: '3 months' },
+  { id: 'safaricom-software-intern', title: 'Software Engineering Intern', company: 'Safaricom · Nairobi', type: '6 months' },
 ];
 
 const scholarshipJobs = [
-  { title: 'Mastercard Foundation Scholars', company: 'Univ. of Nairobi · Full Scholarship', type: '28 Feb', accent: true },
-  { title: 'KCB Foundation Scholarship', company: 'KCB Group · Tuition + Stipend', type: '15 Mar' },
+  { id: 'mastercard-scholars', title: 'Mastercard Foundation Scholars', company: 'Univ. of Nairobi · Full Scholarship', type: '28 Feb', accent: true },
+  { id: 'kcb-scholarship', title: 'KCB Foundation Scholarship', company: 'KCB Group · Tuition + Stipend', type: '15 Mar' },
 ];
 
 const tabs: { key: TabKey; label: string; count: string }[] = [
@@ -36,7 +37,7 @@ const tabContent: Record<TabKey, { jobs: typeof entryLevelJobs; total: number }>
 
 export default function OpportunitiesTabs() {
   const [activeTab, setActiveTab] = useState<TabKey>('e');
-
+  const { openJobById } = useJobModal();
   const current = tabContent[activeTab];
 
   return (
@@ -67,9 +68,10 @@ export default function OpportunitiesTabs() {
         </div>
         <div className="py-5">
           <div className="divide-y divide-subtle">
-            {current.jobs.map((job, i) => (
+            {current.jobs.map((job) => (
               <div
-                key={`${activeTab}-${i}`}
+                key={`${activeTab}-${job.id}`}
+                onClick={() => openJobById(job.id)}
                 className="flex items-center justify-between py-3 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
               >
                 <div>
