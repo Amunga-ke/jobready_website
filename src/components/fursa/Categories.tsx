@@ -1,8 +1,24 @@
 'use client';
 
-import { useRef } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import SectionNumber from './SectionNumber';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+const categorySlugs: Record<string, string> = {
+  'Technology & IT': 'technology',
+  'Finance & Accounting': 'finance-accounting',
+  'Sales & Business Dev': 'sales-business',
+  'Marketing & Comms': 'marketing-communications',
+  'Human Resources': 'human-resources',
+  'Engineering': 'engineering',
+  'Healthcare & Medical': 'healthcare',
+  'Education & Training': 'education',
+  'Operations & Admin': 'operations-admin',
+  'Logistics & Supply Chain': 'supply-chain',
+  'Hospitality & Tourism': 'hospitality',
+  'Legal & Compliance': 'legal',
+  'Creative Arts & Design': 'creative-design',
+  'Government & Public': 'government-public-sector',
+};
 
 const categories = [
   { name: 'Technology & IT', count: '2,300 jobs', dark: true },
@@ -22,45 +38,25 @@ const categories = [
 ];
 
 export default function Categories() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (dir: number) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir * 260, behavior: 'smooth' });
-    }
-  };
+  const router = useRouter();
 
   return (
     <section className="py-14 bg-white border-b border-divider relative overflow-hidden">
-      <SectionNumber num="04" />
       <div className="max-w-6xl mx-auto px-5 relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading text-xl font-bold">Categories</h2>
-          <a href="#" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
+          <Link href="/jobs" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
             40+ →
-          </a>
+          </Link>
         </div>
-        <div className="relative">
-          <button
-            onClick={() => scroll(-1)}
-            className="scroll-arrow absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-9 h-9 rounded-full border border-divider bg-white flex items-center justify-center text-muted shadow-sm opacity-0 lg:opacity-100 transition-opacity"
-          >
-            <ArrowLeft className="text-sm" />
-          </button>
-          <button
-            onClick={() => scroll(1)}
-            className="scroll-arrow absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-9 h-9 rounded-full border border-divider bg-white flex items-center justify-center text-muted shadow-sm opacity-0 lg:opacity-100 transition-opacity"
-          >
-            <ArrowRight className="text-sm" />
-          </button>
-          <div
-            ref={scrollRef}
-            className="flex gap-2.5 overflow-x-auto pb-3 px-1 scrollbar-hide snap-x snap-mandatory"
-          >
-            {categories.map((cat, i) => (
+        <div className="flex gap-2.5 overflow-x-auto pb-3 px-1 scrollbar-hide snap-x snap-mandatory">
+          {categories.map((cat, i) => {
+            const slug = categorySlugs[cat.name] || '';
+            return (
               <button
                 key={i}
-                className={`snap-start shrink-0 px-5 py-4 text-[13px] font-medium rounded-xl transition-colors text-left ${
+                onClick={() => router.push(`/jobs?category=${slug}`)}
+                className={`snap-start shrink-0 px-5 py-4 text-[13px] font-medium rounded-xl transition-colors text-left active:scale-[0.98] transition-transform ${
                   cat.dark
                     ? 'bg-ink text-white hover:bg-ink/90'
                     : 'bg-surface text-ink border border-divider hover:border-ink/30'
@@ -75,8 +71,8 @@ export default function Categories() {
                 </div>
                 {cat.name}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
@@ -18,7 +19,7 @@ export default function Featured() {
       <div className="max-w-6xl mx-auto px-5 relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading text-xl font-bold">Featured</h2>
-          <span className="text-[10px] font-mono text-muted/50 uppercase tracking-widest">Sponsored</span>
+          <Link href="/companies" className="text-[10px] font-mono text-muted/50 uppercase tracking-widest hover:text-muted transition-colors">From top employers</Link>
         </div>
 
         <div

@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useJobModal } from './JobModalContext';
 
 const recentJobs = [
@@ -9,8 +11,28 @@ const recentJobs = [
   { id: 'kenha-civil-engineer', title: 'Civil Engineer', company: 'KeNHA', location: 'Nakuru', time: '12m' },
 ];
 
+const quickFilters = [
+  { label: 'Remote', param: 'workMode=REMOTE' },
+  { label: 'Entry Level', param: 'level=ENTRY_LEVEL' },
+  { label: 'Government', href: '/government' },
+  { label: 'This Week', param: 'posted=this-week' },
+  { label: 'Internships', href: '/opportunities?tab=internships' },
+];
+
 export default function Hero() {
   const { openJobById } = useJobModal();
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const q = formData.get('q') as string;
+    if (q?.trim()) {
+      router.push(`/jobs?q=${encodeURIComponent(q.trim())}`);
+    } else {
+      router.push('/jobs');
+    }
+  };
 
   return (
     <section className="pt-8 pb-16 lg:pt-12 lg:pb-24 border-b border-divider">
@@ -29,30 +51,56 @@ export default function Hero() {
             </p>
 
             <div className="max-w-xl">
-              <div className="border border-divider rounded-xl p-1.5 mb-3">
+              <form onSubmit={handleSearch} className="border border-divider rounded-xl p-1.5 mb-3">
                 <div className="flex">
                   <input
+                    name="q"
                     type="text"
                     placeholder="Job title, company, keyword..."
                     className="flex-1 text-sm bg-transparent focus:outline-none placeholder-muted/60 pl-4 py-3"
                   />
-                  <button className="text-sm font-semibold text-ink hover:text-accent transition-colors shrink-0 pr-4">
+                  <button
+                    type="submit"
+                    className="text-sm font-semibold text-ink hover:text-accent transition-colors shrink-0 pr-4"
+                  >
                     Search →
                   </button>
                 </div>
-              </div>
+              </form>
               <div className="flex flex-wrap gap-3">
-                <button className="text-[11px] text-muted hover:text-ink transition-colors">Remote</button>
-                <button className="text-[11px] text-muted hover:text-ink transition-colors">Entry Level</button>
-                <button className="text-[11px] text-muted hover:text-ink transition-colors">Government</button>
-                <button className="text-[11px] text-muted hover:text-ink transition-colors">This Week</button>
-                <button className="text-[11px] text-muted hover:text-ink transition-colors">Internships</button>
+                {quickFilters.map((filter) => (
+                  filter.href ? (
+                    <Link
+                      key={filter.label}
+                      href={filter.href}
+                      className="text-[11px] text-muted hover:text-ink transition-colors"
+                    >
+                      {filter.label}
+                    </Link>
+                  ) : (
+                    <Link
+                      key={filter.label}
+                      href={`/jobs?${filter.param}`}
+                      className="text-[11px] text-muted hover:text-ink transition-colors"
+                    >
+                      {filter.label}
+                    </Link>
+                  )
+                ))}
               </div>
             </div>
           </div>
 
           <div className="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-divider pt-6 lg:pt-0 lg:pl-8">
-            <div className="font-mono text-[10px] text-muted uppercase tracking-widest mb-4">Just posted</div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="font-mono text-[10px] text-muted uppercase tracking-widest">Just posted</div>
+              <Link
+                href="/jobs"
+                className="font-mono text-[10px] text-accent hover:text-accent-dark transition-colors uppercase tracking-wider"
+              >
+                Latest jobs →
+              </Link>
+            </div>
             <div className="space-y-4">
               {recentJobs.map((job, i) => (
                 <div key={job.id}>

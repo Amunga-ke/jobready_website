@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
@@ -47,9 +48,9 @@ export default function JobUpdates() {
       <div className="max-w-6xl mx-auto px-5 relative">
         <div className="flex items-center justify-between mb-8">
           <h2 className="font-heading text-xl font-bold">Job Updates</h2>
-          <a href="#" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
+          <Link href="/jobs" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
             All updates →
-          </a>
+          </Link>
         </div>
         <div className="grid sm:grid-cols-2 gap-x-10">
           <TimelineColumn updates={leftUpdates} />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
@@ -29,10 +30,10 @@ const tabs: { key: TabKey; label: string; count: string }[] = [
   { key: 's', label: 'Scholarships', count: '23' },
 ];
 
-const tabContent: Record<TabKey, { jobs: typeof entryLevelJobs; total: number }> = {
-  e: { jobs: entryLevelJobs, total: 340 },
-  i: { jobs: internshipJobs, total: 156 },
-  s: { jobs: scholarshipJobs, total: 23 },
+const tabContent: Record<TabKey, { jobs: typeof entryLevelJobs; total: number; href: string }> = {
+  e: { jobs: entryLevelJobs, total: 340, href: '/jobs?level=ENTRY_LEVEL' },
+  i: { jobs: internshipJobs, total: 156, href: '/opportunities?tab=internships' },
+  s: { jobs: scholarshipJobs, total: 23, href: '/opportunities?tab=scholarships' },
 };
 
 export default function OpportunitiesTabs() {
@@ -88,12 +89,12 @@ export default function OpportunitiesTabs() {
               </div>
             ))}
           </div>
-          <a
-            href="#"
+          <Link
+            href={current.href}
             className="inline-flex items-center gap-1 text-[13px] font-medium text-ink hover:text-accent mt-4 transition-colors"
           >
             View all {current.total} →
-          </a>
+          </Link>
         </div>
       </div>
     </section>

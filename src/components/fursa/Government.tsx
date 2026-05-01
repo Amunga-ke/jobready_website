@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
@@ -63,9 +64,12 @@ export default function Government() {
           </div>
         </div>
         <div className="h-px bg-divider mt-6" />
-        <a href="#" className="inline-flex items-center gap-1 text-[13px] font-medium text-ink hover:text-accent mt-4 transition-colors">
+        <Link
+          href="/government"
+          className="inline-flex items-center gap-1 text-[13px] font-medium text-ink hover:text-accent mt-4 transition-colors"
+        >
           Browse all government jobs →
-        </a>
+        </Link>
       </div>
     </section>
   );
