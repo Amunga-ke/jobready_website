@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
@@ -20,9 +21,9 @@ export default function ClosingSoon() {
       <div className="max-w-6xl mx-auto px-5 relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading text-xl font-bold">Closing Soon</h2>
-          <a href="#" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
+          <Link href="/jobs" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
             23 this week →
-          </a>
+          </Link>
         </div>
         <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest">
           <div className="col-span-5">Position</div>

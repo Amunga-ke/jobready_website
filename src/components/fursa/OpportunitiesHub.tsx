@@ -1,7 +1,7 @@
 'use client';
 
+import Link from 'next/link';
 import { useJobModal } from './JobModalContext';
-import SectionNumber from './SectionNumber';
 
 const internships = [
   { id: 'equity-finance-intern', title: 'Finance Intern — Equity Bank' },
@@ -14,7 +14,6 @@ export default function OpportunitiesHub() {
 
   return (
     <section className="py-14 relative overflow-hidden">
-      <SectionNumber num="05" />
       <div className="max-w-6xl mx-auto px-5 relative">
         <h2 className="font-heading text-xl font-bold mb-6">Opportunities Hub</h2>
         <div className="flex gap-3 overflow-x-auto pb-3 -mx-5 px-5 scrollbar-hide snap-x snap-mandatory">
@@ -33,7 +32,9 @@ export default function OpportunitiesHub() {
               ))}
             </div>
             <div className="border-t border-divider mt-3 pt-3">
-              <span className="font-mono text-[11px] text-muted">+156 more</span>
+              <Link href="/opportunities?tab=internships" className="font-mono text-[11px] text-accent hover:text-accent-dark transition-colors">
+                +156 more →
+              </Link>
             </div>
           </div>
 
@@ -52,7 +53,7 @@ export default function OpportunitiesHub() {
           </div>
 
           {/* University Card */}
-          <div className="snap-start shrink-0 w-64 border border-divider rounded-xl p-4 hover:border-ink/20 transition-colors cursor-pointer">
+          <div className="snap-start shrink-0 w-64 border border-divider rounded-xl p-4 hover:border-ink/20 transition-colors">
             <div className="font-mono text-[10px] text-accent uppercase tracking-widest mb-4">03 — University</div>
             <div className="space-y-3 border-t border-divider pt-3">
               <div className="flex items-center justify-between">
@@ -80,7 +81,10 @@ export default function OpportunitiesHub() {
           </div>
 
           {/* Entry Level Card */}
-          <div className="snap-start shrink-0 w-64 bg-ink text-white border border-ink rounded-xl p-4 hover:bg-ink/90 transition-colors cursor-pointer">
+          <Link
+            href="/jobs?level=ENTRY_LEVEL"
+            className="snap-start shrink-0 w-64 bg-ink text-white border border-ink rounded-xl p-4 hover:bg-ink/90 transition-colors cursor-pointer active:scale-[0.98] transition-transform"
+          >
             <div className="font-mono text-[10px] text-accent-light uppercase tracking-widest mb-4">04 — Entry Level</div>
             <div className="border-t border-white/10 pt-4 text-center py-6">
               <div className="font-heading text-6xl font-bold">340</div>
@@ -89,7 +93,7 @@ export default function OpportunitiesHub() {
             <div className="border-t border-white/10 pt-3 text-center">
               <span className="font-mono text-[10px] text-white/50 uppercase tracking-wider">No experience needed</span>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </section>

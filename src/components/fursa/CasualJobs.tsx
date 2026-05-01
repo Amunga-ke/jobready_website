@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useJobModal } from './JobModalContext';
 import SectionNumber from './SectionNumber';
 
@@ -19,7 +20,12 @@ export default function CasualJobs() {
     <section className="py-14 bg-white border-b border-divider relative overflow-hidden">
       <SectionNumber num="09" />
       <div className="max-w-6xl mx-auto px-5 relative">
-        <h2 className="font-heading text-xl font-bold mb-5">Casual & Part-Time</h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-heading text-xl font-bold">Casual & Part-Time</h2>
+          <Link href="/casual" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
+            Browse all →
+          </Link>
+        </div>
         <div className="bg-surface border border-divider rounded-xl p-5 sm:p-6">
           <div className="classifieds-text text-[12px] leading-[2.2]">
             {casualJobs.map((job, i) => (
