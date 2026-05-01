@@ -438,24 +438,6 @@ export default function JobDetailSheet() {
             </div>
           )}
 
-          {/* ── Government notice ── */}
-          {job.isGovernment && (
-            <div className="px-6 py-5 border-b border-subtle">
-              <div className="bg-amber-50 border border-amber-100 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Shield className="w-3.5 h-3.5 text-amber-700" />
-                  <span className="text-[12px] font-medium text-amber-800">
-                    Government Position
-                  </span>
-                </div>
-                <p className="text-[12px] text-amber-700 leading-relaxed">
-                  This is a government position. Applications must follow official government
-                  recruitment procedures.
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* ── Engagement stats ── */}
           {(job.viewsCount || job.applicationsCount) && (
             <div className="px-6 py-4 border-b border-subtle">
