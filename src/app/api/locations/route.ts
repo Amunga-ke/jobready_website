@@ -4,49 +4,62 @@ import { mapToLocations } from '@/lib/data-mapper';
 
 export async function GET() {
   try {
-    // Fetch parent-level locations (COUNTY/COUNTRY/AREA type) with their
-    // child locations and job counts.
+    // Fetch county-level locations (top-level in the Kenya context) with
+    // their child areas and listing counts.
     const locations = await db.location.findMany({
       where: {
-        parentLocationId: null,
+        parentId: null,
+        isActive: true,
       },
       include: {
-        childLocations: {
+        children: {
+          where: { isActive: true },
           select: {
             id: true,
             name: true,
             slug: true,
             type: true,
           },
+          orderBy: { name: 'asc' },
         },
         _count: {
-          select: { jobs: true },
+          select: { listings: true },
         },
       },
       orderBy: { name: 'asc' },
     });
 
-    // Also fetch child locations with job counts (they aren't in the include above)
-    // We need to enrich childLocations with their own job counts
-    const enrichedLocations = await Promise.all(
-      locations.map(async (loc) => {
-        const childWithCounts = await Promise.all(
-          (loc.childLocations || []).map(async (child) => {
-            const jobCount = await db.job.count({
-              where: { locationId: child.id },
-            });
-            return {
-              ...child,
-              _count: { jobs: jobCount },
-            };
-          }),
-        );
-        return {
-          ...loc,
-          childLocations: childWithCounts,
-        };
-      }),
+    // Enrich child locations with their own listing counts
+    // (children in the include above don't carry _count)
+    const childIds = locations.flatMap((loc) =>
+      (loc.children || []).map((child) => child.id),
     );
+
+    // Batch-fetch listing counts for all child locations in one query
+    const childListingCounts = childIds.length > 0
+      ? await db.listing.groupBy({
+          by: ['locationId'],
+          where: {
+            locationId: { in: childIds },
+            status: 'PUBLISHED',
+          },
+          _count: { id: true },
+        })
+      : [];
+
+    // Build a lookup map: locationId → count
+    const countMap = new Map(
+      childListingCounts.map((row) => [row.locationId, row._count.id]),
+    );
+
+    // Enrich locations with child listing counts
+    const enrichedLocations = locations.map((loc) => ({
+      ...loc,
+      children: (loc.children || []).map((child) => ({
+        ...child,
+        _count: { listings: countMap.get(child.id) || 0 },
+      })),
+    }));
 
     return NextResponse.json({
       locations: mapToLocations(enrichedLocations as any),

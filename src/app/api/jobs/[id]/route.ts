@@ -3,13 +3,26 @@ import { db } from '@/lib/db';
 import { mapJobToView } from '@/lib/data-mapper';
 import type { Prisma } from '@prisma/client';
 
-const JOB_INCLUDE = {
-  company: { select: { id: true, name: true, slug: true, logoUrl: true, isGovernment: true } },
-  category: { select: { id: true, name: true, slug: true } },
-  subcategory: { select: { id: true, name: true, slug: true } },
-  location: { select: { id: true, name: true, slug: true, type: true } },
-  tags: { select: { tagId: true, jobId: true, tagIdRef: { select: { id: true, name: true, slug: true } } } },
-} satisfies Prisma.JobInclude;
+const LISTING_INCLUDE = {
+  organization: {
+    include: {
+      organizationType: true,
+      industry: true,
+      location: true,
+    },
+  },
+  listingType: true,
+  category: true,
+  location: true,
+  jobDetail: {
+    include: {
+      employmentType: true,
+      experienceLevel: true,
+      educationLevel: true,
+      currency: true,
+    },
+  },
+} satisfies Prisma.ListingInclude;
 
 export async function GET(
   _request: NextRequest,
@@ -18,19 +31,19 @@ export async function GET(
   try {
     const { id } = await params;
     // The `id` param is treated as a slug
-    const job = await db.job.findUnique({
+    const listing = await db.listing.findUnique({
       where: { slug: id },
-      include: JOB_INCLUDE,
+      include: LISTING_INCLUDE,
     });
 
-    if (!job) {
+    if (!listing) {
       return NextResponse.json(
         { error: 'Job not found' },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ job: mapJobToView(job as any) });
+    return NextResponse.json({ job: mapJobToView(listing as any) });
   } catch (error) {
     console.error('[GET /api/jobs/[id]] Error:', error);
     return NextResponse.json(

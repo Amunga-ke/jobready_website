@@ -43,3 +43,27 @@ Stage Summary:
 - All API endpoints are live and building successfully
 - Frontend components can now query real data from MySQL via API routes
 - Section components still use hardcoded data — ready for migration when needed
+
+---
+Task ID: 2
+Agent: main
+Task: Complete database schema redesign per user specification
+
+Work Log:
+- Rewrote prisma/schema.prisma with new unified architecture
+- Lookup tables replace enums: organization_types, industries, currencies, listing_types, employment_types, experience_levels, education_levels
+- Hierarchical tables: Location (Country > County > City > Area), Category (root + subcategories)
+- Unified Listing table for all opportunity types (jobs, internships, scholarships, casual, etc.)
+- ListingJobDetail 1:1 table for job-specific fields (Google Jobs compatible)
+- Fixed MySQL charset collation issues (utf8mb3 vs utf8mb4)
+- Fixed DATABASE_URL system env override
+- Created optimized seed with raw SQL bulk INSERT IGNORE (runs in <60s)
+- Updated data-mapper.ts for new schema with lookup table resolution
+- Updated all API routes (jobs, categories, locations, newsletter)
+- Production build passes, all routes verified
+
+Stage Summary:
+- 21 database tables created (lookup + hierarchical + core entities + supporting)
+- Seed data: 11 org types, 36 industries, 9 currencies, 21 listing types, 7 employment types, 8 experience levels, 6 education levels, 131 locations, 46 categories, 14 organizations, 32 listings, 21 job details
+- Database is fully operational with the new schema
+- API endpoints serve data from the new unified Listing model

@@ -1,698 +1,409 @@
+// =============================================================================
+// Jobnet — Optimised Seed (raw SQL bulk inserts)
+// =============================================================================
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcryptjs';
 
-const prisma = new PrismaClient();
+const DB_URL = 'mysql://trustfit_jobready_database_admin:Admincyber@vda7300.is.cc:3306/trustfit_jobready_database';
+const prisma = new PrismaClient({ datasources: { db: { url: DB_URL } } });
 
-// ──────────────────────────────────────────────
-//  LOCATIONS
-// ──────────────────────────────────────────────
-
-const LOCATIONS = [
-  // Counties
-  { name: 'Nairobi', slug: 'nairobi', type: 'COUNTY' },
-  { name: 'Mombasa', slug: 'mombasa', type: 'COUNTY' },
-  { name: 'Nakuru', slug: 'nakuru', type: 'COUNTY' },
-  { name: 'Kisumu', slug: 'kisumu', type: 'COUNTY' },
-  { name: 'Eldoret', slug: 'eldoret', type: 'COUNTY' },
-  { name: 'Thika', slug: 'thika', type: 'COUNTY' },
-  { name: 'Naivasha', slug: 'naivasha', type: 'COUNTY' },
-  { name: 'Nationwide', slug: 'nationwide', type: 'COUNTY' },
-  // Nairobi areas
-  { name: 'CBD', slug: 'nairobi-cbd', type: 'AREA' },
-  { name: 'Westlands', slug: 'westlands', type: 'AREA' },
-  { name: 'Kilimani', slug: 'kilimani', type: 'AREA' },
-  { name: 'Industrial Area', slug: 'industrial-area', type: 'AREA' },
-  // Mombasa areas
-  { name: 'Nyali', slug: 'nyali', type: 'AREA' },
-  { name: 'Changamwe', slug: 'changamwe', type: 'AREA' },
-  // Thika
-  { name: 'Thika Rd', slug: 'thika-rd', type: 'AREA' },
-  // Special
-  { name: 'Remote', slug: 'remote', type: 'REMOTE' },
-];
-
-// ──────────────────────────────────────────────
-//  CATEGORIES
-// ──────────────────────────────────────────────
-
-const CATEGORIES = [
-  { name: 'Technology & IT', slug: 'technology-it', jobCount: 2300 },
-  { name: 'Finance & Accounting', slug: 'finance-accounting', jobCount: 1800 },
-  { name: 'Sales & Business Dev', slug: 'sales-business-dev', jobCount: 1200 },
-  { name: 'Marketing & Comms', slug: 'marketing-comms', jobCount: 980 },
-  { name: 'Human Resources', slug: 'human-resources', jobCount: 760 },
-  { name: 'Engineering', slug: 'engineering', jobCount: 690 },
-  { name: 'Healthcare & Medical', slug: 'healthcare-medical', jobCount: 540 },
-  { name: 'Education & Training', slug: 'education-training', jobCount: 480 },
-  { name: 'Operations & Admin', slug: 'operations-admin', jobCount: 420 },
-  { name: 'Logistics & Supply Chain', slug: 'logistics-supply-chain', jobCount: 310 },
-  { name: 'Hospitality & Tourism', slug: 'hospitality-tourism', jobCount: 240 },
-  { name: 'Legal & Compliance', slug: 'legal-compliance', jobCount: 210 },
-  { name: 'Creative Arts & Design', slug: 'creative-arts-design', jobCount: 190 },
-  { name: 'Government & Public', slug: 'government-public', jobCount: 180 },
-];
-
-// ──────────────────────────────────────────────
-//  COMPANIES
-// ──────────────────────────────────────────────
-
-const COMPANIES = [
-  { name: 'Safaricom', slug: 'safaricom', industry: 'Telecommunications', isVerified: true },
-  { name: 'KCB Bank', slug: 'kcb-bank', industry: 'Banking', isVerified: true },
-  { name: 'Equity Bank', slug: 'equity-bank', industry: 'Banking', isVerified: true },
-  { name: 'NCBA Group', slug: 'ncba-group', industry: 'Banking', isVerified: true },
-  { name: 'Co-operative Bank', slug: 'co-operative-bank', industry: 'Banking', isVerified: true },
-  { name: 'KRA', slug: 'kra', industry: 'Government', isVerified: true, isGovernment: true },
-  { name: 'EABL', slug: 'eabl', industry: 'FMCG', isVerified: true },
-  { name: 'KeNHA', slug: 'kenha', industry: 'Government', isVerified: true, isGovernment: true },
-  { name: 'Teachers Service Commission', slug: 'tsc', industry: 'Government', isVerified: true, isGovernment: true },
-  { name: 'Kenya Police Service', slug: 'kenya-police', industry: 'Government', isVerified: true, isGovernment: true },
-  { name: 'Nakuru County Government', slug: 'nakuru-county', industry: 'Government', isGovernment: true },
-  { name: 'Nairobi County Government', slug: 'nairobi-county', industry: 'Government', isGovernment: true },
-  { name: 'Mombasa County Government', slug: 'mombasa-county', industry: 'Government', isGovernment: true },
-  { name: 'University of Nairobi', slug: 'university-of-nairobi', industry: 'Education', isVerified: true },
-  { name: 'KCB Group', slug: 'kcb-group', industry: 'Finance', isVerified: true },
-  { name: 'Various', slug: 'various', industry: 'Various', isVerified: false },
-];
-
-// ──────────────────────────────────────────────
-//  JOBS
-// ──────────────────────────────────────────────
-
-const JOBS = [
-  {
-    title: 'Senior Accountant', slug: 'senior-accountant-safaricom',
-    companySlug: 'safaricom', categorySlug: 'finance-accounting', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Senior',
-    description: 'We are looking for an experienced Senior Accountant to join our Finance team at Safaricom PLC. The successful candidate will be responsible for financial reporting, budgeting, and ensuring compliance with IFRS standards. You will work closely with cross-functional teams and report directly to the Chief Accountant.',
-    requirements: JSON.stringify(["CPA(K) or ACCA qualification", "Bachelor's degree in Accounting or Finance", "5+ years of accounting experience in a large organization", "Strong knowledge of IFRS and Kenyan tax regulations", "Proficiency in ERP systems (SAP preferred)"]),
-    salaryMin: 180000, salaryMax: 250000, salaryCurrency: 'Ksh',
-    tags: ['Accounting', 'Finance', 'CPA', 'IFRS'],
-    postedAt: new Date(Date.now() - 2 * 60000),
-    deadlineAt: new Date(Date.now() + 2 * 86400000),
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Backend Developer', slug: 'backend-developer-kcb',
-    companySlug: 'kcb-bank', categorySlug: 'technology-it', locationSlug: 'remote',
-    type: 'Full-time', level: 'Mid Level',
-    description: 'KCB Bank is seeking a talented Backend Developer to build and maintain robust APIs and microservices that power our digital banking platform. You will collaborate with frontend developers, product managers, and DevOps engineers to deliver scalable solutions serving millions of customers across East Africa.',
-    requirements: JSON.stringify(["Bachelor's degree in Computer Science or related field", "3+ years experience with Node.js, Python, or Java", "Strong knowledge of RESTful APIs and microservices architecture", "Experience with cloud platforms (AWS/Azure)", "Knowledge of database systems (PostgreSQL, MongoDB)"]),
-    salaryMin: 150000, salaryMax: 220000, salaryCurrency: 'Ksh',
-    tags: ['Backend', 'API', 'Node.js', 'Python'],
-    postedAt: new Date(Date.now() - 5 * 60000),
-    deadlineAt: new Date(Date.now() + 5 * 86400000),
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: true,
-  },
-  {
-    title: 'Marketing Intern', slug: 'marketing-intern-ncba',
-    companySlug: 'ncba-group', categorySlug: 'marketing-comms', locationSlug: 'nairobi',
-    type: 'Internship', level: 'Intern',
-    description: "NCBA Group is offering an exciting 6-month internship opportunity in our Marketing department. You will gain hands-on experience in digital marketing, brand management, content creation, and market research. This is a perfect opportunity for recent graduates looking to kickstart their career in marketing.",
-    requirements: JSON.stringify(["Bachelor's degree in Marketing, Communications, or related field", "Strong written and verbal communication skills", "Familiarity with social media platforms and digital marketing tools", "Creative mindset with attention to detail", "Available immediately for 6 months"]),
-    salaryMin: 25000, salaryMax: 35000, salaryCurrency: 'Ksh',
-    tags: ['Marketing', 'Internship', 'Digital Marketing'],
-    postedAt: new Date(Date.now() - 8 * 60000),
-    deadlineAt: new Date(Date.now() + 1 * 86400000),
-    isUrgent: true, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Civil Engineer', slug: 'civil-engineer-kenha',
-    companySlug: 'kenha', categorySlug: 'engineering', locationSlug: 'nakuru',
-    type: 'Full-time', level: 'Mid Level',
-    description: 'The Kenya National Highways Authority is looking for a qualified Civil Engineer to oversee road construction and maintenance projects in the Nakuru region. You will manage project timelines, conduct site inspections, and ensure compliance with engineering standards and safety regulations.',
-    requirements: JSON.stringify(["Bachelor's degree in Civil Engineering", "Registered with Engineers Board of Kenya (EBK)", "5+ years experience in road construction projects", "Strong project management skills", "Knowledge of relevant Kenyan standards and regulations"]),
-    salaryMin: 120000, salaryMax: 180000, salaryCurrency: 'Ksh',
-    tags: ['Engineering', 'Infrastructure', 'Construction'],
-    postedAt: new Date(Date.now() - 12 * 60000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: true, isRemote: false,
-  },
-  {
-    title: 'Senior Product Manager — M-Pesa', slug: 'senior-pm-m-pesa-safaricom',
-    companySlug: 'safaricom', categorySlug: 'technology-it', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Senior',
-    description: "Lead product strategy for 30M+ active users across East Africa. Work with a cross-functional team of 12+ engineers and designers. Define the product roadmap, conduct market analysis, and drive key metrics for M-Pesa's growth and user engagement across multiple markets.",
-    requirements: JSON.stringify(["8+ years of product management experience", "Experience with fintech or mobile payments", "Strong analytical and data-driven decision making", "MBA or equivalent preferred", "Experience leading cross-functional teams of 10+"]),
-    salaryMin: 350000, salaryMax: 500000, salaryCurrency: 'Ksh',
-    tags: ['Product', 'Fintech', 'Mobile', 'Leadership'],
-    postedAt: new Date(Date.now() - 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: true, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Financial Analyst', slug: 'financial-analyst-equity',
-    companySlug: 'equity-bank', categorySlug: 'finance-accounting', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'Equity Bank is seeking a motivated Financial Analyst to join our Corporate Finance team. You will be responsible for financial modeling, preparing investment analysis reports, and supporting strategic decision-making processes across the group.',
-    requirements: JSON.stringify(["Bachelor's degree in Finance, Economics, or related field", "CFA Level 1 or higher preferred", "1-2 years of financial analysis experience", "Advanced Excel and financial modeling skills", "Strong analytical and presentation abilities"]),
-    salaryMin: 80000, salaryMax: 120000, salaryCurrency: 'Ksh',
-    tags: ['Finance', 'Analysis', 'Modeling'],
-    postedAt: new Date(Date.now() - 3 * 3600000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: true, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Software Engineer', slug: 'software-engineer-kcb',
-    companySlug: 'kcb-bank', categorySlug: 'technology-it', locationSlug: 'remote',
-    type: 'Full-time', level: 'Mid Level',
-    description: "Join KCB Bank's technology team to build innovative banking solutions. You will develop full-stack applications using modern frameworks, participate in code reviews, and contribute to our continuous integration and delivery pipeline.",
-    requirements: JSON.stringify(["Bachelor's degree in Computer Science or equivalent", "3+ years of software development experience", "Proficiency in React/Next.js and Node.js", "Experience with CI/CD pipelines and DevOps practices", "Understanding of banking or fintech systems"]),
-    salaryMin: 140000, salaryMax: 200000, salaryCurrency: 'Ksh',
-    tags: ['Software', 'Full-stack', 'React', 'Node.js'],
-    postedAt: new Date(Date.now() - 4 * 3600000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: true, isGovernment: false, isRemote: true,
-  },
-  {
-    title: 'Graduate Trainee', slug: 'graduate-trainee-ncba',
-    companySlug: 'ncba-group', categorySlug: 'finance-accounting', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Entry Level',
-    description: "NCBA Group's Graduate Trainee Program is a 12-month rotational program designed to develop future leaders. You will rotate across different departments including Retail Banking, Corporate Banking, Risk Management, and Operations, gaining a comprehensive understanding of the banking industry.",
-    requirements: JSON.stringify(["Bachelor's degree with Second Class Upper or equivalent", "Graduated within the last 2 years", "Strong leadership potential and interpersonal skills", "Excellent written and verbal communication", "Flexibility to rotate across departments and locations"]),
-    salaryMin: 60000, salaryMax: 80000, salaryCurrency: 'Ksh',
-    tags: ['Graduate', 'Training', 'Leadership'],
-    postedAt: new Date(Date.now() - 6 * 3600000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'HR Manager', slug: 'hr-manager-equity',
-    companySlug: 'equity-bank', categorySlug: 'human-resources', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Senior',
-    description: 'Equity Bank is seeking an experienced HR Manager to lead our Human Resources operations. You will oversee recruitment, employee relations, performance management, and training & development programs for a team of 500+ employees.',
-    requirements: JSON.stringify(["Bachelor's degree in Human Resources or related field", "7+ years of HR management experience", "Professional HR certification (CHRP or equivalent)", "Strong knowledge of Kenyan labor laws", "Experience with HRIS systems"]),
-    salaryMin: 200000, salaryMax: 300000, salaryCurrency: 'Ksh',
-    tags: ['HR', 'Management', 'People'],
-    postedAt: new Date(Date.now() - 2 * 86400000),
-    deadlineAt: new Date(Date.now() + 3 * 86400000),
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Junior Developer', slug: 'junior-developer-kcb',
-    companySlug: 'kcb-bank', categorySlug: 'technology-it', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'KCB Bank is looking for a Junior Developer to join our growing technology team. You will work on exciting projects including mobile banking apps, internal tools, and customer-facing platforms. Mentorship and training will be provided to help you grow your career.',
-    requirements: JSON.stringify(["Bachelor's degree in Computer Science or related field", "0-1 year of development experience", "Basic knowledge of any programming language", "Eager to learn and grow in a fast-paced environment", "Good problem-solving skills"]),
-    salaryMin: 70000, salaryMax: 100000, salaryCurrency: 'Ksh',
-    tags: ['Junior', 'Developer', 'Entry Level'],
-    postedAt: new Date(Date.now() - 86400000),
-    deadlineAt: new Date(Date.now() + 5 * 86400000),
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Data Analyst', slug: 'data-analyst-kra',
-    companySlug: 'kra', categorySlug: 'finance-accounting', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Mid Level',
-    description: 'The Kenya Revenue Authority is seeking a skilled Data Analyst to support data-driven decision making. You will analyze tax compliance data, identify trends and patterns, and provide actionable insights to support revenue collection strategies.',
-    requirements: JSON.stringify(["Bachelor's degree in Statistics, Mathematics, or Data Science", "3+ years of data analysis experience", "Proficiency in SQL, Python, and data visualization tools", "Experience with statistical modeling and forecasting", "Knowledge of tax systems is an added advantage"]),
-    salaryMin: 100000, salaryMax: 160000, salaryCurrency: 'Ksh',
-    tags: ['Data', 'Analytics', 'Statistics'],
-    postedAt: new Date(Date.now() - 2 * 86400000),
-    deadlineAt: new Date(Date.now() + 5 * 86400000),
-    isUrgent: false, isFeatured: false, isGovernment: true, isRemote: false,
-  },
-  {
-    title: 'KRA Graduate Trainee Program 2025', slug: 'kra-graduate-trainee-2025',
-    companySlug: 'kra', categorySlug: 'government-public', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'The Kenya Revenue Authority Graduate Trainee Program is a prestigious 18-month program designed to develop the next generation of tax administration professionals. Trainees will undergo intensive training in tax policy, revenue collection, and public administration.',
-    requirements: JSON.stringify(["Bachelor's degree with Second Class Upper or equivalent", "Graduated within the last 2 years", "Age limit: 28 years and below", "Strong analytical and communication skills", "Must be a Kenyan citizen"]),
-    salaryMin: 70000, salaryMax: 90000, salaryCurrency: 'Ksh',
-    tags: ['Graduate', 'Government', 'Tax', 'Gazette'],
-    postedAt: new Date(Date.now() - 5 * 86400000),
-    deadlineAt: new Date('2025-02-15'),
-    isUrgent: false, isFeatured: false, isGovernment: true, isGazette: true, isRemote: false,
-  },
-  {
-    title: 'TSC — 5,000 Teacher Posts', slug: 'tsc-5000-teacher-posts',
-    companySlug: 'tsc', categorySlug: 'education-training', locationSlug: 'nationwide',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'The Teachers Service Commission is recruiting 5,000 teachers for primary and secondary schools across all 47 counties. Successful candidates will be deployed to schools with the highest staffing needs, particularly in arid and semi-arid regions.',
-    requirements: JSON.stringify(["Diploma or Degree in Education", "Registered with TSC", "Must have valid TSC certificate", "Willing to be posted to any county", "Must be a Kenyan citizen"]),
-    salaryMin: 30000, salaryMax: 50000, salaryCurrency: 'Ksh',
-    tags: ['Teaching', 'Government', 'Education'],
-    postedAt: new Date(Date.now() - 7 * 86400000),
-    deadlineAt: new Date('2025-02-28'),
-    isUrgent: false, isFeatured: false, isGovernment: true, isRemote: false,
-  },
-  {
-    title: 'Kenya Police Constable Recruitment', slug: 'kenya-police-constable-recruitment',
-    companySlug: 'kenya-police', categorySlug: 'government-public', locationSlug: 'nationwide',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'The Kenya Police Service is recruiting police constables to serve in various capacities across the country. Successful candidates will undergo a rigorous 9-month training program at the Kenya Police College before deployment.',
-    requirements: JSON.stringify(["Kenyan citizen aged 18-28 years", "Minimum KCSE grade D+", "Must be physically fit", "No criminal record", "Valid national identity card"]),
-    salaryMin: 35000, salaryMax: 45000, salaryCurrency: 'Ksh',
-    tags: ['Police', 'Government', 'Security', 'Gazette'],
-    postedAt: new Date(Date.now() - 3 * 86400000),
-    deadlineAt: new Date('2025-03-10'),
-    isUrgent: false, isFeatured: false, isGovernment: true, isGazette: true, isRemote: false,
-  },
-  {
-    title: 'Various Positions — Nakuru County', slug: 'various-positions-nakuru-county',
-    companySlug: 'nakuru-county', categorySlug: 'government-public', locationSlug: 'nakuru',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'Nakuru County Government has multiple openings across various departments including Health, Education, Public Works, and Administration. These positions offer competitive salaries and the opportunity to serve the local community.',
-    requirements: JSON.stringify(["Relevant diploma or degree based on position", "Must be a resident of Nakuru County (where applicable)", "Valid certificates and qualifications", "Computer literacy", "No criminal record"]),
-    salaryMin: 30000, salaryMax: 60000, salaryCurrency: 'Ksh',
-    tags: ['County', 'Government', 'Multiple Roles'],
-    postedAt: new Date(Date.now() - 4 * 86400000),
-    deadlineAt: new Date('2025-02-20'),
-    isUrgent: false, isFeatured: false, isGovernment: true, isRemote: false,
-  },
-  {
-    title: 'Health Workers — Nairobi County', slug: 'health-workers-nairobi-county',
-    companySlug: 'nairobi-county', categorySlug: 'healthcare-medical', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'Nairobi County Government is recruiting health workers including nurses, clinical officers, and public health officers to strengthen healthcare service delivery in county health facilities.',
-    requirements: JSON.stringify(["Valid professional license from relevant body", "Diploma or degree in relevant health field", "Experience in a clinical setting preferred", "Good communication and interpersonal skills", "Willingness to work in shifts"]),
-    salaryMin: 40000, salaryMax: 80000, salaryCurrency: 'Ksh',
-    tags: ['Health', 'County', 'Government'],
-    postedAt: new Date(Date.now() - 5 * 86400000),
-    deadlineAt: new Date('2025-02-25'),
-    isUrgent: false, isFeatured: false, isGovernment: true, isRemote: false,
-  },
-  {
-    title: 'Engineers — Mombasa County', slug: 'engineers-mombasa-county',
-    companySlug: 'mombasa-county', categorySlug: 'engineering', locationSlug: 'mombasa',
-    type: 'Full-time', level: 'Mid Level',
-    description: 'Mombasa County Government is seeking qualified Civil, Electrical, and Mechanical Engineers to oversee infrastructure projects including road construction, water supply systems, and public buildings.',
-    requirements: JSON.stringify(["Bachelor's degree in relevant engineering field", "Registered with Engineers Board of Kenya", "3+ years of relevant experience", "Project management skills", "Knowledge of county government operations"]),
-    salaryMin: 80000, salaryMax: 150000, salaryCurrency: 'Ksh',
-    tags: ['Engineering', 'County', 'Government'],
-    postedAt: new Date(Date.now() - 6 * 86400000),
-    deadlineAt: new Date('2025-03-05'),
-    isUrgent: false, isFeatured: false, isGovernment: true, isRemote: false,
-  },
-  {
-    title: 'Junior Accountant', slug: 'junior-accountant-coop-bank',
-    companySlug: 'co-operative-bank', categorySlug: 'finance-accounting', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'Co-operative Bank is looking for a Junior Accountant to support our Finance team. You will assist with bookkeeping, financial reporting, bank reconciliations, and preparing tax returns. Great opportunity for a recent graduate starting their accounting career.',
-    requirements: JSON.stringify(["Bachelor's degree in Accounting or Finance", "CPA Section 2 and above", "0-1 year accounting experience", "Proficiency in Microsoft Excel", "Attention to detail and high integrity"]),
-    salaryMin: 60000, salaryMax: 90000, salaryCurrency: 'Ksh',
-    tags: ['Accounting', 'Entry Level', 'Banking'],
-    postedAt: new Date(Date.now() - 3 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Customer Service Representative', slug: 'customer-service-safaricom',
-    companySlug: 'safaricom', categorySlug: 'sales-business-dev', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'Safaricom is hiring Customer Service Representatives to handle customer inquiries, resolve complaints, and provide information about our products and services. You will be the face of Safaricom to our millions of customers.',
-    requirements: JSON.stringify(["Diploma or degree in any field", "Excellent communication skills in English and Kiswahili", "Previous customer service experience preferred", "Computer literacy", "Ability to work in shifts"]),
-    salaryMin: 35000, salaryMax: 50000, salaryCurrency: 'Ksh',
-    tags: ['Customer Service', 'Entry Level', 'Telecom'],
-    postedAt: new Date(Date.now() - 4 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Data Entry Clerk', slug: 'data-entry-clerk-kra',
-    companySlug: 'kra', categorySlug: 'operations-admin', locationSlug: 'nairobi',
-    type: 'Contract', level: 'Entry Level',
-    description: 'KRA needs a Data Entry Clerk on a 6-month contract to support digitization of tax records. You will accurately input, verify, and maintain data in our systems while ensuring data integrity and confidentiality.',
-    requirements: JSON.stringify(["Diploma in IT, Business Administration, or related field", "Typing speed of 40+ WPM", "Proficiency in Microsoft Office Suite", "High attention to detail", "Ability to maintain confidentiality"]),
-    salaryMin: 25000, salaryMax: 35000, salaryCurrency: 'Ksh',
-    tags: ['Data Entry', 'Contract', 'Government'],
-    postedAt: new Date(Date.now() - 5 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: true, isRemote: false,
-  },
-  {
-    title: 'Marketing Assistant', slug: 'marketing-assistant-eabl',
-    companySlug: 'eabl', categorySlug: 'marketing-comms', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Entry Level',
-    description: 'East African Breweries Limited is looking for a Marketing Assistant to support our brand management team. You will assist in executing marketing campaigns, managing social media accounts, coordinating events, and analyzing market trends.',
-    requirements: JSON.stringify(["Bachelor's degree in Marketing or related field", "1 year of marketing experience preferred", "Creative with strong organizational skills", "Social media savvy", "Valid driving license preferred"]),
-    salaryMin: 45000, salaryMax: 65000, salaryCurrency: 'Ksh',
-    tags: ['Marketing', 'FMCG', 'Entry Level'],
-    postedAt: new Date(Date.now() - 6 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Finance Intern', slug: 'finance-intern-equity',
-    companySlug: 'equity-bank', categorySlug: 'finance-accounting', locationSlug: 'nairobi',
-    type: 'Internship', level: 'Intern',
-    description: 'Equity Bank is offering a 3-month Finance Internship program. You will gain exposure to financial analysis, budgeting, forecasting, and reporting. Ideal for students in their final year or recent graduates.',
-    requirements: JSON.stringify(["Pursuing or completed a degree in Finance/Accounting", "Strong analytical skills", "Proficiency in Excel", "Eager to learn in a fast-paced environment", "Available for 3 months starting immediately"]),
-    salaryMin: 20000, salaryMax: 30000, salaryCurrency: 'Ksh',
-    tags: ['Finance', 'Internship', 'Banking'],
-    postedAt: new Date(Date.now() - 7 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Software Engineering Intern', slug: 'software-engineering-intern-safaricom',
-    companySlug: 'safaricom', categorySlug: 'technology-it', locationSlug: 'nairobi',
-    type: 'Internship', level: 'Intern',
-    description: "Safaricom's 6-month Software Engineering Internship offers hands-on experience in building mobile and web applications used by millions. You will work alongside senior engineers, participate in agile sprints, and contribute to production code.",
-    requirements: JSON.stringify(["Pursuing or completed a degree in Computer Science", "Knowledge of at least one programming language", "Understanding of web or mobile development", "Strong problem-solving abilities", "Available for 6 months"]),
-    salaryMin: 25000, salaryMax: 40000, salaryCurrency: 'Ksh',
-    tags: ['Software', 'Internship', 'Mobile'],
-    postedAt: new Date(Date.now() - 7 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Mastercard Foundation Scholars', slug: 'mastercard-foundation-scholars',
-    companySlug: 'university-of-nairobi', categorySlug: 'education-training', locationSlug: 'nairobi',
-    type: 'Full-time', level: 'Any',
-    description: 'The Mastercard Foundation Scholars Program at the University of Nairobi provides full scholarships to academically talented yet economically disadvantaged young Africans. The scholarship covers tuition, accommodation, books, stipend, and mentorship support.',
-    requirements: JSON.stringify(["Strong academic performance", "Demonstrated financial need", "Leadership potential and community involvement", "Under 30 years of age", "Commitment to giving back to the community"]),
-    salaryMin: null, salaryMax: null, salaryCurrency: '',
-    salaryNote: 'Full Scholarship',
-    tags: ['Scholarship', 'University', 'Full Sponsorship'],
-    postedAt: new Date(Date.now() - 14 * 86400000),
-    deadlineAt: new Date('2025-02-28'),
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'KCB Foundation Scholarship', slug: 'kcb-foundation-scholarship',
-    companySlug: 'kcb-group', categorySlug: 'education-training', locationSlug: 'nationwide',
-    type: 'Full-time', level: 'Any',
-    description: 'The KCB Foundation Scholarship supports students from disadvantaged backgrounds pursuing tertiary education in Kenya. The scholarship covers tuition fees and provides a monthly stipend for living expenses.',
-    requirements: JSON.stringify(["Kenyan citizen from an economically disadvantaged background", "Admitted to a recognized Kenyan university or college", "Strong academic record", "Demonstrated leadership and community service", "Not older than 25 years"]),
-    salaryMin: null, salaryMax: null, salaryCurrency: '',
-    salaryNote: 'Tuition + Stipend',
-    tags: ['Scholarship', 'Foundation', 'Tuition'],
-    postedAt: new Date(Date.now() - 21 * 86400000),
-    deadlineAt: new Date('2025-03-15'),
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Waitstaff', slug: 'waitstaff-various',
-    companySlug: 'various', categorySlug: 'hospitality-tourism', locationSlug: 'westlands',
-    type: 'Casual', level: 'Any',
-    description: 'Immediate opening for waitstaff at a busy restaurant in Westlands. No experience needed — training provided on the job. Flexible hours available.',
-    requirements: JSON.stringify(["No experience required", "Must be 18+ years old", "Good customer service attitude", "Available for immediate start", "Neat personal appearance"]),
-    salaryMin: null, salaryMax: null, salaryCurrency: 'Ksh',
-    casualRate: 'Ksh 500/day', casualNote: 'Immediate start', isCasual: true,
-    tags: ['Casual', 'Hospitality', 'Waitstaff'],
-    postedAt: new Date(Date.now() - 2 * 3600000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Delivery Rider', slug: 'delivery-rider-various',
-    companySlug: 'various', categorySlug: 'logistics-supply-chain', locationSlug: 'nairobi-cbd',
-    type: 'Casual', level: 'Any',
-    description: 'Delivery riders needed for a growing logistics company based in Nairobi CBD. Earn competitive daily rates with the flexibility to choose your own schedule. Must own a motorcycle.',
-    requirements: JSON.stringify(["Must own a motorcycle (bodaboda)", "Valid riding license", "Smartphone for navigation", "Knowledge of Nairobi routes", "18+ years old"]),
-    salaryMin: null, salaryMax: null, salaryCurrency: 'Ksh',
-    casualRate: 'Ksh 1,200/day', casualNote: 'Own bike required', isCasual: true,
-    tags: ['Casual', 'Delivery', 'Logistics'],
-    postedAt: new Date(Date.now() - 4 * 3600000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Farm Worker', slug: 'farm-worker-various',
-    companySlug: 'various', categorySlug: 'hospitality-tourism', locationSlug: 'naivasha',
-    type: 'Casual', level: 'Any',
-    description: 'Farm workers needed at a flower farm in Naivasha. Accommodation is provided on-site. Meals are also included. Great opportunity for those looking for steady work in a beautiful location.',
-    requirements: JSON.stringify(["No experience required", "Physically fit", "Willing to live on-site", "Hardworking and reliable", "18+ years old"]),
-    salaryMin: null, salaryMax: null, salaryCurrency: 'Ksh',
-    casualRate: 'Ksh 700/day', casualNote: 'Accommodation provided', isCasual: true,
-    tags: ['Casual', 'Agriculture', 'Farm'],
-    postedAt: new Date(Date.now() - 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Shop Assistant', slug: 'shop-assistant-various',
-    companySlug: 'various', categorySlug: 'sales-business-dev', locationSlug: 'thika-rd',
-    type: 'Part-time', level: 'Entry Level',
-    description: 'Part-time shop assistant needed at a retail store along Thika Road. Flexible schedule — work 3-4 days per week. Ideal for students or those looking for supplementary income.',
-    requirements: JSON.stringify(["Basic computer literacy", "Good customer service skills", "Honest and reliable", "Available on weekends", "18+ years old"]),
-    salaryMin: null, salaryMax: null, salaryCurrency: 'Ksh',
-    casualRate: 'Ksh 15k/mo', casualNote: 'Part-time', isCasual: true,
-    tags: ['Part-time', 'Retail', 'Shop'],
-    postedAt: new Date(Date.now() - 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Cleaning Staff', slug: 'cleaning-staff-various',
-    companySlug: 'various', categorySlug: 'operations-admin', locationSlug: 'kilimani',
-    type: 'Casual', level: 'Any',
-    description: 'Weekend cleaning staff needed for office spaces in Kilimani. Work every Saturday and Sunday from 8am to 2pm. Perfect for those with weekday commitments looking for weekend work.',
-    requirements: JSON.stringify(["No experience required", "Physically able", "Punctual and reliable", "Available on weekends", "18+ years old"]),
-    salaryMin: null, salaryMax: null, salaryCurrency: 'Ksh',
-    casualRate: 'Ksh 600/day', casualNote: 'Weekends only', isCasual: true,
-    tags: ['Casual', 'Cleaning', 'Weekend'],
-    postedAt: new Date(Date.now() - 2 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Loader', slug: 'loader-various',
-    companySlug: 'various', categorySlug: 'logistics-supply-chain', locationSlug: 'industrial-area',
-    type: 'Casual', level: 'Any',
-    description: 'Loaders needed at a warehouse in Industrial Area for the morning shift. You will handle loading and offloading of goods, packaging, and inventory management.',
-    requirements: JSON.stringify(["Physically strong and fit", "No experience required", "Punctual for morning shifts", "Reliable and hardworking", "18+ years old"]),
-    salaryMin: null, salaryMax: null, salaryCurrency: 'Ksh',
-    casualRate: 'Ksh 800/day', casualNote: 'Morning shift (6am-2pm)', isCasual: true,
-    tags: ['Casual', 'Warehouse', 'Loading'],
-    postedAt: new Date(Date.now() - 3 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-  {
-    title: 'Marketing Intern', slug: 'marketing-intern-eabl',
-    companySlug: 'eabl', categorySlug: 'marketing-comms', locationSlug: 'nairobi',
-    type: 'Internship', level: 'Intern',
-    description: "EABL offers a structured internship program in the Marketing department. You will work on real brand campaigns, support event planning, conduct market research, and gain exposure to one of East Africa's largest FMCG companies.",
-    requirements: JSON.stringify(["Pursuing or completed a degree in Marketing/Communications", "Creative mindset", "Strong communication skills", "Knowledge of social media platforms", "Available for 3-6 months"]),
-    salaryMin: 25000, salaryMax: 35000, salaryCurrency: 'Ksh',
-    tags: ['Marketing', 'FMCG', 'Internship'],
-    postedAt: new Date(Date.now() - 7 * 86400000),
-    deadlineAt: null,
-    isUrgent: false, isFeatured: false, isGovernment: false, isRemote: false,
-  },
-];
-
-// ──────────────────────────────────────────────
-//  ARTICLES
-// ──────────────────────────────────────────────
-
-const ARTICLES = [
-  {
-    title: 'How to Pass the KRA Graduate Trainee Assessment',
-    slug: 'kra-graduate-trainee-assessment-guide',
-    category: 'Interview Tips',
-    excerpt: 'A complete guide to the KRA recruitment process, including sample questions, tips from successful candidates, and what evaluators look for.',
-    content: 'Full article content here...',
-    coverUrl: 'https://picsum.photos/seed/kra-career-final/800/450.jpg',
-    readTime: '6 min read',
-    isPublished: true,
-    publishedAt: new Date(Date.now() - 2 * 86400000),
-  },
-  {
-    title: '5 Tips for Your First County Government Interview',
-    slug: 'county-government-interview-tips',
-    category: 'Interview Tips',
-    excerpt: 'Practical advice for acing county government job interviews in Kenya.',
-    content: 'Full article content here...',
-    readTime: '3 min read',
-    isPublished: true,
-    publishedAt: new Date(Date.now() - 3 * 86400000),
-  },
-  {
-    title: "Salary Negotiation in Kenya's Job Market",
-    slug: 'salary-negotiation-kenya',
-    category: 'Salary Guide',
-    excerpt: 'Understanding salary ranges and negotiation strategies for the Kenyan job market.',
-    content: 'Full article content here...',
-    readTime: '5 min read',
-    isPublished: true,
-    publishedAt: new Date(Date.now() - 5 * 86400000),
-  },
-  {
-    title: 'CV Mistakes That Get Your Application Rejected',
-    slug: 'cv-mistakes-rejected',
-    category: 'CV Writing',
-    excerpt: 'Common CV mistakes that recruiters say are instant dealbreakers.',
-    content: 'Full article content here...',
-    readTime: '4 min read',
-    isPublished: true,
-    publishedAt: new Date(Date.now() - 7 * 86400000),
-  },
-  {
-    title: 'Remote Work: Legitimate Opportunities vs. Scams',
-    slug: 'remote-work-legitimate-vs-scams',
-    category: 'Remote Work',
-    excerpt: 'How to tell legitimate remote job opportunities from scams targeting Kenyan jobseekers.',
-    content: 'Full article content here...',
-    readTime: '6 min read',
-    isPublished: true,
-    publishedAt: new Date(Date.now() - 10 * 86400000),
-  },
-  {
-    title: 'From Internship to Full-Time: A Transition Guide',
-    slug: 'internship-to-fulltime-guide',
-    category: 'Career Growth',
-    excerpt: 'A step-by-step guide to converting your internship into a full-time position.',
-    content: 'Full article content here...',
-    readTime: '4 min read',
-    isPublished: true,
-    publishedAt: new Date(Date.now() - 12 * 86400000),
-  },
-];
-
-// ──────────────────────────────────────────────
-//  JOB UPDATES
-// ──────────────────────────────────────────────
-
-const JOB_UPDATES = [
-  { jobSlug: 'kra-graduate-trainee-2025', content: '42 candidates shortlisted — KRA Graduate Trainee', isActive: true },
-  { jobSlug: 'financial-analyst-equity', content: 'Interview invites sent — Equity Graduate Program', isActive: true },
-  { jobSlug: 'senior-pm-m-pesa-safaricom', content: 'Safaricom Senior PM applications now closed', isActive: false },
-  { jobSlug: 'marketing-intern-ncba', content: 'NCBA extends Marketing Intern deadline to Feb 20', isActive: true },
-  { jobSlug: 'tsc-5000-teacher-posts', content: 'TSC internship postings for Q2 2025 now open', isActive: true },
-  { jobSlug: 'backend-developer-kcb', content: 'KCB final round interviews scheduled for next week', isActive: false },
-];
+const $raw = prisma.$executeRawUnsafe.bind(prisma);
+const $query = prisma.$queryRawUnsafe.bind(prisma);
 
 async function main() {
-  console.log('🌱 Seeding Jobnet database...\n');
+  console.log('=== Jobnet Optimised Seed ===\n');
 
-  // 1. Locations
-  console.log('📍 Creating locations...');
-  const locationMap: Record<string, string> = {};
-  for (const loc of LOCATIONS) {
-    const created = await prisma.location.create({ data: loc });
-    locationMap[loc.slug] = created.id;
+  // ── 1. Organisation Types ──
+  console.log('Seeding organisation types...');
+  await $raw(`INSERT IGNORE INTO organization_types (id, code, name, slug, sort_order) VALUES
+    ('ot_private','PRIVATE','Private Sector Companies','private-sector',1),
+    ('ot_sme','SMALL_BUSINESS','Small & Medium Enterprises','small-business',2),
+    ('ot_startup','STARTUP','Startup','startup',3),
+    ('ot_ngo','NGO','Non-Governmental Organization','ngo',4),
+    ('ot_intl','INTERNATIONAL','International Organization','international-org',5),
+    ('ot_natgov','NATIONAL_GOV','National Government','national-government',6),
+    ('ot_cntgov','COUNTY_GOV','County Government','county-government',7),
+    ('ot_statecorp','STATE_CORP','State Corporation','state-corporation',8),
+    ('ot_edu','EDUCATION','Education & Research','education',9),
+    ('ot_found','FOUNDATION','Foundation','foundation',10),
+    ('ot_relig','RELIGIOUS','Religious Organization','religious-org',11)`);
+  console.log('  ✅ 11 org types');
+
+  // ── 2. Industries ──
+  console.log('Seeding industries...');
+  await $raw(`INSERT IGNORE INTO industries (id,code,name,slug,sort_order) VALUES
+('ind_agri','AGRICULTURE','Agriculture & Agribusiness','agriculture',1),
+('ind_auto','AUTOMOTIVE','Automotive','automotive',2),
+('ind_avia','AVIATION','Aviation & Aerospace','aviation',3),
+('ind_bank','BANKING','Banking & Finance','banking',4),
+('ind_cons','CONSTRUCTION','Construction','construction',5),
+('ind_consult','CONSULTING','Consulting','consulting',6),
+('ind_cpg','CONSUMER_GOODS','Consumer Goods','consumer-goods',7),
+('ind_edu','EDUCATION','Education','education',8),
+('ind_energy','ENERGY','Energy','energy',9),
+('ind_env','ENVIRONMENT','Environment & Sustainability','environment',10),
+('ind_fintech','FINTECH','Fintech','fintech',11),
+('ind_fb','FOOD_BEVERAGE','Food & Beverage','food-beverage',12),
+('ind_gov','GOVERNMENT','Government & Public Admin','government',13),
+('ind_health','HEALTHCARE','Healthcare','healthcare',14),
+('ind_hosp','HOSPITALITY','Hospitality & Tourism','hospitality',15),
+('ind_hr','HUMAN_RESOURCES','Human Resources','human-resources',16),
+('ind_it','INFORMATION_TECHNOLOGY','Information Technology','information-technology',17),
+('ind_ins','INSURANCE','Insurance','insurance',18),
+('ind_intldev','INTERNATIONAL_DEV','International Development','international-dev',19),
+('ind_legal','LEGAL','Legal','legal',20),
+('ind_log','LOGISTICS','Logistics & Supply Chain','logistics',21),
+('ind_mfg','MANUFACTURING','Manufacturing','manufacturing',22),
+('ind_mkt','MARKETING','Marketing & Advertising','marketing',23),
+('ind_media','MEDIA','Media & Entertainment','media',24),
+('ind_mining','MINING','Mining','mining',25),
+('ind_np','NON_PROFIT','Non-Profit','non-profit',26),
+('ind_pharma','PHARMACEUTICAL','Pharmaceutical','pharmaceutical',27),
+('ind_re','REAL_ESTATE','Real Estate','real-estate',28),
+('ind_res','RESEARCH','Research','research',29),
+('ind_ret','RETAIL','Retail','retail',30),
+('ind_sec','SECURITY','Security & Defense','security',31),
+('ind_sport','SPORTS','Sports','sports',32),
+('ind_tele','TELECOMMUNICATIONS','Telecommunications','telecommunications',33),
+('ind_text','TEXTILES','Textiles & Apparel','textiles',34),
+('ind_trade','TRADES','Skilled Trades','trades',35),
+('ind_water','WATER','Water & Sanitation','water',36)`);
+  console.log('  ✅ 36 industries');
+
+  // ── 3. Currencies ──
+  console.log('Seeding currencies...');
+  await $raw(`INSERT IGNORE INTO currencies (id,code,name,symbol) VALUES
+('cur_kes','KES','Kenyan Shilling','Ksh'),
+('cur_usd','USD','US Dollar','$'),
+('cur_eur','EUR','Euro','€'),
+('cur_gbp','GBP','British Pound','£'),
+('cur_ugx','UGX','Ugandan Shilling','UGX'),
+('cur_tzs','TZS','Tanzanian Shilling','TZS'),
+('cur_rwf','RWF','Rwandan Franc','RWF'),
+('cur_zar','ZAR','South African Rand','ZAR'),
+('cur_ngn','NGN','Nigerian Naira','NGN')`);
+  console.log('  ✅ 9 currencies');
+
+  // ── 4. Listing Types ──
+  console.log('Seeding listing types...');
+  await $raw(`INSERT IGNORE INTO listing_types (id,code,name,slug,sort_order) VALUES
+('lt_job','JOB','Job','job',1),
+('lt_intern','INTERNSHIP','Internship','internship',2),
+('lt_schol','SCHOLARSHIP','Scholarship','scholarship',3),
+('lt_burs','BURSARY','Bursary','bursary',4),
+('lt_boot','BOOTCAMP','Bootcamp','bootcamp',5),
+('lt_fell','FELLOWSHIP','Fellowship','fellowship',6),
+('lt_appren','APPRENTICESHIP','Apprenticeship','apprenticeship',7),
+('lt_uni','UNIVERSITY_ADMISSION','University Admission','university-admission',8),
+('lt_vol','VOLUNTEER','Volunteer','volunteer',9),
+('lt_train','TRAINING','Training','training',10),
+('lt_grant','GRANT','Grant','grant',11),
+('lt_cert','CERTIFICATION','Certification','certification',12),
+('lt_comp','COMPETITION','Competition','competition',13),
+('lt_ment','MENTORSHIP','Mentorship','mentorship',14),
+('lt_accel','ACCELERATOR','Accelerator','accelerator',15),
+('lt_incub','INCUBATOR','Incubator','incubator',16),
+('lt_work','WORKSHOP','Workshop','workshop',17),
+('lt_conf','CONFERENCE','Conference','conference',18),
+('lt_research','RESEARCH','Research','research',19),
+('lt_exch','EXCHANGE','Exchange Program','exchange',20),
+('lt_casual','CASUAL','Casual Work','casual',21)`);
+  console.log('  ✅ 21 listing types');
+
+  // ── 5. Employment Types ──
+  console.log('Seeding employment types...');
+  await $raw(`INSERT IGNORE INTO employment_types (id,code,name,slug,sort_order) VALUES
+('et_ft','FULL_TIME','Full-time','full-time',1),
+('et_pt','PART_TIME','Part-time','part-time',2),
+('et_ct','CONTRACT','Contract','contract',3),
+('et_tmp','TEMPORARY','Temporary','temporary',4),
+('et_int','INTERNSHIP','Internship','internship',5),
+('et_cas','CASUAL','Casual','casual',6),
+('et_vol','VOLUNTEER','Volunteer','volunteer',7)`);
+  console.log('  ✅ 7 employment types');
+
+  // ── 6. Experience Levels ──
+  console.log('Seeding experience levels...');
+  await $raw(`INSERT IGNORE INTO experience_levels (id,code,name,slug,sort_order) VALUES
+('el_entry','ENTRY_LEVEL','Entry Level','entry-level',1),
+('el_int','INTERNSHIP','Intern','intern',2),
+('el_mid','MID_LEVEL','Mid Level','mid-level',3),
+('el_sen','SENIOR','Senior','senior',4),
+('el_lead','LEAD','Lead','lead',5),
+('el_mgr','MANAGER','Manager','manager',6),
+('el_dir','DIRECTOR','Director','director',7),
+('el_exec','EXECUTIVE','Executive','executive',8)`);
+  console.log('  ✅ 8 experience levels');
+
+  // ── 7. Education Levels ──
+  console.log('Seeding education levels...');
+  await $raw(`INSERT IGNORE INTO education_levels (id,code,name,slug,sort_order) VALUES
+('edl_hs','HIGH_SCHOOL','High School Certificate','high-school',1),
+('edl_dip','DIPLOMA','Diploma','diploma',2),
+('edl_bac','BACHELORS','Bachelor''s Degree','bachelors',3),
+('edl_mas','MASTERS','Master''s Degree','masters',4),
+('edl_doc','DOCTORATE','PhD / Doctorate','doctorate',5),
+('edl_pro','PROFESSIONAL','Professional Certification','professional',6)`);
+  console.log('  ✅ 6 education levels');
+
+  // ── 8. Locations ──
+  console.log('Seeding locations...');
+  // Kenya country (idempotent)
+  await $raw(`INSERT IGNORE INTO locations (id,name,slug,type,country_code,dial_code,flag,depth,sort_order) VALUES
+('loc_ke','Kenya','kenya','COUNTRY','KE','+254','KE',0,1)`);
+
+  // Counties
+  await $raw(`INSERT IGNORE INTO locations (id,parent_id,name,slug,type,country_code,depth,sort_order) VALUES
+('loc_nairobi','loc_ke','Nairobi','nairobi','COUNTY','KE',1,1),
+('loc_mombasa','loc_ke','Mombasa','mombasa','COUNTY','KE',1,2),
+('loc_nakuru','loc_ke','Nakuru','nakuru','COUNTY','KE',1,3),
+('loc_kiambu','loc_ke','Kiambu','kiambu','COUNTY','KE',1,4),
+('loc_uasin','loc_ke','Uasin Gishu','uasin-gishu','COUNTY','KE',1,5),
+('loc_kisumu','loc_ke','Kisumu','kisumu','COUNTY','KE',1,6),
+('loc_machakos','loc_ke','Machakos','machakos','COUNTY','KE',1,7),
+('loc_kajiado','loc_ke','Kajiado','kajiado','COUNTY','KE',1,8),
+('loc_kakamega','loc_ke','Kakamega','kakamega','COUNTY','KE',1,9),
+('loc_meru','loc_ke','Meru','meru','COUNTY','KE',1,10),
+('loc_embu','loc_ke','Embu','embu','COUNTY','KE',1,11),
+('loc_nyeri','loc_ke','Nyeri','nyeri','COUNTY','KE',1,12),
+('loc_laikipia','loc_ke','Laikipia','laikipia','COUNTY','KE',1,13),
+('loc_muranga','loc_ke','Murang''a','muranga','COUNTY','KE',1,14),
+('loc_kirinyaga','loc_ke','Kirinyaga','kirinyaga','COUNTY','KE',1,15),
+('loc_nyandarua','loc_ke','Nyandarua','nyandarua','COUNTY','KE',1,16),
+('loc_nandi','loc_ke','Nandi','nandi','COUNTY','KE',1,17),
+('loc_bungoma','loc_ke','Bungoma','bungoma','COUNTY','KE',1,18),
+('loc_transnzoia','loc_ke','Trans Nzoia','trans-nzoia','COUNTY','KE',1,19),
+('loc_kisii','loc_ke','Kisii','kisii','COUNTY','KE',1,20),
+('loc_migori','loc_ke','Migori','migori','COUNTY','KE',1,21),
+('loc_homabay','loc_ke','Homa Bay','homa-bay','COUNTY','KE',1,22),
+('loc_siaya','loc_ke','Siaya','siaya','COUNTY','KE',1,23),
+('loc_busia','loc_ke','Busia','busia','COUNTY','KE',1,24),
+('loc_bomet','loc_ke','Bomet','bomet','COUNTY','KE',1,25),
+('loc_kericho','loc_ke','Kericho','kericho','COUNTY','KE',1,26),
+('loc_narok','loc_ke','Narok','narok','COUNTY','KE',1,27),
+('loc_turkana','loc_ke','Turkana','turkana','COUNTY','KE',1,28),
+('loc_westpokot','loc_ke','West Pokot','west-pokot','COUNTY','KE',1,29),
+('loc_isiolo','loc_ke','Isiolo','isiolo','COUNTY','KE',1,30),
+('loc_samburu','loc_ke','Samburu','samburu','COUNTY','KE',1,31),
+('loc_elgeyo','loc_ke','Elgeyo Marakwet','elgeyo-marakwet','COUNTY','KE',1,32),
+('loc_baringo','loc_ke','Baringo','baringo','COUNTY','KE',1,33),
+('loc_tanariver','loc_ke','Tana River','tana-river','COUNTY','KE',1,34),
+('loc_kilifi','loc_ke','Kilifi','kilifi','COUNTY','KE',1,35),
+('loc_kwale','loc_ke','Kwale','kwale','COUNTY','KE',1,36),
+('loc_taita','loc_ke','Taita Taveta','taita-taveta','COUNTY','KE',1,37),
+('loc_vihiga','loc_ke','Vihiga','vihiga','COUNTY','KE',1,38),
+('loc_nyamira','loc_ke','Nyamira','nyamira','COUNTY','KE',1,39),
+('loc_lamu','loc_ke','Lamu','lamu','COUNTY','KE',1,40),
+('loc_garissa','loc_ke','Garissa','garissa','COUNTY','KE',1,41),
+('loc_marsabit','loc_ke','Marsabit','marsabit','COUNTY','KE',1,42)`);
+  console.log('  ✅ 42 counties');
+
+  // Nairobi areas
+  await $raw(`INSERT IGNORE INTO locations (id,parent_id,name,slug,type,country_code,depth,sort_order) VALUES
+('loc_nai_cbd','loc_nairobi','CBD','cbd','AREA','KE',2,1),
+('loc_nai_west','loc_nairobi','Westlands','westlands','AREA','KE',2,2),
+('loc_nai_kili','loc_nairobi','Kilimani','kilimani','AREA','KE',2,3),
+('loc_nai_ia','loc_nairobi','Industrial Area','industrial-area','AREA','KE',2,4),
+('loc_nai_upper','loc_nairobi','Upper Hill','upper-hill','AREA','KE',2,5),
+('loc_nai_park','loc_nairobi','Parklands','parklands','AREA','KE',2,6),
+('loc_nai_east','loc_nairobi','Eastlands','eastlands','AREA','KE',2,7),
+('loc_nai_thikard','loc_nairobi','Thika Rd','thika-rd','AREA','KE',2,8)`);
+  console.log('  ✅ 8 Nairobi areas');
+
+  // Mombasa areas
+  await $raw(`INSERT IGNORE INTO locations (id,parent_id,name,slug,type,country_code,depth,sort_order) VALUES
+('loc_mom_nyali','loc_mombasa','Nyali','nyali','AREA','KE',2,1),
+('loc_mom_diani','loc_mombasa','Diani','diani','AREA','KE',2,2),
+('loc_mom_lik','loc_mombasa','Likoni','likoni','AREA','KE',2,3)`);
+  console.log('  ✅ 3 Mombasa areas');
+
+  // Nakuru areas
+  await $raw(`INSERT IGNORE INTO locations (id,parent_id,name,slug,type,country_code,depth,sort_order) VALUES
+('loc_nak_naivasha','loc_nakuru','Naivasha','naivasha','AREA','KE',2,1),
+('loc_nak_gilgil','loc_nakuru','Gilgil','gilgil','AREA','KE',2,2)`);
+  console.log('  ✅ 2 Nakuru areas');
+
+  // ── 9. Categories ──
+  console.log('Seeding categories...');
+  await $raw(`INSERT IGNORE INTO categories (id,name,slug,type,listing_count,sort_order,meta_title,meta_description) VALUES
+('cat_tech','Technology & IT','technology-it','JOB',186,1,'Technology & IT Jobs in Kenya','Browse technology and IT job opportunities across Kenya.'),
+('cat_finance','Finance & Accounting','finance-accounting','JOB',142,2,'Finance & Accounting Jobs in Kenya','Browse finance and accounting jobs across Kenya.'),
+('cat_sales','Sales & Business Dev','sales-business-dev','JOB',97,3,'Sales Jobs in Kenya','Browse sales and business development jobs.'),
+('cat_mkt','Marketing & Comms','marketing-comms','JOB',89,4,'Marketing Jobs in Kenya','Browse marketing and communications jobs.'),
+('cat_hr','Human Resources','human-resources','JOB',67,5,'HR Jobs in Kenya','Browse human resources jobs.'),
+('cat_eng','Engineering','engineering','JOB',78,6,'Engineering Jobs in Kenya','Browse engineering jobs across Kenya.'),
+('cat_health','Healthcare & Medical','healthcare-medical','JOB',112,7,'Healthcare Jobs in Kenya','Browse healthcare and medical jobs.'),
+('cat_edu','Education & Training','education-training','JOB',156,8,'Education Jobs in Kenya','Browse education and training jobs.'),
+('cat_ops','Operations & Admin','operations-admin','JOB',54,9,'Operations Jobs in Kenya','Browse operations and admin jobs.'),
+('cat_log','Logistics & Supply Chain','logistics-supply-chain','JOB',43,10,'Logistics Jobs in Kenya','Browse logistics and supply chain jobs.'),
+('cat_hosp','Hospitality & Tourism','hospitality-tourism','JOB',71,11,'Hospitality Jobs in Kenya','Browse hospitality and tourism jobs.'),
+('cat_gov','Government & Public','government-public','JOB',198,12,'Government Jobs in Kenya','Browse government job opportunities.'),
+('cat_creative','Creative Arts & Design','creative-arts-design','JOB',38,13,'Creative Jobs in Kenya','Browse creative and design jobs.'),
+('cat_agri','Agriculture & Agribusiness','agriculture','JOB',52,14,'Agriculture Jobs in Kenya','Browse agriculture jobs.'),
+('cat_legal','Legal & Compliance','legal-compliance','JOB',29,15,'Legal Jobs in Kenya','Browse legal and compliance jobs.'),
+('cat_cust','Customer Service','customer-service','JOB',48,16,'Customer Service Jobs in Kenya','Browse customer service jobs.'),
+('cat_trades','Skilled Trades','skilled-trades','JOB',35,17,'Skilled Trade Jobs in Kenya','Browse skilled trade jobs.'),
+('cat_media','Media & Publishing','media-publishing','JOB',27,18,'Media Jobs in Kenya','Browse media and publishing jobs.'),
+('cat_np','Nonprofit & Social Services','nonprofit-social-services','JOB',41,19,'Nonprofit Jobs in Kenya','Browse nonprofit jobs.'),
+('cat_re','Real Estate','real-estate','JOB',33,20,'Real Estate Jobs in Kenya','Browse real estate jobs.'),
+('cat_sec','Security & Defense','security-defense','JOB',22,21,'Security Jobs in Kenya','Browse security and defense jobs.'),
+('cat_tele','Telecommunications','telecommunications','JOB',18,22,'Telecom Jobs in Kenya','Browse telecommunications jobs.'),
+('cat_energy','Energy & Utilities','energy-utilities','JOB',25,23,'Energy Jobs in Kenya','Browse energy and utility jobs.'),
+('cat_sport','Sports & Recreation','sports-recreation','JOB',15,24,'Sports Jobs in Kenya','Browse sports and recreation jobs.'),
+('cat_trans','Transport','transport','JOB',31,25,'Transport Jobs in Kenya','Browse transport jobs.'),
+('cat_sci','Science & Research','science-research','JOB',19,26,'Research Jobs in Kenya','Browse science and research jobs.'),
+('cat_consult','Consulting','consulting','JOB',44,27,'Consulting Jobs in Kenya','Browse consulting jobs.'),
+('cat_ins','Insurance','insurance','JOB',21,28,'Insurance Jobs in Kenya','Browse insurance jobs.')`);
+  console.log('  ✅ 28 root categories');
+
+  // Subcategories
+  await $raw(`INSERT IGNORE INTO categories (id,parent_id,name,slug,type,listing_count,sort_order) VALUES
+('cat_tech_sw','cat_tech','Software Development','software-development','JOB',85,1),
+('cat_tech_ds','cat_tech','Data Science & Analytics','data-science-analytics','JOB',32,2),
+('cat_tech_it','cat_tech','IT Support','it-support','JOB',28,3),
+('cat_tech_cyber','cat_tech','Cybersecurity','cybersecurity','JOB',14,4),
+('cat_tech_pm','cat_tech','Product Management','product-management','JOB',15,5),
+('cat_tech_devops','cat_tech','DevOps & Cloud','devops-cloud','JOB',12,6),
+('cat_fin_acc','cat_finance','Accounting','accounting','JOB',48,1),
+('cat_fin_fa','cat_finance','Financial Analysis','financial-analysis','JOB',22,2),
+('cat_fin_bnk','cat_finance','Banking','banking','JOB',38,3),
+('cat_fin_audit','cat_finance','Audit & Compliance','audit-compliance','JOB',18,4),
+('cat_eng_civ','cat_eng','Civil Engineering','civil-engineering','JOB',35,1),
+('cat_eng_elec','cat_eng','Electrical Engineering','electrical-engineering','JOB',18,2),
+('cat_eng_mech','cat_eng','Mechanical Engineering','mechanical-engineering','JOB',15,3),
+('cat_mkt_dig','cat_mkt','Digital Marketing','digital-marketing','JOB',38,1),
+('cat_mkt_con','cat_mkt','Content & Social Media','content-social-media','JOB',22,2),
+('cat_mkt_brand','cat_mkt','Brand Management','brand-management','JOB',14,3)`);
+  console.log('  ✅ 18 subcategories');
+
+  // ── 10. Organizations ──
+  console.log('Seeding organizations...');
+  await $raw(`INSERT IGNORE INTO organizations (id,name,slug,organization_type_id,industry_id,location_id,is_verified,verified_at,website_url,description) VALUES
+('org_saf','Safaricom','safaricom','ot_private','ind_tele','loc_nairobi',1,NOW(),'https://www.safaricom.co.ke','Leading communications company in Kenya.'),
+('org_kcb','KCB Bank','kcb-bank','ot_private','ind_bank','loc_nairobi',1,NOW(),'https://www.kcbgroup.com','One of the largest commercial banks in East Africa.'),
+('org_ncba','NCBA Group','ncba-group','ot_private','ind_bank','loc_nairobi',1,NOW(),'https://www.ncbagroup.com','Financial services group formed from NIC and CBA merger.'),
+('org_eq','Equity Bank','equity-bank','ot_private','ind_bank','loc_nairobi',1,NOW(),'https://www.equitybank.co.ke','Financial services group across East and Central Africa.'),
+('org_kra','Kenya Revenue Authority','kra','ot_natgov','ind_gov','loc_nairobi',0,NULL,'https://www.kra.go.ke','Revenue collection for the Government of Kenya.'),
+('org_tsc','Teachers Service Commission','tsc','ot_natgov','ind_edu','loc_nairobi',0,NULL,'https://www.tsc.go.ke','Constitutional commission for teacher management.'),
+('org_kps','Kenya Police Service','kenya-police-service','ot_natgov','ind_sec','loc_nairobi',0,NULL,'https://www.kenyapolice.go.ke','National police service of Kenya.'),
+('org_nak','Nakuru County Government','nakuru-county-gov','ot_cntgov','ind_gov','loc_nakuru',0,NULL,NULL,'Governance and service delivery in Nakuru County.'),
+('org_ncg','Nairobi County Government','nairobi-county-gov','ot_cntgov','ind_gov','loc_nairobi',0,NULL,NULL,'Governance and service delivery in Nairobi County.'),
+('org_mcg','Mombasa County Government','mombasa-county-gov','ot_cntgov','ind_gov','loc_mombasa',0,NULL,NULL,'Governance and service delivery in Mombasa County.'),
+('org_eabl','East African Breweries Limited','eabl','ot_private','ind_mfg','loc_nairobi',1,NOW(),'https://www.eabl.com','Leading beverage manufacturer in East Africa.'),
+('org_coop','Co-operative Bank','co-operative-bank','ot_private','ind_bank','loc_nairobi',1,NOW(),'https://www.co-opbank.co.ke','Leading commercial bank focused on cooperative societies.'),
+('org_uon','University of Nairobi','university-of-nairobi','ot_edu','ind_edu','loc_nairobi',1,NOW(),'https://www.uonbi.ac.ke','Oldest and largest university in Kenya.'),
+('org_kenha','Kenya National Highways Authority','kenha','ot_statecorp','ind_gov','loc_nairobi',0,NULL,'https://www.kenha.co.ke','State corp for national trunk roads.')`);
+  console.log('  ✅ 14 organizations');
+
+  // ── 11. Listings ──
+  console.log('Seeding listings...');
+  const now = new Date();
+  const postedAt = (d: number) => new Date(now.getTime() - d * 86400000).toISOString().replace('T',' ').slice(0,19);
+  const deadlineAt = (d: number) => new Date(now.getTime() + d * 86400000).toISOString().replace('T',' ').slice(0,19);
+
+  // Helper for tags JSON
+  const tags = (arr: string[]) => JSON.stringify(arr);
+
+  await $raw(`INSERT IGNORE INTO listings (id,organization_id,category_id,location_id,listing_type_id,title,slug,summary,description,tags,status,is_verified,is_featured,posted_at,deadline_date) VALUES
+-- 1. Senior Accountant at Safaricom
+('l_01','org_saf','cat_finance','loc_nairobi','lt_job','Senior Accountant','safaricom-senior-accountant','Join Safaricom as a Senior Accountant','We are looking for an experienced Senior Accountant to join our Finance team at Safaricom PLC. The successful candidate will be responsible for financial reporting, budgeting, and ensuring compliance with IFRS standards.','${tags(["Accounting","Finance","CPA","IFRS"])}','PUBLISHED',1,1,'${postedAt(1)}','${deadlineAt(2)}'),
+-- 2. Backend Developer at KCB
+('l_02','org_kcb','cat_tech',NULL,'lt_job','Backend Developer','kcb-backend-developer','Build robust APIs for digital banking','KCB Bank is seeking a talented Backend Developer to build and maintain robust APIs and microservices that power our digital banking platform serving millions of customers.','${tags(["Backend","API","Node.js","Python"])}','PUBLISHED',1,0,'${postedAt(0)}',NULL),
+-- 3. Marketing Intern at NCBA
+('l_03','org_ncba','cat_mkt','loc_nairobi','lt_intern','Marketing Intern','ncba-marketing-intern','6-month marketing internship at NCBA Group','NCBA Group is offering an exciting 6-month internship in our Marketing department. Gain hands-on experience in digital marketing, brand management, and content creation.','${tags(["Marketing","Internship","Digital Marketing"])}','PUBLISHED',0,0,'${postedAt(1)}','${deadlineAt(1)}'),
+-- 4. Civil Engineer at KeNHA
+('l_04','org_kenha','cat_eng','loc_nakuru','lt_job','Civil Engineer','kenha-civil-engineer','Oversee road construction projects in Nakuru','The Kenya National Highways Authority is looking for a qualified Civil Engineer to oversee road construction and maintenance projects in the Nakuru region.','${tags(["Engineering","Infrastructure","Construction"])}','PUBLISHED',0,0,'${postedAt(1)}',NULL),
+-- 5. Senior Product Manager M-Pesa at Safaricom
+('l_05','org_saf','cat_tech','loc_nairobi','lt_job','Senior Product Manager — M-Pesa','safaricom-senior-pm','Lead product strategy for 30M+ active users','Lead product strategy for 30M+ active users across East Africa. Work with cross-functional teams of 12+ engineers and designers.','${tags(["Product","Fintech","Mobile","Leadership"])}','PUBLISHED',1,1,'${postedAt(1)}',NULL),
+-- 6. Financial Analyst at Equity Bank
+('l_06','org_eq','cat_finance','loc_nairobi','lt_job','Financial Analyst','equity-financial-analyst','Join Equity Bank as a Financial Analyst','Equity Bank is seeking a motivated Financial Analyst to join our Corporate Finance team for financial modeling and investment analysis.','${tags(["Finance","Analysis","Modeling"])}','PUBLISHED',1,0,'${postedAt(0)}',NULL),
+-- 7. Software Engineer at KCB
+('l_07','org_kcb','cat_tech',NULL,'lt_job','Software Engineer','kcb-software-engineer','Build innovative banking solutions','Join KCB Bank technology team to build innovative banking solutions using modern frameworks.','${tags(["Software","Full-stack","React","Node.js"])}','PUBLISHED',1,0,'${postedAt(0)}',NULL),
+-- 8. Graduate Trainee at NCBA
+('l_08','org_ncba','cat_finance','loc_nairobi','lt_job','Graduate Trainee','ncba-graduate-trainee','12-month rotational program','NCBA Group Graduate Trainee Program — a 12-month rotational program across different departments.','${tags(["Graduate","Training","Leadership"])}','PUBLISHED',0,0,'${postedAt(0)}',NULL),
+-- 9. HR Manager at Equity Bank
+('l_09','org_eq','cat_hr','loc_nairobi','lt_job','HR Manager','equity-hr-manager','Lead HR operations for 500+ employees','Equity Bank is seeking an experienced HR Manager to lead Human Resources operations including recruitment and performance management.','${tags(["HR","Management","People"])}','PUBLISHED',0,0,'${postedAt(2)}','${deadlineAt(3)}'),
+-- 10. Junior Developer at KCB
+('l_10','org_kcb','cat_tech','loc_nairobi','lt_job','Junior Developer','kcb-junior-developer','Start your dev career at KCB Bank','KCB Bank is looking for a Junior Developer to join our growing technology team. Mentorship provided.','${tags(["Junior","Developer","Entry Level"])}','PUBLISHED',0,0,'${postedAt(1)}','${deadlineAt(5)}'),
+-- 11. Data Analyst at KRA
+('l_11','org_kra','cat_finance','loc_nairobi','lt_job','Data Analyst','kra-data-analyst','Support data-driven decision making at KRA','The Kenya Revenue Authority is seeking a skilled Data Analyst to support data-driven decision making.','${tags(["Data","Analytics","Statistics"])}','PUBLISHED',0,0,'${postedAt(2)}','${deadlineAt(5)}'),
+-- 12. KRA Graduate Trainee
+('l_12','org_kra','cat_gov','loc_nairobi','lt_job','KRA Graduate Trainee Program 2025','kra-graduate-trainee','Prestigious 18-month graduate program','The KRA Graduate Trainee Program is a prestigious 18-month program for developing tax administration professionals.','${tags(["Graduate","Government","Tax","Gazette"])}','PUBLISHED',0,0,'${postedAt(5)}','${deadlineAt(14)}'),
+-- 13. TSC 5000 Teacher Posts
+('l_13','org_tsc','cat_edu','loc_ke','lt_job','TSC — 5,000 Teacher Posts','tsc-5000-teacher-posts','Recruiting 5,000 teachers across all 47 counties','The Teachers Service Commission is recruiting 5,000 teachers for primary and secondary schools across all 47 counties.','${tags(["Teaching","Government","Education"])}','PUBLISHED',0,0,'${postedAt(7)}','${deadlineAt(21)}'),
+-- 14. Kenya Police Recruitment
+('l_14','org_kps','cat_gov','loc_ke','lt_job','Kenya Police Constable Recruitment','kenya-police-recruitment','Police constable recruitment nationwide','The Kenya Police Service is recruiting police constables for a rigorous 9-month training program.','${tags(["Police","Government","Security","Gazette"])}','PUBLISHED',0,0,'${postedAt(3)}','${deadlineAt(7)}'),
+-- 15. Nakuru County Positions
+('l_15','org_nak','cat_gov','loc_nakuru','lt_job','Various Positions — Nakuru County','nakuru-county-various','Multiple openings across departments','Nakuru County Government has multiple openings across Health, Education, Public Works, and Administration.','${tags(["County","Government","Multiple Roles"])}','PUBLISHED',0,0,'${postedAt(4)}','${deadlineAt(14)}'),
+-- 16. Health Workers Nairobi County
+('l_16','org_ncg','cat_health','loc_nairobi','lt_job','Health Workers — Nairobi County','nairobi-county-health','Recruiting nurses, clinical officers, public health officers','Nairobi County Government is recruiting health workers to strengthen healthcare service delivery.','${tags(["Health","County","Government"])}','PUBLISHED',0,0,'${postedAt(5)}','${deadlineAt(18)}'),
+-- 17. Engineers Mombasa County
+('l_17','org_mcg','cat_eng','loc_mombasa','lt_job','Engineers — Mombasa County','mombasa-county-engineers','Civil, Electrical, Mechanical Engineers needed','Mombasa County Government is seeking qualified Engineers to oversee infrastructure projects.','${tags(["Engineering","County","Government"])}','PUBLISHED',0,0,'${postedAt(6)}','${deadlineAt(7)}'),
+-- 18. Junior Accountant at Co-op Bank
+('l_18','org_coop','cat_finance','loc_nairobi','lt_job','Junior Accountant','co-op-junior-accountant','Support the Finance team at Co-operative Bank','Co-operative Bank is looking for a Junior Accountant to support bookkeeping, financial reporting, and tax returns.','${tags(["Accounting","Entry Level","Banking"])}','PUBLISHED',0,0,'${postedAt(3)}',NULL),
+-- 19. Customer Service at Safaricom
+('l_19','org_saf','cat_cust','loc_nairobi','lt_job','Customer Service Representative','safaricom-customer-service','Handle customer inquiries at Safaricom','Safaricom is hiring Customer Service Representatives to handle inquiries, resolve complaints, and provide product information.','${tags(["Customer Service","Entry Level","Telecom"])}','PUBLISHED',0,0,'${postedAt(4)}',NULL),
+-- 20. Data Entry at KRA
+('l_20','org_kra','cat_ops','loc_nairobi','lt_job','Data Entry Clerk','kra-data-entry','6-month contract for digitization','KRA needs a Data Entry Clerk on a 6-month contract to support digitization of tax records.','${tags(["Data Entry","Contract","Government"])}','PUBLISHED',0,0,'${postedAt(5)}',NULL),
+-- 21. Marketing Assistant at EABL
+('l_21','org_eabl','cat_mkt','loc_nairobi','lt_job','Marketing Assistant','eabl-marketing-assistant','Support brand management at EABL','East African Breweries Limited is looking for a Marketing Assistant to support brand management.','${tags(["Marketing","FMCG","Entry Level"])}','PUBLISHED',0,0,'${postedAt(6)}',NULL),
+-- 22. Finance Intern at Equity
+('l_22','org_eq','cat_finance','loc_nairobi','lt_intern','Finance Intern','equity-finance-intern','3-month Finance Internship program','Equity Bank is offering a 3-month Finance Internship for financial analysis and reporting exposure.','${tags(["Finance","Internship","Banking"])}','PUBLISHED',0,0,'${postedAt(7)}',NULL),
+-- 23. Software Engineering Intern at Safaricom
+('l_23','org_saf','cat_tech','loc_nairobi','lt_intern','Software Engineering Intern','safaricom-software-intern','6-month hands-on engineering internship','Safaricom 6-month Software Engineering Internship offers hands-on experience building mobile and web applications.','${tags(["Software","Internship","Mobile"])}','PUBLISHED',0,0,'${postedAt(7)}',NULL),
+-- 24. Mastercard Foundation Scholars
+('l_24','org_uon','cat_edu','loc_nairobi','lt_schol','Mastercard Foundation Scholars','mastercard-foundation-scholars','Full scholarship at University of Nairobi','The Mastercard Foundation Scholars Program provides full scholarships covering tuition, accommodation, and stipend.','${tags(["Scholarship","University","Full Sponsorship"])}','PUBLISHED',0,1,'${postedAt(14)}',NULL),
+-- 25. KCB Foundation Scholarship
+('l_25','org_kcb','cat_edu','loc_ke','lt_schol','KCB Foundation Scholarship','kcb-foundation-scholarship','Tuition + stipend for disadvantaged students','The KCB Foundation Scholarship supports students from disadvantaged backgrounds pursuing tertiary education.','${tags(["Scholarship","Foundation","Tuition"])}','PUBLISHED',0,0,'${postedAt(21)}',NULL),
+-- 26. Casual Waitstaff
+('l_26',NULL,'cat_hosp','loc_nai_west','lt_casual','Waitstaff','casual-waitstaff','Immediate opening for waitstaff in Westlands','Immediate opening for waitstaff at a busy restaurant in Westlands. No experience needed — training provided.','${tags(["Casual","Hospitality","Waitstaff"])}','PUBLISHED',0,0,'${postedAt(0)}',NULL),
+-- 27. Delivery Rider
+('l_27',NULL,'cat_log','loc_nai_cbd','lt_casual','Delivery Rider','casual-delivery-rider','Delivery riders needed in Nairobi CBD','Delivery riders needed for a growing logistics company in Nairobi CBD. Must own a motorcycle.','${tags(["Casual","Delivery","Logistics"])}','PUBLISHED',0,0,'${postedAt(0)}',NULL),
+-- 28. Farm Worker
+('l_28',NULL,'cat_hosp','loc_nak_naivasha','lt_casual','Farm Worker','casual-farm-worker','Farm workers needed at Naivasha flower farm','Farm workers needed at a flower farm in Naivasha. Accommodation and meals provided on-site.','${tags(["Casual","Agriculture","Farm"])}','PUBLISHED',0,0,'${postedAt(1)}',NULL),
+-- 29. Shop Assistant
+('l_29',NULL,'cat_sales','loc_nai_thikard','lt_casual','Shop Assistant','casual-shop-assistant','Part-time shop assistant along Thika Road','Part-time shop assistant needed at a retail store along Thika Road. Flexible schedule.','${tags(["Part-time","Retail","Shop"])}','PUBLISHED',0,0,'${postedAt(1)}',NULL),
+-- 30. Cleaning Staff
+('l_30',NULL,'cat_ops','loc_nai_kili','lt_casual','Cleaning Staff','casual-cleaning-staff','Weekend cleaning staff in Kilimani','Weekend cleaning staff needed for office spaces in Kilimani. Work every Saturday and Sunday.','${tags(["Casual","Cleaning","Weekend"])}','PUBLISHED',0,0,'${postedAt(2)}',NULL),
+-- 31. Loader
+('l_31',NULL,'cat_log','loc_nai_ia','lt_casual','Loader','casual-loader','Warehouse loader needed in Industrial Area','Loaders needed at a warehouse in Industrial Area for the morning shift.','${tags(["Casual","Warehouse","Loading"])}','PUBLISHED',0,0,'${postedAt(3)}',NULL),
+-- 32. Marketing Intern at EABL
+('l_32','org_eabl','cat_mkt','loc_nairobi','lt_intern','Marketing Intern','eabl-marketing-intern','Structured internship in Marketing at EABL','EABL offers a structured internship program in the Marketing department.','${tags(["Marketing","FMCG","Internship"])}','PUBLISHED',0,0,'${postedAt(7)}',NULL)`);
+  console.log('  ✅ 32 listings');
+
+  // ── 12. Listing Job Details ──
+  console.log('Seeding listing job details...');
+  await $raw(`INSERT IGNORE INTO listing_job_details (id,listing_id,employment_type_id,experience_level_id,education_level_id,workMode,salaryMin,salaryMax,currency_id,salaryDisplay,salaryPeriod) VALUES
+('jd_01','l_01','et_ft','el_sen','edl_mas','ONSITE',180000,250000,'cur_kes','RANGE','MONTHLY'),
+('jd_02','l_02','et_ft','el_mid','edl_bac','REMOTE',150000,220000,'cur_kes','RANGE','MONTHLY'),
+('jd_04','l_04','et_ft','el_mid','edl_bac','ONSITE',120000,180000,'cur_kes','RANGE','MONTHLY'),
+('jd_05','l_05','et_ft','el_sen','edl_mas','ONSITE',350000,500000,'cur_kes','RANGE','MONTHLY'),
+('jd_06','l_06','et_ft','el_entry','edl_bac','ONSITE',80000,120000,'cur_kes','RANGE','MONTHLY'),
+('jd_07','l_07','et_ft','el_mid','edl_bac','REMOTE',140000,200000,'cur_kes','RANGE','MONTHLY'),
+('jd_08','l_08','et_ft','el_entry','edl_bac','ONSITE',60000,80000,'cur_kes','RANGE','MONTHLY'),
+('jd_09','l_09','et_ft','el_sen','edl_mas','ONSITE',200000,300000,'cur_kes','RANGE','MONTHLY'),
+('jd_10','l_10','et_ft','el_entry','edl_bac','ONSITE',70000,100000,'cur_kes','RANGE','MONTHLY'),
+('jd_11','l_11','et_ft','el_mid','edl_bac','ONSITE',100000,160000,'cur_kes','RANGE','MONTHLY'),
+('jd_12','l_12','et_ft','el_entry','edl_bac','ONSITE',70000,90000,'cur_kes','RANGE','MONTHLY'),
+('jd_13','l_13','et_ft','el_entry','edl_dip','ONSITE',30000,50000,'cur_kes','RANGE','MONTHLY'),
+('jd_14','l_14','et_ft','el_entry','edl_hs','ONSITE',35000,45000,'cur_kes','RANGE','MONTHLY'),
+('jd_15','l_15','et_ft','el_entry','edl_dip','ONSITE',30000,60000,'cur_kes','RANGE','MONTHLY'),
+('jd_16','l_16','et_ft','el_entry','edl_dip','ONSITE',40000,80000,'cur_kes','RANGE','MONTHLY'),
+('jd_17','l_17','et_ft','el_mid','edl_bac','ONSITE',80000,150000,'cur_kes','RANGE','MONTHLY'),
+('jd_18','l_18','et_ft','el_entry','edl_dip','ONSITE',60000,90000,'cur_kes','RANGE','MONTHLY'),
+('jd_19','l_19','et_ft','el_entry','edl_dip','ONSITE',35000,50000,'cur_kes','RANGE','MONTHLY'),
+('jd_20','l_20','et_ct','el_entry','edl_dip','ONSITE',25000,35000,'cur_kes','RANGE','MONTHLY'),
+('jd_21','l_21','et_ft','el_entry','edl_bac','ONSITE',45000,65000,'cur_kes','RANGE','MONTHLY')`);
+  console.log('  ✅ 21 job details');
+
+  // ── Summary ──
+  console.log('\n=== Seed Complete ===');
+  const tables = ['organization_types','industries','currencies','listing_types','employment_types','experience_levels','education_levels','locations','categories','organizations','listings','listing_job_details'];
+  for (const t of tables) {
+    const r: any[] = await $query(`SELECT COUNT(*) as c FROM ${t}`);
+    console.log(`  ${t}: ${r[0].c}`);
   }
-  console.log(`   ✅ ${LOCATIONS.length} locations created`);
-
-  // 2. Categories
-  console.log('📂 Creating categories...');
-  const categoryMap: Record<string, string> = {};
-  for (const cat of CATEGORIES) {
-    const created = await prisma.category.create({ data: cat });
-    categoryMap[cat.slug] = created.id;
-  }
-  console.log(`   ✅ ${CATEGORIES.length} categories created`);
-
-  // 3. Companies
-  console.log('🏢 Creating companies...');
-  const companyMap: Record<string, string> = {};
-  for (const co of COMPANIES) {
-    const created = await prisma.company.create({ data: co });
-    companyMap[co.slug] = created.id;
-  }
-  console.log(`   ✅ ${COMPANIES.length} companies created`);
-
-  // 4. Tags (deduplicated)
-  console.log('🏷️  Creating tags...');
-  const allTags = new Set<string>();
-  for (const job of JOBS) {
-    for (const tag of (job as any).tags || []) {
-      allTags.add(tag);
-    }
-  }
-  const tagMap: Record<string, string> = {};
-  for (const tagName of allTags) {
-    const slug = tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const created = await prisma.tag.create({ data: { name: tagName, slug } });
-    tagMap[tagName] = created.id;
-  }
-  console.log(`   ✅ ${allTags.size} tags created`);
-
-  // 5. Jobs
-  console.log('💼 Creating jobs...');
-  let createdJobs = 0;
-  for (const job of JOBS) {
-    const companyId = companyMap[job.companySlug];
-    const categoryId = categoryMap[job.categorySlug];
-    const locationId = locationMap[job.locationSlug];
-
-    if (!companyId || !categoryId || !locationId) {
-      console.log(`   ⚠️  Skipping "${job.title}" — missing FK (company:${!!companyId}, cat:${!!categoryId}, loc:${!!locationId})`);
-      continue;
-    }
-
-    const tags = (job as any).tags || [];
-    const { tags: _tags, companySlug: _cs, categorySlug: _cats, locationSlug: _ls, ...jobData } = job as any;
-
-    const created = await prisma.job.create({
-      data: {
-        ...jobData,
-        companyId,
-        categoryId,
-        locationId,
-        tags: {
-          create: tags.map((t: string) => ({ tagId: tagMap[t] })),
-        },
-      },
-    });
-
-    createdJobs++;
-  }
-  console.log(`   ✅ ${createdJobs} jobs created`);
-
-  // 6. Job Updates
-  console.log('📢 Creating job updates...');
-  let updateCount = 0;
-  for (const update of JOB_UPDATES) {
-    const job = await prisma.job.findFirst({ where: { slug: update.jobSlug } });
-    if (job) {
-      await prisma.jobUpdate.create({
-        data: {
-          content: update.content,
-          isActive: update.isActive,
-          jobId: job.id,
-          createdAt: new Date(Date.now() - Math.random() * 6 * 3600000), // Spread over last 6 hours
-        },
-      });
-      updateCount++;
-    }
-  }
-  console.log(`   ✅ ${updateCount} job updates created`);
-
-  // 7. Articles
-  console.log('📰 Creating articles...');
-  let articleCount = 0;
-  for (const article of ARTICLES) {
-    await prisma.article.create({ data: article });
-    articleCount++;
-  }
-  console.log(`   ✅ ${articleCount} articles created`);
-
-  // 8. Admin user
-  console.log('👤 Creating admin user...');
-  const passwordHash = await hash('Admin123!', 12);
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@jobnet.co.ke' },
-    update: {},
-    create: {
-      email: 'admin@jobnet.co.ke',
-      passwordHash,
-      name: 'Jobnet Admin',
-      role: 'ADMIN',
-    },
-  });
-  console.log(`   ✅ Admin user created (${admin.email})`);
-
-  // 9. Sample newsletter subscription
-  console.log('📧 Creating sample newsletter subscription...');
-  await prisma.newsletterSubscription.upsert({
-    where: { email: 'demo@jobnet.co.ke' },
-    update: {},
-    create: { email: 'demo@jobnet.co.ke' },
-  });
-  console.log('   ✅ Newsletter subscription created');
-
-  console.log('\n🎉 Seed complete!');
 }
 
 main()
-  .catch((e) => {
-    console.error('❌ Seed failed:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch((e) => { console.error('SEED ERROR:', e.message?.slice(0, 300)); process.exit(1); })
+  .finally(() => prisma.$disconnect());
