@@ -1,8 +1,131 @@
 'use client';
 
 import { useJobModal } from './JobModalContext';
-import { X, MapPin, Clock, Briefcase, Building2, Bookmark, Share2, ExternalLink } from 'lucide-react';
+import {
+  X,
+  MapPin,
+  Clock,
+  Briefcase,
+  Building2,
+  Bookmark,
+  Share2,
+  ExternalLink,
+  GraduationCap,
+  Users,
+  Wifi,
+  Mail,
+  Shield,
+  TrendingUp,
+} from 'lucide-react';
 import type { Job } from '@/types';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const isNonJob = (code: string) =>
+  ['SCHOLARSHIP', 'BURSARY', 'FELLOWSHIP', 'GRANT', 'INTERNSHIP', 'APPRENTICESHIP',
+   'BOOTCAMP', 'TRAINING', 'WORKSHOP', 'MENTORSHIP', 'VOLUNTEER', 'CONFERENCE'].includes(code);
+
+const listingTypeAccent: Record<string, string> = {
+  SCHOLARSHIP: 'text-purple-700 bg-purple-50',
+  INTERNSHIP: 'text-blue-700 bg-blue-50',
+  FELLOWSHIP:  'text-indigo-700 bg-indigo-50',
+  BURSARY:     'text-emerald-700 bg-emerald-50',
+  GRANT:       'text-teal-700 bg-teal-50',
+  BOOTCAMP:    'text-orange-700 bg-orange-50',
+  VOLUNTEER:   'text-pink-700 bg-pink-50',
+  CASUAL:      'text-amber-700 bg-amber-50',
+};
+
+function workModeLabel(mode?: string): string | null {
+  if (!mode || mode === 'ONSITE') return null;
+  return mode === 'REMOTE' ? 'Remote' : 'Hybrid';
+}
+
+// ---------------------------------------------------------------------------
+// Sub-section components
+// ---------------------------------------------------------------------------
+
+function MetaPill({
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="bg-surface rounded-lg p-3">
+      <div className="flex items-center gap-1.5 text-[10px] text-muted uppercase tracking-wider mb-1">
+        <Icon className="w-3 h-3" />
+        {label}
+      </div>
+      <p className={`text-sm font-medium ${accent ? 'text-accent' : ''}`}>{value}</p>
+    </div>
+  );
+}
+
+function DescriptionBlock({ description }: { description: string }) {
+  // Split on ## headings
+  const parts = description.split(/\n(?=##\s)/);
+  return (
+    <div className="space-y-4">
+      {parts.map((part, i) => {
+        if (part.startsWith('## ')) {
+          const [heading, ...body] = part.split('\n');
+          const headingText = heading.replace('## ', '').trim();
+          const bodyText = body.join('\n').trim();
+          // Parse list items
+          const lines = bodyText.split('\n');
+          const isList = lines.every((l) => /^[-*]\s/.test(l.trim()) || l.trim() === '');
+
+          return (
+            <div key={i}>
+              <h4 className="font-heading text-sm font-bold text-ink mb-2">{headingText}</h4>
+              {isList ? (
+                <ul className="space-y-2">
+                  {lines
+                    .filter((l) => l.trim().startsWith('-') || l.trim().startsWith('*'))
+                    .map((line, j) => {
+                      const text = line.replace(/^[-*]\s+/, '');
+                      return (
+                        <li
+                          key={j}
+                          className="flex items-start gap-2.5 text-[13px] text-muted leading-relaxed"
+                        >
+                          <span className="w-1.5 h-1.5 bg-accent rounded-full mt-[7px] shrink-0" />
+                          <span>{text}</span>
+                        </li>
+                      );
+                    })}
+                </ul>
+              ) : (
+                <p className="text-[13px] text-muted leading-relaxed">{bodyText}</p>
+              )}
+            </div>
+          );
+        }
+        // First part — plain paragraph
+        if (part.trim()) {
+          return (
+            <p key={i} className="text-[13px] text-muted leading-relaxed">
+              {part.trim()}
+            </p>
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
 
 export default function JobDetailSheet() {
   const { isOpen, selectedJob, closeJob } = useJobModal();
@@ -10,6 +133,14 @@ export default function JobDetailSheet() {
   if (!isOpen || !selectedJob) return null;
 
   const job = selectedJob as Job;
+  const isScholarshipLike = isNonJob(job.listingTypeCode);
+  const wMode = workModeLabel(job.workMode);
+  const typeAccentClass = listingTypeAccent[job.listingTypeCode] ?? '';
+  const hasSalary = job.salaryCurrency && !job.isCasual && !isScholarshipLike;
+  const hasJobDetails = !isScholarshipLike;
+
+  // Build the apply URL
+  const applyUrl = job.applicationUrl || job.sourceUrl || undefined;
 
   return (
     <>
@@ -23,37 +154,69 @@ export default function JobDetailSheet() {
 
       {/* Sheet Panel */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-full sm:w-[480px] lg:w-[540px] bg-white shadow-2xl transition-transform duration-300 ease-out flex flex-col ${
+        className={`fixed top-0 right-0 z-50 h-full w-full sm:w-[500px] lg:w-[560px] bg-white shadow-2xl transition-transform duration-300 ease-out flex flex-col ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        {/* Header */}
+        {/* ─── Header ─── */}
         <div className="border-b border-divider px-6 py-4 flex items-start justify-between shrink-0">
           <div className="flex-1 min-w-0 pr-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="font-mono text-[9px] uppercase tracking-widest text-accent bg-accent-bg px-2 py-0.5 rounded-md">
-                {job.category}
-              </span>
+            {/* Pills row */}
+            <div className="flex items-center flex-wrap gap-2 mb-2">
+              {/* Category pill */}
+              {job.category && (
+                <span className="font-mono text-[9px] uppercase tracking-widest text-accent bg-accent-bg px-2 py-0.5 rounded-md">
+                  {job.category}
+                </span>
+              )}
+              {/* Listing type pill (coloured for non-job types) */}
+              {typeAccentClass ? (
+                <span
+                  className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-md ${typeAccentClass}`}
+                >
+                  {job.listingType}
+                </span>
+              ) : (
+                <span className="font-mono text-[9px] uppercase tracking-widest text-muted bg-surface px-2 py-0.5 rounded-md">
+                  {job.type}
+                </span>
+              )}
+              {/* Urgency pill */}
               {job.urgent && (
                 <span className="font-mono text-[9px] uppercase tracking-widest text-red-600 bg-red-50 px-2 py-0.5 rounded-md">
                   Closing soon
                 </span>
               )}
+              {/* Government pill */}
+              {job.isGovernment && (
+                <span className="font-mono text-[9px] uppercase tracking-widest text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                  <Shield className="w-2.5 h-2.5" />
+                  Government
+                </span>
+              )}
             </div>
             <h2 className="font-heading text-xl font-bold leading-tight">{job.title}</h2>
-            <p className="text-sm text-muted mt-1">{job.company}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-sm text-muted">{job.company}</p>
+              {job.isVerified && (
+                <span className="inline-flex items-center justify-center w-4 h-4 bg-accent rounded-full" title="Verified employer">
+                  <Shield className="w-2.5 h-2.5 text-white" />
+                </span>
+              )}
+            </div>
           </div>
           <button
             onClick={closeJob}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface transition-colors text-muted hover:text-ink shrink-0 mt-1"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Scrollable Content */}
+        {/* ─── Scrollable Content ─── */}
         <div className="flex-1 overflow-y-auto overscroll-contain">
-          {/* Company & Meta */}
+          {/* ── Organization card ── */}
           <div className="px-6 py-5 border-b border-subtle">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 border border-divider rounded-xl flex items-center justify-center shrink-0 font-heading font-bold text-base text-muted">
@@ -61,73 +224,112 @@ export default function JobDetailSheet() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">{job.company}</p>
-                <div className="flex items-center gap-3 mt-0.5 text-[12px] text-muted">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {job.location}
-                  </span>
-                  {job.isRemote && (
-                    <span className="text-accent font-medium">Remote</span>
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  {job.organizationType && (
+                    <span className="text-[11px] text-muted">{job.organizationType}</span>
+                  )}
+                  {job.industry && (
+                    <>
+                      <span className="text-[11px] text-subtle">·</span>
+                      <span className="text-[11px] text-muted">{job.industry}</span>
+                    </>
                   )}
                 </div>
+                {job.companyWebsite && (
+                  <a
+                    href={job.companyWebsite}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-accent hover:underline mt-0.5 inline-block"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {job.companyWebsite.replace(/^https?:\/\//, '')}
+                  </a>
+                )}
               </div>
             </div>
 
-            {/* Key details grid */}
+            {/* ── Key details grid ── */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-surface rounded-lg p-3">
-                <div className="flex items-center gap-1.5 text-[10px] text-muted uppercase tracking-wider mb-1">
-                  <Briefcase className="w-3 h-3" />
-                  Type
-                </div>
-                <p className="text-sm font-medium">{job.type}</p>
-              </div>
-              <div className="bg-surface rounded-lg p-3">
-                <div className="flex items-center gap-1.5 text-[10px] text-muted uppercase tracking-wider mb-1">
-                  <Building2 className="w-3 h-3" />
-                  Level
-                </div>
-                <p className="text-sm font-medium">{job.level}</p>
-              </div>
-              <div className="bg-surface rounded-lg p-3">
-                <div className="flex items-center gap-1.5 text-[10px] text-muted uppercase tracking-wider mb-1">
-                  <Clock className="w-3 h-3" />
-                  Posted
-                </div>
-                <p className="text-sm font-medium">{job.posted} ago</p>
-              </div>
-              <div className="bg-surface rounded-lg p-3">
-                <div className="flex items-center gap-1.5 text-[10px] text-muted uppercase tracking-wider mb-1">
-                  <Clock className="w-3 h-3" />
-                  Deadline
-                </div>
-                <p className={`text-sm font-medium ${job.urgent ? 'text-accent' : ''}`}>
-                  {job.deadline || 'Open'}
-                </p>
-              </div>
+              {/* Employment type / listing type */}
+              {hasJobDetails && (
+                <MetaPill icon={Briefcase} label="Type" value={job.type} />
+              )}
+              {/* Level (for jobs) */}
+              {hasJobDetails && job.level !== 'Any' && (
+                <MetaPill icon={Building2} label="Level" value={job.level} />
+              )}
+              {/* Work mode */}
+              {wMode && (
+                <MetaPill
+                  icon={Wifi}
+                  label="Work mode"
+                  value={wMode}
+                  accent={wMode === 'Remote'}
+                />
+              )}
+              {/* Location */}
+              <MetaPill icon={MapPin} label="Location" value={job.location} />
+              {/* Education */}
+              {job.educationLevel && (
+                <MetaPill icon={GraduationCap} label="Education" value={job.educationLevel} />
+              )}
+              {/* Vacancies */}
+              {job.vacancies != null && job.vacancies > 0 && (
+                <MetaPill icon={Users} label="Vacancies" value={`${job.vacancies} positions`} />
+              )}
+              {/* Contract duration */}
+              {job.contractDuration && (
+                <MetaPill icon={Clock} label="Duration" value={job.contractDuration} />
+              )}
+              {/* Posted */}
+              <MetaPill icon={Clock} label="Posted" value={`${job.posted} ago`} />
+              {/* Deadline */}
+              <MetaPill
+                icon={Clock}
+                label="Deadline"
+                value={job.deadline || 'Open'}
+                accent={job.urgent}
+              />
             </div>
           </div>
 
-          {/* Description */}
+          {/* ── Summary ── */}
+          {job.summary && (
+            <div className="px-6 py-4 border-b border-subtle bg-surface/50">
+              <p className="text-[13px] text-ink/80 leading-relaxed">{job.summary}</p>
+            </div>
+          )}
+
+          {/* ── Description ── */}
           <div className="px-6 py-5 border-b border-subtle">
-            <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-3">About this role</h3>
-            <p className="text-[13px] text-muted leading-relaxed">{job.description}</p>
+            <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-3">
+              {isScholarshipLike ? 'About this programme' : 'About this role'}
+            </h3>
+            <DescriptionBlock description={job.description} />
           </div>
 
-          {/* Salary */}
-          {job.salaryCurrency && !job.isCasual && (
+          {/* ── Compensation ── */}
+          {hasSalary && (
             <div className="px-6 py-5 border-b border-subtle bg-accent-bg">
-              <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-2">Compensation</h3>
+              <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-2">
+                Compensation
+              </h3>
               <p className="text-lg font-heading font-bold text-ink">
                 {job.salaryCurrency} {job.salary}
-                <span className="text-[12px] text-muted font-normal font-sans"> /month</span>
+                {job.salaryPeriod && (
+                  <span className="text-[12px] text-muted font-normal font-sans">
+                    {' '}
+                    {job.salaryPeriod}
+                  </span>
+                )}
               </p>
             </div>
           )}
 
-          {/* Casual rate */}
+          {/* ── Casual rate ── */}
           {job.isCasual && (
-            <div className="px-6 py-5 border-b border-subtle bg-accent-bg">
+            <div className="px-6 py-5 border-b border-subtle bg-amber-50">
               <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-2">Pay</h3>
               <p className="text-lg font-heading font-bold text-ink">{job.casualRate}</p>
               {job.casualNote && (
@@ -136,66 +338,116 @@ export default function JobDetailSheet() {
             </div>
           )}
 
-          {/* Requirements */}
-          <div className="px-6 py-5 border-b border-subtle">
-            <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-3">Requirements</h3>
-            <ul className="space-y-2.5">
-              {job.requirements.map((req, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-[13px] text-muted">
-                  <span className="w-1.5 h-1.5 bg-accent rounded-full mt-1.5 shrink-0" />
-                  <span>{req}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Tags */}
-          <div className="px-6 py-5 border-b border-subtle">
-            <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-3">Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {job.tags.map((tag, i) => (
-                <span
-                  key={i}
-                  className="text-[11px] text-muted bg-surface border border-subtle rounded-md px-2.5 py-1"
-                >
-                  {tag}
-                </span>
-              ))}
+          {/* ── Application instructions ── */}
+          {job.applicationInstructions && (
+            <div className="px-6 py-5 border-b border-subtle">
+              <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-3">
+                How to apply
+              </h3>
+              <p className="text-[13px] text-muted leading-relaxed">
+                {job.applicationInstructions}
+              </p>
             </div>
-          </div>
+          )}
 
-          {/* Government notice */}
+          {/* ── Tags ── */}
+          {job.tags.length > 0 && (
+            <div className="px-6 py-5 border-b border-subtle">
+              <h3 className="font-heading text-sm font-bold uppercase tracking-wider mb-3">Tags</h3>
+              <div className="flex flex-wrap gap-2">
+                {job.tags.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="text-[11px] text-muted bg-surface border border-subtle rounded-md px-2.5 py-1"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Government notice ── */}
           {job.isGovernment && (
             <div className="px-6 py-5 border-b border-subtle">
-              <div className="bg-surface border border-subtle rounded-lg p-4">
-                {job.isGazette && (
-                  <span className="inline-block font-mono text-[9px] uppercase tracking-widest bg-white text-muted px-1.5 py-0.5 rounded-md border border-subtle mb-2">
-                    Gazette Notice
+              <div className="bg-amber-50 border border-amber-100 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Shield className="w-3.5 h-3.5 text-amber-700" />
+                  <span className="text-[12px] font-medium text-amber-800">
+                    Government Position
+                  </span>
+                </div>
+                <p className="text-[12px] text-amber-700 leading-relaxed">
+                  This is a government position. Applications must follow official government
+                  recruitment procedures.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Engagement stats ── */}
+          {(job.viewsCount || job.applicationsCount) && (
+            <div className="px-6 py-4 border-b border-subtle">
+              <div className="flex items-center gap-5 text-[11px] text-muted">
+                {job.viewsCount != null && job.viewsCount > 0 && (
+                  <span className="flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    {job.viewsCount.toLocaleString('en-KE')} views
                   </span>
                 )}
-                <p className="text-[12px] text-muted leading-relaxed">
-                  This is a government position. Applications must follow official government recruitment procedures.
-                  {job.isGazette && ' Refer to the official Kenya Gazette for full details.'}
-                </p>
+                {job.applicationsCount != null && job.applicationsCount > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Users className="w-3 h-3" />
+                    {job.applicationsCount.toLocaleString('en-KE')} applications
+                  </span>
+                )}
               </div>
             </div>
           )}
         </div>
 
-        {/* Sticky Footer Actions */}
+        {/* ─── Sticky Footer Actions ─── */}
         <div className="border-t border-divider px-6 py-4 bg-white shrink-0">
           <div className="flex gap-3">
+            {/* Apply button */}
+            {applyUrl ? (
+              <a
+                href={applyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 bg-ink text-white text-sm font-medium py-3 rounded-xl hover:bg-ink/90 transition-colors flex items-center justify-center gap-2"
+              >
+                Apply Now
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            ) : job.applicationEmail ? (
+              <a
+                href={`mailto:${job.applicationEmail}`}
+                className="flex-1 bg-ink text-white text-sm font-medium py-3 rounded-xl hover:bg-ink/90 transition-colors flex items-center justify-center gap-2"
+              >
+                Apply via Email
+                <Mail className="w-3.5 h-3.5" />
+              </a>
+            ) : (
+              <button
+                className="flex-1 bg-ink text-white text-sm font-medium py-3 rounded-xl hover:bg-ink/90 transition-colors flex items-center justify-center gap-2"
+              >
+                Apply Now
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {/* Save */}
             <button
-              onClick={closeJob}
-              className="flex-1 bg-ink text-white text-sm font-medium py-3 rounded-xl hover:bg-ink/90 transition-colors flex items-center justify-center gap-2"
+              className="w-11 h-11 border border-divider rounded-xl flex items-center justify-center text-muted hover:text-accent hover:border-accent/30 transition-colors shrink-0"
+              title="Save listing"
             >
-              Apply Now
-              <ExternalLink className="w-3.5 h-3.5" />
-            </button>
-            <button className="w-11 h-11 border border-divider rounded-xl flex items-center justify-center text-muted hover:text-accent hover:border-accent/30 transition-colors shrink-0">
               <Bookmark className="w-4 h-4" />
             </button>
-            <button className="w-11 h-11 border border-divider rounded-xl flex items-center justify-center text-muted hover:text-accent hover:border-accent/30 transition-colors shrink-0">
+            {/* Share */}
+            <button
+              className="w-11 h-11 border border-divider rounded-xl flex items-center justify-center text-muted hover:text-accent hover:border-accent/30 transition-colors shrink-0"
+              title="Share"
+            >
               <Share2 className="w-4 h-4" />
             </button>
           </div>
