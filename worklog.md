@@ -176,3 +176,26 @@ Stage Summary:
 - Subcategories: now wired into category pages with real DB counts
 - Category pages: show real listings + subcategory drill-down grid
 - All data.ts queries: include category + subcategory relations
+
+---
+Task ID: 8
+Agent: Main Agent
+Task: JobUpdate table, sidesheet on category pages, improved JobUpdates section
+
+Work Log:
+- Added JobUpdate model to prisma/schema.prisma (title, body, source, updateType, listingSlug, status, timestamps)
+- Pushed schema to MySQL database with prisma db push
+- Created prisma/seed-updates.ts with 18 realistic Kenyan job updates (ministry postings, shortlisting results, closing deadlines, internship announcements)
+- Updated /api/updates/route.ts to query the JobUpdate table instead of just listing latest job listings
+- Redesigned JobUpdates.tsx component with expand/collapse body text, type-specific icons (Megaphone for postings, ClipboardCheck for shortlisted, AlertTriangle for closing), "Official" badge, and proper type badges (NEW POSTING, SHORTLISTED, CLOSING SOON, DEADLINE PASSED)
+- Created JobRowClickable.tsx — thin client wrapper that opens the sidesheet via openJobById(slug) for server components that have raw listing data
+- Updated /jobs/category/[slug]/page.tsx to use JobRowClickable instead of Link for job rows — clicking a job now opens the sidesheet overlay instead of navigating to /jobs/[slug]
+- Verified /jobs/[slug] page works correctly as fallback for direct URL access
+- Build passes: all routes compile clean
+- Committed and pushed to GitHub (commit 20cdb09)
+
+Stage Summary:
+- JobUpdate table: DONE (new model, 18 seed records)
+- JobUpdates section: DONE (own DB table, expand/collapse, type icons, Official badge)
+- Category page sidesheet: DONE (JobRowClickable replaces Link, opens sidesheet on job click)
+- /jobs/[slug] fallback: VERIFIED (works for direct URL access)
