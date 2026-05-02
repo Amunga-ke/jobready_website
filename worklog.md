@@ -259,3 +259,57 @@ Stage Summary:
 - Government state-corporations page: NOW SHOWS REAL LISTINGS from DB
 - Added getGovernmentJobsByLevel() to data.ts
 - Pages are force-dynamic for fresh data on every request
+
+---
+Task ID: 11
+Agent: Main Agent
+Task: Add sitemap.xml, feed.xml, robots.txt routes + page-level metadata across all pages
+
+Work Log:
+- Created /src/app/sitemap.xml/route.ts — dynamic sitemap using Next.js MetadataRoute
+  - Static pages (homepage, jobs, government, opportunities, casual, companies, articles, updates)
+  - Government level pages (national, county, state-corporations)
+  - Category pages from DB (Prisma Category model)
+  - County pages from DB (Prisma County model)
+  - Opportunity type pages from constants (23 types)
+  - Individual job listings (1000 most recent active)
+  - Individual updates (200 most recent published)
+  - Priority tiers: 1.0 (home) → 0.9 (jobs) → 0.8 (landing) → 0.7 (taxon) → 0.6 (listings) → 0.5 (updates)
+- Created /src/app/feed.xml/route.ts — RSS 2.0 feed
+  - 50 latest active job listings with title, link, description, category, pubDate
+  - 20 latest published updates with title, link, body excerpt, category, pubDate
+  - Proper XML escaping, CDATA wrapping, atom:self link
+  - Cache-Control: s-maxage=3600, stale-while-revalidate=600
+- Created /src/app/robots.txt/route.ts — proper robots.txt
+  - Allow /, Disallow /api/*
+  - Sitemap: https://jobreadyke.co.ke/sitemap.xml
+- Deleted static /public/robots.txt (replaced by dynamic route)
+- Updated root layout.tsx:
+  - Added metadataBase: new URL("https://jobreadyke.co.ke") — makes all relative OG URLs absolute
+  - Added title template: "%s | JobReady"
+  - Added openGraph: siteName, type, locale (en_KE)
+  - Added twitter: card "summary_large_image"
+- Added generateMetadata to homepage (page.tsx) — full title, description, canonical, OG, Twitter
+- Added generateMetadata to /jobs page (page.tsx) — dynamic titles based on search params
+- Created layout.tsx files for 6 client-component pages with metadata:
+  - /government/layout.tsx
+  - /opportunities/layout.tsx
+  - /articles/layout.tsx
+  - /updates/layout.tsx
+  - /casual/layout.tsx
+  - /companies/layout.tsx
+  - All include: title, description, canonical URL, OpenGraph, Twitter cards
+- Build passes: all 51 routes compile clean
+- Committed and pushed to GitHub (commit dcaba81)
+
+Stage Summary:
+- Sitemap: DONE (dynamic, covers all programmatic pages from DB)
+- RSS Feed: DONE (/feed.xml with 50 jobs + 20 updates)
+- Robots.txt: DONE (disallow /api/*, sitemap directive)
+- Static robots.txt: DELETED (replaced)
+- Root layout: UPDATED (metadataBase, title template, OG, Twitter)
+- Homepage metadata: DONE
+- /jobs metadata: DONE (dynamic titles)
+- 6 client pages: DONE (layout wrappers with metadata)
+- OpenGraph URLs: NOW ABSOLUTE (via metadataBase)
+- Twitter Cards: ADDED site-wide (summary_large_image)
