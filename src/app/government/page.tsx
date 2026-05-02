@@ -178,7 +178,7 @@ export default function GovernmentPage() {
                 Showing {nationalJobs.length + countyJobs.length} government positions
               </p>
               <a
-                href="/jobs?government=true"
+                href="/jobs?type=GOVERNMENT"
                 className="inline-flex items-center gap-1 text-[13px] font-medium text-ink hover:text-accent transition-colors"
               >
                 Browse all government jobs →

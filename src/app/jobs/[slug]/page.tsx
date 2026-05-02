@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Clock, Building2, ExternalLink, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Building2, ExternalLink } from "lucide-react";
 import { formatDateUTC } from "@/lib/format-date";
 import { getJobBySlug } from "@/lib/data";
-import prisma from "@/lib/prisma";
+import ShareButton from "@/components/jobready/ShareButton";
 
 // ─── Dynamic metadata for SEO ───
 export async function generateMetadata({
@@ -233,27 +233,5 @@ export default async function JobDetailPage({
         </div>
       </article>
     </main>
-  );
-}
-
-// ─── Share button (server-safe) ───
-function ShareButton({ slug, title }: { slug: string; title: string }) {
-  return (
-    <button
-      onClick={() => {
-        if (typeof window !== "undefined") {
-          const url = `${window.location.origin}/jobs/${slug}`;
-          if (navigator.share) {
-            navigator.share({ title, url });
-          } else {
-            navigator.clipboard.writeText(url);
-          }
-        }
-      }}
-      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-medium text-muted hover:text-ink hover:bg-ink/[0.04] transition-colors"
-    >
-      <Share2 className="w-4 h-4" />
-      Share
-    </button>
   );
 }

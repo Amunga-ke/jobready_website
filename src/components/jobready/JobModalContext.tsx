@@ -6,19 +6,25 @@ import type { Job } from "@/types";
 interface JobModalContextType {
   /** Open the sidesheet for a specific job (by full job object) */
   openJob: (job: Job) => void;
+  /** Open the sidesheet by fetching the job by slug or ID from the API */
+  openJobById: (idOrSlug: string) => void;
   /** Close the sidesheet */
   closeJob: () => void;
   /** Currently open job (null if closed) */
   currentJob: Job | null;
   /** Whether the sheet is open */
   isOpen: boolean;
+  /** Whether a fetch is in progress */
+  isLoading: boolean;
 }
 
 const JobModalContext = createContext<JobModalContextType>({
   openJob: () => {},
+  openJobById: () => {},
   closeJob: () => {},
   currentJob: null,
   isOpen: false,
+  isLoading: false,
 });
 
 /**
@@ -34,33 +40,50 @@ function nativePushState(state: any, title: string, url: string | URL | null) {
 
 export function JobModalProvider({ children }: { children: React.ReactNode }) {
   const [currentJob, setCurrentJob] = useState<Job | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const popstateJobRef = useRef<string | null>(null);
 
-  const openJob = useCallback((job: Job) => {
-    setCurrentJob(job);
+  const pushUrlForJob = useCallback((slug: string) => {
     if (typeof window !== "undefined") {
-      const url = `/jobs/${job.slug}`;
-      popstateJobRef.current = job.slug;
-      // Use native pushState to avoid Next.js soft-navigation
-      nativePushState({ jobSlug: job.slug }, "", url);
+      const url = `/jobs/${slug}`;
+      popstateJobRef.current = slug;
+      nativePushState({ jobSlug: slug }, "", url);
     }
   }, []);
 
+  const openJob = useCallback((job: Job) => {
+    setCurrentJob(job);
+    pushUrlForJob(job.slug);
+  }, [pushUrlForJob]);
+
+  const openJobById = useCallback(async (idOrSlug: string) => {
+    setIsLoading(true);
+    try {
+      // First try fetching by slug via our API
+      const res = await fetch(`/api/jobs/${idOrSlug}`);
+      if (!res.ok) throw new Error("Job not found");
+      const data = await res.json();
+      if (data.job) {
+        setCurrentJob(data.job);
+        pushUrlForJob(data.job.slug);
+      }
+    } catch (error) {
+      console.error("[openJobById] Failed to fetch job:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [pushUrlForJob]);
+
   const closeJob = useCallback(() => {
     if (typeof window !== "undefined" && popstateJobRef.current) {
-      // We pushed state, so going back cleans the URL bar.
-      // The popstate listener below will see no matching slug and clear state.
       window.history.back();
       popstateJobRef.current = null;
     } else {
-      // Fallback: direct navigation or no pushed state
       setCurrentJob(null);
     }
   }, []);
 
   // When the user presses the browser back button, close the sidesheet.
-  // This fires *after* history.back() has already popped the URL,
-  // so we just clear the job state here.
   useEffect(() => {
     const onPopState = () => {
       setCurrentJob(null);
@@ -72,7 +95,7 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <JobModalContext.Provider
-      value={{ openJob, closeJob, currentJob, isOpen: currentJob !== null }}
+      value={{ openJob, openJobById, closeJob, currentJob, isOpen: currentJob !== null, isLoading }}
     >
       {children}
     </JobModalContext.Provider>
