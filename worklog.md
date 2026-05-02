@@ -345,3 +345,25 @@ Stage Summary:
 - OpenGraph URLs: ALL ABSOLUTE across every page
 - Twitter Cards: COMPLETE on all dynamic pages
 - Sitemap: ENHANCED with subcategory pages
+
+---
+Task ID: 13
+Agent: Main Agent
+Task: Fix sidesheet on all listing pages, connection pooling, smart sitemap with thin-page filtering
+
+Work Log:
+- Fixed /government/[level]/page.tsx — replaced Link with JobRowClickable, clicking a gov job now opens sidesheet instead of navigating to /jobs/[slug]
+- Fixed /jobs/in-[county]/page.tsx — replaced Link with JobRowClickable for county job listings
+- Fixed /jobs/category/[slug]/in-[county]/page.tsx — replaced Link with JobRowClickable for category×county listings
+- Fixed /opportunities/[type]/in-[county]/page.tsx — replaced hardcoded getListingCount(0) stub with real DB queries (getOpportunityCountByCounty + getOpportunitiesByCounty using listingToJob transform)
+- Added full OG and Twitter Card meta to opportunity×county pages
+- Updated src/lib/prisma.ts — auto-appends connection_limit=5&pool_timeout=10 to DATABASE_URL to prevent max_user_connections errors on shared hosting
+- Rewrote src/app/sitemap.xml/route.ts — now uses Prisma groupBy to get category×county and opportunity×county counts, only includes combo pages with ≥3 listings (matching SEO_THRESHOLDS), made force-dynamic
+- SEO noindex already working via getRobotsMeta() in page-thresholds.ts on CAT_COUNTY, OPP_COUNTY, SUBCAT_COUNTY pages
+
+Stage Summary:
+- Sidesheet: NOW WORKS on all listing pages (government, county, category×county, opportunity×county)
+- Connection pooling: FIXED (auto connection_limit=5, pool_timeout=10)
+- Sitemap: SMART FILTERING — only exposes quality pages (≥3 listings for combos)
+- SEO architecture: { 34K potential pages → quality threshold filter → ~500-2000 indexable pages }
+- Commit: 7fe5726 pushed to GitHub

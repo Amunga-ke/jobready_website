@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Menu, X, LayoutDashboard } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Jobs", href: "/jobs" },
@@ -16,11 +17,12 @@ const NAV_LINKS = [
 
 const MOBILE_BOTTOM = [
   { label: "Post a Job", href: "/post-job" },
-  { label: "Sign In", href: "/signin" },
+  { label: "Sign In", href: "/auth/login" },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { data: session } = useSession();
 
   // Lock body scroll when overlay is open
   useEffect(() => {
@@ -29,6 +31,8 @@ export default function Navbar() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const displayName = session?.user?.name || "Dashboard";
 
   return (
     <>
@@ -52,7 +56,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Desktop CTA — Sign In prominent, Post Job subtle */}
+          {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-4">
             <Link
               href="/post-job"
@@ -60,12 +64,22 @@ export default function Navbar() {
             >
               Post a Job
             </Link>
-            <Link
-              href="/signin"
-              className="bg-ink text-white text-[13px] font-medium px-4 py-2 rounded-lg hover:bg-ink/90 transition-colors"
-            >
-              Sign In
-            </Link>
+            {session ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1.5 bg-ink text-white text-[13px] font-medium px-4 py-2 rounded-lg hover:bg-ink/90 transition-colors"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                {displayName}
+              </Link>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="bg-ink text-white text-[13px] font-medium px-4 py-2 rounded-lg hover:bg-ink/90 transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -120,22 +134,34 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Bottom CTA — Sign In prominent */}
+            {/* Bottom CTA */}
             <div className="px-5 py-5 border-t border-divider space-y-3">
-              <Link
-                href="/signin"
-                onClick={() => setOpen(false)}
-                className="block w-full text-center bg-ink text-white text-[14px] font-medium px-4 py-2.5 rounded-lg hover:bg-ink/90 transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/post-job"
-                onClick={() => setOpen(false)}
-                className="block w-full text-center text-[13px] font-medium text-muted hover:text-ink transition-colors"
-              >
-                Post a Job
-              </Link>
+              {session ? (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="block w-full text-center bg-ink text-white text-[14px] font-medium px-4 py-2.5 rounded-lg hover:bg-ink/90 transition-colors"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setOpen(false)}
+                    className="block w-full text-center bg-ink text-white text-[14px] font-medium px-4 py-2.5 rounded-lg hover:bg-ink/90 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/post-job"
+                    onClick={() => setOpen(false)}
+                    className="block w-full text-center text-[13px] font-medium text-muted hover:text-ink transition-colors"
+                  >
+                    Post a Job
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
