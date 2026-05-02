@@ -367,3 +367,88 @@ Stage Summary:
 - Sitemap: SMART FILTERING — only exposes quality pages (≥3 listings for combos)
 - SEO architecture: { 34K potential pages → quality threshold filter → ~500-2000 indexable pages }
 - Commit: 7fe5726 pushed to GitHub
+
+---
+Task ID: 14
+Agent: Main Agent
+Task: Build complete Job Seeker Dashboard with authentication
+
+Work Log:
+- Updated Prisma schema with 4 new models: User, SavedJob, Application, JobAlert
+  - User: email, passwordHash, name, phone, county, bio, cvUrl, avatarUrl, role, emailVerified, isActive
+  - SavedJob: userId + listingId unique constraint, note field
+  - Application: userId + listingId unique constraint, status enum (DRAFT/SUBMITTED/VIEWED/SHORTLISTED/INTERVIEW/OFFERED/REJECTED/WITHDRAWN), coverLetter, cvUrl
+  - JobAlert: userId, name, query (JSON), frequency (DAILY/WEEKLY/INSTANT), isActive, lastTriggered
+  - Added savedJobs and applications relations to Listing model
+  - Pushed schema to MySQL database
+
+- Installed bcryptjs + @types/bcryptjs for password hashing
+
+- Created auth system:
+  - /src/lib/auth.ts — NextAuth config with CredentialsProvider, JWT strategy, callbacks for id/name/email/role
+  - /src/app/api/auth/[...nextauth]/route.ts — NextAuth handler
+  - /src/app/api/auth/register/route.ts — User registration with bcrypt password hashing
+  - /src/middleware.ts — Route protection for /dashboard/* via withAuth
+  - /src/components/Providers.tsx — Client component wrapper for SessionProvider in root layout
+
+- Created auth pages:
+  - /auth/login — Clean login form with email/password, show/hide password, Suspense boundary for useSearchParams
+  - /auth/register — Registration with name, email, password, confirm password, county dropdown, role selector (Seeker/Employer), terms checkbox
+  - /auth/forgot-password — Simple email input form (UI placeholder)
+  - All use existing design system (text-ink, bg-surface, border-divider, etc.)
+
+- Created 15 API routes under /api/dashboard/:
+  - /stats — Overview stats (saved count, application counts by status, profile completion %)
+  - /saved-jobs — GET (list), POST (save), DELETE (unsave), PATCH (update note)
+  - /applications — GET (list), POST (create)
+  - /applications/[id] — DELETE (withdraw)
+  - /applications/[id]/status — PATCH (update status)
+  - /profile — GET (fetch), PUT (update name/phone/county/bio), POST (CV upload)
+  - /profile/cv — POST (dedicated CV upload endpoint)
+  - /alerts — GET (list), POST (create), DELETE (remove)
+  - /settings — PUT (notification/privacy preferences)
+  - All routes check authentication via getServerSession(), return proper error codes
+
+- Created dashboard layout:
+  - /src/app/dashboard/layout.tsx — Server component with metadata, force-dynamic
+  - /src/app/dashboard/DashboardShell.tsx — Client component with responsive sidebar
+    - Desktop: fixed sidebar with nav items, user info, sign out
+    - Mobile: hamburger overlay + bottom tab navigation (5 items)
+    - Nav items: Overview, Saved Jobs, Applications, Profile, Alerts, Settings
+    - Active state highlighting with chevron indicator
+    - Redirects to /auth/login if unauthenticated
+
+- Created 6 dashboard pages:
+  - /dashboard — Overview with stats cards, profile completion bar, recent saved jobs, recent applications, quick actions
+  - /dashboard/saved-jobs — Saved jobs list with sort (Date/Deadline/Salary), notes, unsave, apply link
+  - /dashboard/applications — Applications list with color-coded status badges, filter tabs (All/Active/Closed), withdraw
+  - /dashboard/profile — Edit form (name, phone, county, bio), CV upload, change password section, danger zone
+  - /dashboard/alerts — Alert list with create modal, toggle active/pause, delete, frequency selector
+  - /dashboard/settings — Notification toggles (4 types), privacy toggle, localStorage persistence
+
+- Updated existing components:
+  - JobDetailSheet.tsx — SaveJobButton now uses DB when authenticated, localStorage fallback for guests, shows "Sign in" tooltip for unauthenticated users
+  - Navbar.tsx — Shows "Dashboard" button with user name when authenticated, "Sign In" when not
+  - Root layout.tsx — Wrapped in Providers (SessionProvider) client component
+
+- Created seed script:
+  - prisma/seed-users.ts — 2 test users (seeker@test.com, employer@test.com, password: password123)
+  - Both users seeded with full profiles, phone, county, bio
+
+- Added NEXTAUTH_SECRET and NEXTAUTH_URL to .env
+
+- Build: PASSES (61 pages, 0 compilation errors)
+- Commit: 3ca2908 pushed to GitHub
+
+Stage Summary:
+- Prisma schema: 4 new models (User, SavedJob, Application, JobAlert)
+- Auth: NextAuth.js v4 with JWT strategy, bcryptjs password hashing
+- Auth pages: Login, Register, Forgot Password (all responsive, existing design system)
+- Dashboard layout: Responsive sidebar + mobile bottom nav
+- Dashboard pages: Overview, Saved Jobs, Applications, Profile, Alerts, Settings (6 total)
+- API routes: 15 endpoints for dashboard functionality
+- SaveJobButton: DB-backed for authenticated users, localStorage fallback for guests
+- Navbar: Auth-aware (shows Dashboard/Sign In based on session)
+- Test users: seeker@test.com + employer@test.com (password: password123)
+- Build: PASSES
+- Commit: 3ca2908 → https://github.com/Amunga-ke/jobready_website.git
