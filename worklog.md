@@ -22,3 +22,30 @@ Stage Summary:
 - Sign In/Post Job swap: DONE (Sign In prominent)
 - Job detail page + sidesheet: DONE (SSR page + URL sync + shareable links)
 - 3 sample job pages seeded for testing
+
+---
+Task ID: 2
+Agent: Main
+Task: Build SEO framework with smart thresholds, rich fallbacks, and programmatic page routes
+
+Work Log:
+- Created /src/lib/constants.ts — Full TypeScript conversion of org_data.js with 49 categories, 639 subcategories, 47 KE counties, 11 countries, 23 opportunity types, province groupings, lookup helpers
+- Created /src/lib/seo/page-thresholds.ts — SEO tier system (HUB, CATEGORY, COUNTY, CAT_COUNTY, SUBCAT_COUNTY, OPPORTUNITY, OPP_COUNTY) with min listing thresholds and fallback strategies
+- Created /src/lib/seo/fallback-content.ts — Rich fallback content generators: category/county intros, salary context, nearby counties, breadcrumb generation, JSON-LD structured data, meta title/description generators
+- Created /src/components/fursa/SeoPageLayout.tsx — Shared layout components: SeoPageHeader (breadcrumbs), RichFallback (empty state with salary/nearby/related), SubcategoryGrid, CountyGrid
+- Created /src/app/jobs/category/[slug]/page.tsx — 49 pre-rendered category pages with salary overview, subcategory grid, county drill-down, related categories
+- Created /src/app/jobs/in-[county]/page.tsx — 47 pre-rendered county pages with category grid, opportunity links, nearby counties
+- Created /src/app/jobs/category/[slug]/in-[county]/page.tsx — Category × County combo pages (2,303 potential) with threshold-gated noindex, salary context, subcategory drill-down, nearby counties, related categories
+- Created /src/app/opportunities/[type]/page.tsx — 23 pre-rendered opportunity type pages with county drill-down, related types
+- Created /src/app/opportunities/[type]/in-[county]/page.tsx — Opportunity × County combos (1,081 potential) with threshold gating
+- Created /src/app/government/[level]/page.tsx — 3 government sub-pages (national, county, state-corporations) with "How to Apply" guide content
+- Build verified: 41 static pages generated at build time, all routes compile clean
+
+Stage Summary:
+- SEO framework: DONE (thresholds + fallbacks + robots meta + JSON-LD)
+- Category pages: 49 pre-rendered (/jobs/category/*)
+- County pages: 47 pre-rendered (/jobs/in-*)
+- Category × County combos: 2,303 potential (threshold-gated, noindex until ≥3 listings)
+- Opportunity type pages: 23 pre-rendered (/opportunities/*)
+- Government sub-pages: 3 pre-rendered (/government/*)
+- Total at build: 41 pages | Total potential: ~34,000+ (scaling with DB content)
