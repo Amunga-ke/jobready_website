@@ -95,7 +95,7 @@ export function generateBreadcrumbs(
 ): { name: string; item: string }[] {
   return items.map((item) => ({
     name: item.label,
-    item: `https://fursake.co.ke${item.href}`,
+    item: `https://jobreadyke.co.ke${item.href}`,
   }));
 }
 
@@ -118,8 +118,8 @@ export function generateJobListingLd(
     ...(count !== undefined && { numberOfItems: count }),
     isPartOf: {
       "@type": "WebSite",
-      name: "FursaKE",
-      url: "https://fursake.co.ke",
+      name: "JobReady",
+      url: "https://jobreadyke.co.ke",
     },
   };
 }
@@ -142,32 +142,32 @@ export function generateMeta(
   switch (type) {
     case "category":
       return {
-        title: `${category} Jobs in Kenya (${count || ""} Openings) | FursaKE`,
-        description: `Browse the latest ${category} jobs in Kenya. ${count || ""} verified openings from top employers. Apply now on FursaKE.`,
+        title: `${category} Jobs in Kenya (${count || ""} Openings) | JobReady`,
+        description: `Browse the latest ${category} jobs in Kenya. ${count || ""} verified openings from top employers. Apply now on JobReady.`,
       };
 
     case "county":
       return {
-        title: `Jobs in ${county}, Kenya (${count || ""} Openings) | FursaKE`,
+        title: `Jobs in ${county}, Kenya (${count || ""} Openings) | JobReady`,
         description: `Find jobs in ${county}, Kenya. ${count || ""} verified openings from local and national employers. Your next career move starts here.`,
       };
 
     case "combo":
       return {
-        title: `${category} Jobs in ${county} (${count || ""} Openings) | FursaKE`,
-        description: `Browse ${category} jobs in ${county}, Kenya. ${count || ""} verified openings. Apply now on FursaKE — Kenya's trusted job board.`,
+        title: `${category} Jobs in ${county} (${count || ""} Openings) | JobReady`,
+        description: `Browse ${category} jobs in ${county}, Kenya. ${count || ""} verified openings. Apply now on JobReady — Kenya's trusted job board.`,
       };
 
     case "opportunity":
       return {
-        title: `${opportunity} Opportunities in Kenya | FursaKE`,
-        description: `Find ${opportunity} opportunities in Kenya. Deadlines, eligibility, and application guides. Updated daily on FursaKE.`,
+        title: `${opportunity} Opportunities in Kenya | JobReady`,
+        description: `Find ${opportunity} opportunities in Kenya. Deadlines, eligibility, and application guides. Updated daily on JobReady.`,
       };
 
     case "opp_county":
       return {
-        title: `${opportunity} in ${county}, Kenya | FursaKE`,
-        description: `Discover ${opportunity} opportunities in ${county}, Kenya. Application details and deadlines on FursaKE.`,
+        title: `${opportunity} in ${county}, Kenya | JobReady`,
+        description: `Discover ${opportunity} opportunities in ${county}, Kenya. Application details and deadlines on JobReady.`,
       };
   }
 }

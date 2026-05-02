@@ -36,7 +36,7 @@ export default function Navbar() {
         <div className="max-w-6xl mx-auto px-5 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="font-heading font-bold text-lg tracking-tight">
-            FURSA<span className="text-accent">KE</span>
+            JOB<span className="text-accent">READY</span>
           </Link>
 
           {/* Desktop links */}
@@ -93,7 +93,7 @@ export default function Navbar() {
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-divider">
               <span className="font-heading font-bold text-lg tracking-tight">
-                FURSA<span className="text-accent">KE</span>
+                JOB<span className="text-accent">READY</span>
               </span>
               <button
                 onClick={() => setOpen(false)}

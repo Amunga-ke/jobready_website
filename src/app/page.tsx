@@ -1,7 +1,6 @@
 import Navbar from '@/components/fursa/Navbar';
 import Hero from '@/components/fursa/Hero';
 import TrustedBy from '@/components/fursa/TrustedBy';
-import JobUpdates from '@/components/fursa/JobUpdates';
 import ClosingSoon from '@/components/fursa/ClosingSoon';
 import Featured from '@/components/fursa/Featured';
 import TrendingMarquee from '@/components/fursa/TrendingMarquee';
@@ -16,24 +15,58 @@ import CareerResources from '@/components/fursa/CareerResources';
 import Newsletter from '@/components/fursa/Newsletter';
 import Footer from '@/components/fursa/Footer';
 import StickyNewsletter from '@/components/fursa/StickyNewsletter';
+import type { Job } from '@/types';
+import type { Category, County } from '@prisma/client';
+import {
+  getFeaturedJobs,
+  getClosingSoon,
+  getGovernmentJobs,
+  getCasualJobs,
+  getOpportunities,
+  getCategories,
+  getCounties,
+} from '@/lib/data';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  // Fetch all homepage data in parallel
+  const [
+    featuredJobs,
+    closingSoonJobs,
+    governmentJobs,
+    casualJobs,
+    opportunities,
+    categories,
+    counties,
+  ] = await Promise.all([
+    getFeaturedJobs(),
+    getClosingSoon(),
+    getGovernmentJobs(),
+    getCasualJobs(),
+    getOpportunities(),
+    getCategories(),
+    getCounties(),
+  ]);
+
+  // Get just-posted from featured (already sorted by latest)
+  const justPosted = featuredJobs.slice(0, 4);
+
   return (
     <>
       <Navbar />
       <Hero />
       <TrustedBy />
-      <JobUpdates />
-      <ClosingSoon />
-      <Featured />
+      <ClosingSoon jobs={closingSoonJobs} />
+      <Featured jobs={featuredJobs} />
       <TrendingMarquee />
-      <Categories />
-      <OpportunitiesHub />
-      <OpportunitiesTabs />
-      <ByLocation />
-      <Government />
+      <Categories categories={categories} />
+      <OpportunitiesHub opportunities={opportunities} />
+      <OpportunitiesTabs opportunities={opportunities} />
+      <ByLocation counties={counties} />
+      <Government nationalJobs={governmentJobs.national} countyJobs={governmentJobs.county} />
       <CVBanner variant="light" />
-      <CasualJobs />
+      <CasualJobs jobs={casualJobs} />
       <CareerResources />
       <CVBanner variant="dark" />
       <Newsletter />

@@ -30,7 +30,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FursaKE — Jobs for Kenyans",
+  title: "JobReady — Jobs for Kenyans",
   description: "Kenya's most trusted job board. Real jobs from verified employers.",
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",

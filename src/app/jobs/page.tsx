@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Browse Jobs in Kenya | FursaKE",
+  title: "Browse Jobs in Kenya | JobReady",
   description:
     "Find the latest jobs in Kenya. Browse by category, location, company, and employment type. Real jobs from verified employers.",
 };

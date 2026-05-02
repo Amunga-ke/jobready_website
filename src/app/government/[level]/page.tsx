@@ -36,20 +36,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { level } = await params;
   const gov = GOV_LEVELS.find((g) => g.slug === level);
-  if (!gov) return { title: "Not Found | FursaKE" };
+  if (!gov) return { title: "Not Found | JobReady" };
 
   return {
-    title: `${gov.label} Jobs in Kenya | FursaKE`,
+    title: `${gov.label} Jobs in Kenya | JobReady`,
     description: gov.description,
     alternates: {
-      canonical: `https://fursake.co.ke/government/${level}`,
+      canonical: `https://jobreadyke.co.ke/government/${level}`,
     },
     openGraph: {
-      title: `${gov.label} Jobs | FursaKE`,
+      title: `${gov.label} Jobs | JobReady`,
       description: gov.description,
       url: `/government/${level}`,
       type: "website",
-      siteName: "FursaKE",
+      siteName: "JobReady",
     },
   };
 }

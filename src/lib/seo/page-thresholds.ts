@@ -99,7 +99,7 @@ export function buildCanonicalUrl(
   basePath: string,
   params: Record<string, string>
 ): string {
-  const url = new URL(basePath, "https://fursake.co.ke");
+  const url = new URL(basePath, "https://jobreadyke.co.ke");
   Object.entries(params).forEach(([key, value]) => {
     url.searchParams.set(key, value);
   });

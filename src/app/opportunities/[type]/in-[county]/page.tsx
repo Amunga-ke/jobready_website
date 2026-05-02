@@ -17,17 +17,17 @@ export async function generateMetadata({
   const { type: typeSlug, county: countySlug } = await params;
   const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
   const county = getCountyBySlug(countySlug);
-  if (!opp || !county) return { title: "Not Found | FursaKE" };
+  if (!opp || !county) return { title: "Not Found | JobReady" };
 
   const count = await getListingCount(typeSlug, countySlug);
   const robots = getRobotsMeta(count, "OPP_COUNTY" as SeoTier);
 
   return {
-    title: `${opp.label} in ${county}, Kenya | FursaKE`,
-    description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya. Application details and deadlines on FursaKE.`,
+    title: `${opp.label} in ${county}, Kenya | JobReady`,
+    description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya. Application details and deadlines on JobReady.`,
     robots,
     alternates: {
-      canonical: `https://fursake.co.ke/opportunities/${typeSlug}/in-${countySlug}`,
+      canonical: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`,
     },
   };
 }

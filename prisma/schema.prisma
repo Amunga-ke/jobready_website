@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// ─── JobReady Database Schema ───
+// Provider: sqlite (dev) → mysql (production)
+// Just change provider + DATABASE_URL to switch
 
 generator client {
   provider = "prisma-client-js"
@@ -13,20 +11,171 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ─── Companies / Employers ───
+
+model Company {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  logo        String?
+  verified    Boolean   @default(false)
+  orgType     String    @default("PRIVATE") // NATIONAL_GOV, COUNTY_GOV, STATE_CORPORATION, SME, NGO, INTERNATIONAL, STARTUP, ACADEMIC, PARASTATAL, OTHER
+  industry    String?
+  description String?
+  website     String?
+  location    String?
+  county      String?
+  country     String    @default("Kenya")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  listings Listing[]
 }
 
-model Post {
+// ─── Job Categories ───
+
+model Category {
+  id        String        @id @default(cuid())
+  slug      String        @unique
+  name      String
+  icon      String?       // emoji or icon name
+  sortOrder Int           @default(0)
+  active    Boolean       @default(true)
+
+  subcategories Subcategory[]
+  listings      Listing[]
+}
+
+// ─── Subcategories ───
+
+model Subcategory {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  name       String
+  categoryId String
+  sortOrder  Int      @default(0)
+  active     Boolean  @default(true)
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  listings Listing[]
+}
+
+// ─── Counties ───
+
+model County {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  slug      String   @unique
+  name      String
+  code      String?  // e.g. "047" for Nairobi
+  active    Boolean  @default(true)
+
+  listings Listing[]
+}
+
+// ─── Tags ───
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+
+  listings ListingTag[]
+}
+
+// ─── Listings (Jobs / Government / Casual / Opportunities) ───
+
+model Listing {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  title           String
+  description     String       @default("") // HTML content
+  requirements    String?      // HTML content
+  instructions    String?      // HTML content
+
+  // Type
+  listingType     String       @default("JOB") // JOB, GOVERNMENT, CASUAL, OPPORTUNITY
+  governmentLevel String?      // NATIONAL, COUNTY, STATE_CORPORATION
+  opportunityType String?      // INTERNSHIP, SCHOLARSHIP, FELLOWSHIP, etc.
+
+  // Employer
+  companyId       String
+  company         Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Classification
+  categoryId      String?
+  category        Category?    @relation(fields: [categoryId], references: [id])
+  subcategoryId   String?
+  subcategory     Subcategory? @relation(fields: [subcategoryId], references: [id])
+
+  // Location
+  location        String       @default("")
+  countyId        String?
+  county          County?      @relation(fields: [countyId], references: [id])
+  countyName      String       @default("") // denormalized for easy querying
+  country         String       @default("Kenya")
+
+  // Employment details
+  employmentType  String       @default("Full-time") // Full-time, Part-time, Contract, Internship, Volunteer, Temporary
+  experienceLevel String       @default("Mid-level") // Entry-level, Junior, Mid-level, Senior, Director, Executive
+  workMode        String       @default("ONSITE") // ONSITE, REMOTE, HYBRID
+
+  // Salary
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String       @default("KES")
+  salaryPeriod    String?      // month, year, day, hour, project
+
+  // AI-predicted salary (shown when salary not disclosed)
+  predictedSalary  String?
+  isPredictedSalary Boolean @default(false)
+
+  // Status & visibility
+  status          String       @default("ACTIVE") // ACTIVE, CLOSED, EXPIRED, DRAFT, PAUSED
+  featured        Boolean      @default(false)
+  isUrgent        Boolean      @default(false) // closing within 48h
+
+  // Application
+  applicationUrl  String?
+  applyEmail      String?      // apply via email
+  applyCount      Int          @default(0)
+
+  // Metadata
+  source          String?      // where the listing was scraped/imported from
+  viewCount       Int          @default(0)
+
+  // Dates
+  deadline        DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  tags ListingTag[]
+
+  @@index([listingType])
+  @@index([categoryId])
+  @@index([countyId])
+  @@index([countyName])
+  @@index([companyId])
+  @@index([status])
+  @@index([featured])
+  @@index([deadline])
+  @@index([createdAt])
+  @@index([governmentLevel])
+  @@index([opportunityType])
+  @@index([employmentType])
+  @@index([experienceLevel])
+  @@index([workMode])
+  @@index([listingType, status])
+  @@index([listingType, countyName])
+}
+
+// ─── Listing ↔ Tag junction ───
+
+model ListingTag {
+  listingId String
+  tagId     String
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([listingId, tagId])
 }

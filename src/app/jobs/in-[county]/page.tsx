@@ -18,24 +18,24 @@ export async function generateMetadata({
   const { county: countySlug } = await params;
   const countyName = getCountyBySlug(countySlug);
 
-  if (!countyName) return { title: "Not Found | FursaKE" };
+  if (!countyName) return { title: "Not Found | JobReady" };
 
   const count = await getListingCount(countySlug);
   const robots = getRobotsMeta(count, "COUNTY" as SeoTier);
 
   return {
-    title: `Jobs in ${countyName}, Kenya (${count || ""} Openings) | FursaKE`,
+    title: `Jobs in ${countyName}, Kenya (${count || ""} Openings) | JobReady`,
     description: getCountyIntro(countyName),
     robots,
     alternates: {
-      canonical: `https://fursake.co.ke/jobs/in-${countySlug}`,
+      canonical: `https://jobreadyke.co.ke/jobs/in-${countySlug}`,
     },
     openGraph: {
-      title: `Jobs in ${countyName} | FursaKE`,
+      title: `Jobs in ${countyName} | JobReady`,
       description: getCountyIntro(countyName),
       url: `/jobs/in-${countySlug}`,
       type: "website",
-      siteName: "FursaKE",
+      siteName: "JobReady",
     },
   };
 }

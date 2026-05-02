@@ -37,7 +37,7 @@ export default function Footer() {
           {/* Logo */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="font-heading font-bold text-lg tracking-tight">
-              FURSA<span className="text-accent">KE</span>
+              JOB<span className="text-accent">READY</span>
             </Link>
             <p className="text-[12px] text-muted mt-3 leading-relaxed">
               Kenya&apos;s most trusted job board. Real jobs from verified employers.
@@ -125,11 +125,11 @@ export default function Footer() {
         <div className="h-px bg-divider my-10"></div>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-mono text-[11px] text-muted/40">
-            &copy; {new Date().getFullYear()} FursaKE
+            &copy; {new Date().getFullYear()} JobReady
           </p>
           <div className="flex items-center gap-4">
             <a
-              href="https://x.com/fursake"
+              href="https://x.com/jobreadyke"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted/30 hover:text-ink transition-colors"
@@ -145,7 +145,7 @@ export default function Footer() {
               </svg>
             </a>
             <a
-              href="https://linkedin.com/company/fursake"
+              href="https://linkedin.com/company/jobreadyke"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted/30 hover:text-ink transition-colors"
@@ -153,7 +153,7 @@ export default function Footer() {
               <Linkedin className="text-base" />
             </a>
             <a
-              href="https://facebook.com/fursake"
+              href="https://facebook.com/jobreadyke"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted/30 hover:text-ink transition-colors"
@@ -161,7 +161,7 @@ export default function Footer() {
               <Facebook className="text-base" />
             </a>
             <a
-              href="https://instagram.com/fursake"
+              href="https://instagram.com/jobreadyke"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted/30 hover:text-ink transition-colors"
