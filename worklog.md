@@ -71,3 +71,22 @@ Stage Summary:
 - Sidesheet now opens on click from all 6 homepage sections: Featured, Closing Soon, Government, Casual Jobs, Opportunities Hub (internships), Opportunities Tabs
 - Server component rendering preserved: only JobClickable is a client component, parent sections remain server components
 - Mock data provides rich sidesheet content (descriptions, requirements, salary, tags) for demo purposes
+
+---
+Task ID: 4
+Agent: Main
+Task: Fix Hero "Just Posted", create JobUpdates, build /jobs page, add Save Job to sidesheet
+
+Work Log:
+- Modified Hero.tsx — Added `jobs: Job[]` prop, renders first 4 jobs as clickable cards using JobClickable with formatDateShortUTC, kept "Browse all latest jobs" CTA link
+- Created JobUpdates.tsx — Section 01 placeholder activity feed with 3 timeline items (No updates yet, No new messages, No upcoming deadlines), uses SectionNumber, Bell/Mail/CalendarCheck icons
+- Updated page.tsx — Added getJustPosted() to Promise.all, passed justPosted to Hero, inserted JobUpdates between TrustedBy and ClosingSoon, removed unused Category/County type imports
+- Built /jobs page (src/app/jobs/page.tsx) — Full server component with force-dynamic, searchParams mapping (q, type→listingType, mode→workMode, employment→employmentType, experience→experienceLevel, opportunity→opportunityType), search bar with clear button, filter pills (All/Remote/Full-Time/Part-Time/Government/Internships/Entry Level/Closing Soon/Casual), sort options (Latest/Closing Soon), table-style job list with deadline indicators, "No jobs found" empty state, pagination with Previous/Next and page counter, results count footer
+- Updated JobDetailSheet.tsx — Added SaveJobButton component with Bookmark/BookmarkCheck toggle, localStorage persistence (key: "saved-jobs", JSON array of slugs), used lazy useState initializer (no useEffect) to avoid lint error, wrapped with key={job.slug} for remount on job change, placed Save button between Share and Apply Now in footer
+
+Stage Summary:
+- Hero Just Posted: DONE (4 real job cards with clickable sidesheet)
+- JobUpdates section: DONE (Section 01 with 3 placeholder items)
+- Homepage updated: DONE (JobUpdates after TrustedBy, Hero receives justPosted data)
+- /jobs page: DONE (search, filters, sort, pagination, empty state)
+- Save Job button: DONE (localStorage toggle with Bookmark/BookmarkCheck icons)
