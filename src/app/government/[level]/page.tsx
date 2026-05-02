@@ -49,9 +49,14 @@ export async function generateMetadata({
     openGraph: {
       title: `${gov.label} Jobs | JobReady`,
       description: gov.description,
-      url: `/government/${level}`,
+      url: `https://jobreadyke.co.ke/government/${level}`,
       type: "website",
       siteName: "JobReady",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${gov.label} Jobs | JobReady`,
+      description: gov.description,
     },
   };
 }

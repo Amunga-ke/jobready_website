@@ -33,9 +33,14 @@ export async function generateMetadata({
     openGraph: {
       title: `${category.label} Jobs in Kenya | JobReady`,
       description: getCategoryIntro(category),
-      url: `/jobs/category/${slug}`,
+      url: `https://jobreadyke.co.ke/jobs/category/${slug}`,
       type: "website",
       siteName: "JobReady",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${category.label} Jobs in Kenya | JobReady`,
+      description: getCategoryIntro(category),
     },
   };
 }

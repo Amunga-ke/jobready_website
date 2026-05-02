@@ -166,6 +166,81 @@ export async function getJobBySlug(slug: string) {
   return listing ? listingToJob(listing) : null;
 }
 
+// ─── Job count by county slug (for /jobs/in-[county] pages) ───
+export async function getJobCountByCounty(countySlug: string): Promise<number> {
+  return prisma.listing.count({
+    where: {
+      status: "ACTIVE",
+      county: { slug: countySlug },
+    },
+  });
+}
+
+// ─── Job count by category + county slug (for /jobs/category/[slug]/in-[county] pages) ───
+export async function getJobCountByCategoryAndCounty(categorySlug: string, countySlug: string): Promise<number> {
+  const [catRecord, countyRecord] = await Promise.all([
+    prisma.category.findUnique({ where: { slug: categorySlug }, select: { id: true } }),
+    prisma.county.findUnique({ where: { slug: countySlug }, select: { id: true } }),
+  ]);
+
+  if (!catRecord || !countyRecord) return 0;
+
+  return prisma.listing.count({
+    where: {
+      status: "ACTIVE",
+      categoryId: catRecord.id,
+      countyId: countyRecord.id,
+    },
+  });
+}
+
+// ─── Jobs by county (for /jobs/in-[county] pages) ───
+export async function getJobsByCounty(countySlug: string, limit = 20) {
+  const countyRecord = await prisma.county.findUnique({
+    where: { slug: countySlug },
+    select: { id: true },
+  });
+  if (!countyRecord) return { jobs: [] as Job[], count: 0 };
+
+  const [listings, count] = await Promise.all([
+    prisma.listing.findMany({
+      where: { status: "ACTIVE", countyId: countyRecord.id },
+      include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    }),
+    prisma.listing.count({
+      where: { status: "ACTIVE", countyId: countyRecord.id },
+    }),
+  ]);
+
+  return { jobs: listings.map(listingToJob), count };
+}
+
+// ─── Jobs by category + county (for /jobs/category/[slug]/in-[county] pages) ───
+export async function getJobsByCategoryAndCounty(categorySlug: string, countySlug: string, limit = 20) {
+  const [catRecord, countyRecord] = await Promise.all([
+    prisma.category.findUnique({ where: { slug: categorySlug }, select: { id: true } }),
+    prisma.county.findUnique({ where: { slug: countySlug }, select: { id: true } }),
+  ]);
+
+  if (!catRecord || !countyRecord) return { jobs: [] as Job[], count: 0 };
+
+  const [listings, count] = await Promise.all([
+    prisma.listing.findMany({
+      where: { status: "ACTIVE", categoryId: catRecord.id, countyId: countyRecord.id },
+      include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    }),
+    prisma.listing.count({
+      where: { status: "ACTIVE", categoryId: catRecord.id, countyId: countyRecord.id },
+    }),
+  ]);
+
+  return { jobs: listings.map(listingToJob), count };
+}
+
 // ─── Paginated job listings (for /jobs page) ───
 export async function getJobs(params: {
   q?: string;

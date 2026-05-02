@@ -5,10 +5,7 @@ import { OPPORTUNITY_TYPES, KE_COUNTIES, slugifyCounty } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getOpportunityIntro } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
-
-async function getListingCount(typeSlug: string) {
-  return 0;
-}
+import prisma from "@/lib/prisma";
 
 export async function generateMetadata({
   params,
@@ -19,7 +16,10 @@ export async function generateMetadata({
   const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
   if (!opp) return { title: "Not Found | JobReady" };
 
-  const count = await getListingCount(typeSlug);
+  const dbType = opp.value.replace(/-/g, "_");
+  const count = await prisma.listing.count({
+    where: { status: "ACTIVE", opportunityType: dbType },
+  });
   const robots = getRobotsMeta(count, "OPPORTUNITY" as SeoTier);
 
   return {
@@ -32,9 +32,14 @@ export async function generateMetadata({
     openGraph: {
       title: `${opp.label} in Kenya | JobReady`,
       description: getOpportunityIntro(opp.label),
-      url: `/opportunities/${typeSlug}`,
+      url: `https://jobreadyke.co.ke/opportunities/${typeSlug}`,
       type: "website",
       siteName: "JobReady",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${opp.label} in Kenya | JobReady`,
+      description: getOpportunityIntro(opp.label),
     },
   };
 }
@@ -53,7 +58,10 @@ export default async function OpportunityTypePage({
 
   if (!opp) notFound();
 
-  const count = await getListingCount(typeSlug);
+  const dbType = opp.value.replace(/-/g, "_");
+  const count = await prisma.listing.count({
+    where: { status: "ACTIVE", opportunityType: dbType },
+  });
   const nearbyCounties = KE_COUNTIES.slice(0, 8) as unknown as string[];
 
   return (

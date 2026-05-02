@@ -22,9 +22,14 @@ export async function generateMetadata({
     openGraph: {
       title: `${job.title} at ${job.companyName}`,
       description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`,
-      url: `/jobs/${slug}`,
+      url: `https://jobreadyke.co.ke/jobs/${slug}`,
       type: "article",
       siteName: "JobReady",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${job.title} at ${job.companyName}`,
+      description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`,
     },
   };
 }
