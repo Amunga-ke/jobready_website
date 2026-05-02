@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Clock, Building2, ExternalLink, Share2 } from "lucide-react";
+import { formatDateUTC } from "@/lib/format-date";
 import type { Job } from "@/types";
 
 // ─── Mock data until DB is connected ───
@@ -197,12 +198,7 @@ export default async function JobDetailPage({
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Clock className="w-4 h-4" />
-            Posted{" "}
-            {new Date(job.createdAt).toLocaleDateString("en-KE", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}
+            Posted {formatDateUTC(job.createdAt)}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Building2 className="w-4 h-4" />
@@ -212,12 +208,7 @@ export default async function JobDetailPage({
           <span>{job.experienceLevel.replace(/_/g, " ")}</span>
           {job.deadline && (
             <span className="text-accent font-medium">
-              Deadline:{" "}
-              {new Date(job.deadline).toLocaleDateString("en-KE", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
+              Deadline: {formatDateUTC(job.deadline)}
             </span>
           )}
         </div>

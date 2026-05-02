@@ -1,6 +1,7 @@
 import SectionNumber from './SectionNumber';
 import JobClickable from './JobClickable';
 import { nationalGovJobs, countyGovJobs } from '@/lib/mock-jobs';
+import { formatDateShortUTC } from '@/lib/format-date';
 
 export default function Government() {
   return (
@@ -23,7 +24,7 @@ export default function Government() {
                     )}
                     {job.deadline && (
                       <span className="font-mono text-[11px] text-muted tabular-nums">
-                        Closes {new Date(job.deadline).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
+                        Closes {formatDateShortUTC(job.deadline)}
                       </span>
                     )}
                   </div>
@@ -39,7 +40,7 @@ export default function Government() {
                   <p className="text-sm font-medium group-hover:text-accent transition-colors">{job.title}</p>
                   {job.deadline && (
                     <span className="font-mono text-[11px] text-muted tabular-nums mt-1 block">
-                      Closes {new Date(job.deadline).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
+                      Closes {formatDateShortUTC(job.deadline)}
                     </span>
                   )}
                 </JobClickable>

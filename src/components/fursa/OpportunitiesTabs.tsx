@@ -4,6 +4,7 @@ import { useState } from 'react';
 import SectionNumber from './SectionNumber';
 import JobClickable from './JobClickable';
 import { entryLevelJobs, internshipJobs, scholarshipJobs } from '@/lib/mock-jobs';
+import { formatDateShortUTC } from '@/lib/format-date';
 import type { Job } from '@/types';
 
 type TabKey = 'e' | 'i' | 's';
@@ -67,7 +68,7 @@ export default function OpportunitiesTabs() {
                   <span className={`font-mono text-[11px] shrink-0 ml-3 ${
                     job.opportunityType === 'SCHOLARSHIP' ? 'text-accent font-medium' : 'text-muted'
                   }`}>
-                    {new Date(job.deadline).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
+                    {formatDateShortUTC(job.deadline)}
                   </span>
                 )}
               </JobClickable>

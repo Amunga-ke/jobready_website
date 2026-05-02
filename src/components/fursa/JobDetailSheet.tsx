@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { X, MapPin, Clock, Building2, ExternalLink, Share2 } from "lucide-react";
 import { useJobModal } from "./JobModalContext";
+import { formatDateUTC } from "@/lib/format-date";
 import type { Job } from "@/types";
 
 function GovernmentBadge({ level }: { level?: string }) {
@@ -54,12 +55,7 @@ function OpportunityBadge({ type }: { type?: string }) {
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-KE", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return formatDateUTC(dateStr);
 }
 
 function daysUntil(dateStr: string | null | undefined): string | null {
