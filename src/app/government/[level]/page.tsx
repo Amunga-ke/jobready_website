@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { KE_COUNTIES, slugifyCounty } from "@/lib/constants";
+import { getGovernmentJobsByLevel } from "@/lib/data";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
+import { formatDateShortUTC } from "@/lib/format-date";
+import type { Job } from "@/types";
 
 const GOV_LEVELS = [
   {
@@ -10,24 +13,23 @@ const GOV_LEVELS = [
     label: "National Government",
     description:
       "Browse job openings from Kenya's national government ministries, departments, and agencies. Civil service positions, parastatal roles, and public sector careers.",
+    dbLevel: "NATIONAL" as const,
   },
   {
     slug: "county",
     label: "County Governments",
     description:
       "Find jobs across all 47 county governments in Kenya. County public service board announcements, county executive positions, and county assembly roles.",
+    dbLevel: "COUNTY" as const,
   },
   {
     slug: "state-corporations",
     label: "State Corporations & Parastatals",
     description:
       "Explore career opportunities at Kenyan state corporations, parastatals, and semi-autonomous government agencies.",
+    dbLevel: "STATE_CORPORATION" as const,
   },
 ] as const;
-
-async function getListingCount(level: string) {
-  return 0;
-}
 
 export async function generateMetadata({
   params,
@@ -54,9 +56,7 @@ export async function generateMetadata({
   };
 }
 
-export async function generateStaticParams() {
-  return GOV_LEVELS.map((g) => ({ level: g.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export default async function GovernmentLevelPage({
   params,
@@ -68,7 +68,8 @@ export default async function GovernmentLevelPage({
 
   if (!gov) notFound();
 
-  const count = await getListingCount(level);
+  const jobs = await getGovernmentJobsByLevel(gov.dbLevel);
+  const count = jobs.length;
   const otherLevels = GOV_LEVELS.filter((g) => g.slug !== level);
 
   return (
@@ -101,9 +102,14 @@ export default async function GovernmentLevelPage({
         {/* Listings or fallback */}
         {count > 0 ? (
           <div className="mb-10">
-            <p className="text-[14px] text-muted">
+            <p className="text-[14px] text-muted mb-4">
               Showing {count} {gov.label.toLowerCase()} positions.
             </p>
+            <div className="space-y-0 divide-y divide-subtle">
+              {jobs.map((job) => (
+                <GovJobRow key={job.id} job={job} />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="mb-10">
@@ -183,5 +189,45 @@ export default async function GovernmentLevelPage({
         </div>
       </div>
     </main>
+  );
+}
+
+/* ── Government job row (server component) ── */
+function GovJobRow({ job }: { job: Job }) {
+  return (
+    <Link
+      href={`/jobs/${job.slug}`}
+      className="flex items-center justify-between py-3 group cursor-pointer rounded-lg hover:bg-white/60 -mx-2 px-2 transition-colors"
+    >
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium group-hover:text-accent transition-colors leading-snug truncate">
+          {job.title}
+        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[12px] text-muted">{job.companyName}</span>
+          {job.location && (
+            <>
+              <span className="text-divider">·</span>
+              <span className="text-[12px] text-muted">{job.location}</span>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-3 ml-4 shrink-0">
+        {job.deadline && (
+          <span className="font-mono text-[11px] text-muted tabular-nums">
+            Closes {formatDateShortUTC(job.deadline)}
+          </span>
+        )}
+        <svg
+          className="w-4 h-4 text-muted/40 group-hover:text-accent transition-colors"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
+    </Link>
   );
 }
