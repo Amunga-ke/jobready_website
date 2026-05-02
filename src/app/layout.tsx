@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { JobModalProvider } from "@/components/fursa/JobModalContext";
+import JobDetailSheet from "@/components/fursa/JobDetailSheet";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -45,7 +47,10 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${spaceGrotesk.variable} ${inter.variable} ${jetbrains.variable} font-inter antialiased bg-surface text-ink`}
       >
-        {children}
+        <JobModalProvider>
+          {children}
+          <JobDetailSheet />
+        </JobModalProvider>
       </body>
     </html>
   );
