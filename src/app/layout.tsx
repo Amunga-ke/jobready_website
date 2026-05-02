@@ -34,10 +34,23 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JobReady — Jobs for Kenyans",
-  description: "Kenya's most trusted job board. Real jobs from verified employers.",
+  metadataBase: new URL("https://jobreadyke.co.ke"),
+  title: {
+    default: "JobReady — Jobs for Kenyans",
+    template: "%s | JobReady",
+  },
+  description:
+    "Kenya's most trusted job board. Real jobs from verified employers.",
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+  },
+  openGraph: {
+    siteName: "JobReady",
+    type: "website",
+    locale: "en_KE",
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 

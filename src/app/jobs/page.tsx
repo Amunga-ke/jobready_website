@@ -1,10 +1,63 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getJobs } from "@/lib/data";
 import { formatDateShortUTC } from "@/lib/format-date";
 import JobClickable from "@/components/jobready/JobClickable";
 import { Search, SlidersHorizontal, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
+  const listingType = typeof params.type === "string" ? params.type : undefined;
+  const workMode = typeof params.mode === "string" ? params.mode : undefined;
+  const employmentType = typeof params.employment === "string" ? params.employment : undefined;
+  const opportunityType = typeof params.opportunity === "string" ? params.opportunity : undefined;
+
+  let title = "Browse All Jobs | JobReady";
+  let description = "Search and browse thousands of jobs from verified employers across Kenya.";
+
+  if (q) {
+    title = `Results for "${q}" | JobReady`;
+    description = `Search results for "${q}" on JobReady Kenya. Find matching jobs from verified employers.`;
+  } else if (workMode === "REMOTE") {
+    title = "Remote Jobs in Kenya | JobReady";
+    description = "Browse work-from-home and remote job opportunities from Kenyan and international employers.";
+  } else if (listingType === "GOVERNMENT") {
+    title = "Government Jobs in Kenya | JobReady";
+    description = "Browse government positions from national, county and state corporations.";
+  } else if (listingType === "CASUAL") {
+    title = "Casual & Part-Time Jobs | JobReady";
+    description = "Find daily-wage, weekend and flexible casual jobs across Kenya.";
+  } else if (opportunityType) {
+    const label = opportunityType.replace(/_/g, " ").toLowerCase();
+    title = `${label.charAt(0).toUpperCase() + label.slice(1)} Opportunities | JobReady`;
+    description = `Browse the latest ${label} opportunities available in Kenya.`;
+  } else if (employmentType) {
+    const label = employmentType.replace(/_/g, " ").toLowerCase();
+    title = `${label.charAt(0).toUpperCase() + label.slice(1)} Jobs | JobReady`;
+    description = `Browse ${label} positions from verified employers across Kenya.`;
+  }
+
+  return {
+    title,
+    description,
+    alternates: { canonical: "https://jobreadyke.co.ke/jobs" },
+    openGraph: {
+      title,
+      description,
+      url: "https://jobreadyke.co.ke/jobs",
+      siteName: "JobReady",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 // ─── Filter pills config ───
 const FILTER_PILLS: { label: string; param: string; value: string }[] = [

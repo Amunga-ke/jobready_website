@@ -16,6 +16,7 @@ import Newsletter from '@/components/jobready/Newsletter';
 import StickyNewsletter from '@/components/jobready/StickyNewsletter';
 import type { Job } from '@/types';
 import type { Category, County } from '@prisma/client';
+import type { Metadata } from 'next';
 import {
   getFeaturedJobs,
   getJustPosted,
@@ -28,6 +29,29 @@ import {
 } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "JobReady — Jobs for Kenyans | Real Jobs from Verified Employers",
+    description:
+      "Kenya's most trusted job board. Browse thousands of jobs from verified employers across Nairobi, Mombasa, Kisumu and all 47 counties. Government, private sector, internships and more.",
+    alternates: { canonical: "https://jobreadyke.co.ke/" },
+    openGraph: {
+      title: "JobReady — Jobs for Kenyans",
+      description:
+        "Kenya's most trusted job board. Real jobs from verified employers.",
+      url: "https://jobreadyke.co.ke/",
+      siteName: "JobReady",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "JobReady — Jobs for Kenyans",
+      description:
+        "Kenya's most trusted job board. Real jobs from verified employers.",
+    },
+  };
+}
 
 export default async function Home() {
   // Fetch all homepage data in parallel
