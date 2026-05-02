@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { JOB_CATEGORIES, getCategoryBySlug, KE_COUNTIES, slugifyCounty } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCategoryIntro, getSalaryContext, getRelatedCategoriesForCounty } from "@/lib/seo/fallback-content";
-import { SeoPageHeader, SubcategoryGrid, CountyGrid, RichFallback } from "@/components/fursa/SeoPageLayout";
+import { SeoPageHeader, SubcategoryGrid, CountyGrid, RichFallback } from "@/components/jobready/SeoPageLayout";
 
 // Mock: in production this queries DB
 async function getListingCount(categorySlug: string, countySlug?: string) {

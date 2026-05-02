@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getJobs } from "@/lib/data";
 import { formatDateShortUTC } from "@/lib/format-date";
-import JobClickable from "@/components/fursa/JobClickable";
+import JobClickable from "@/components/jobready/JobClickable";
 import { Search, SlidersHorizontal, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";

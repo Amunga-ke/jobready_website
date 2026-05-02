@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { OPPORTUNITY_TYPES, KE_COUNTIES, slugifyCounty, getCountyBySlug } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
-import { SeoPageHeader, RichFallback } from "@/components/fursa/SeoPageLayout";
+import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 
 async function getListingCount(typeSlug: string, countySlug: string) {
   return 0;

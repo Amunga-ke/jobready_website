@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useJobModal } from '@/components/fursa/JobModalContext';
+import { useJobModal } from '@/components/jobready/JobModalContext';
 import { Shield, Clock, FileText, Loader2, AlertCircle } from 'lucide-react';
 import type { GovernmentJobEntry } from '@/types';
 

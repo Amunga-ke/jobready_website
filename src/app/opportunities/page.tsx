@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useJobModal } from '@/components/fursa/JobModalContext';
+import { useJobModal } from '@/components/jobready/JobModalContext';
 import { GraduationCap, Briefcase, Award, DollarSign, Clock, AlertTriangle, Loader2, AlertCircle } from 'lucide-react';
 
 /* ── Tab config ── */
