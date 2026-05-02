@@ -167,6 +167,24 @@ model Listing {
   @@index([listingType, countyName])
 }
 
+// ─── Job Updates (official announcements from ministries, employers) ───
+
+model JobUpdate {
+  id          String   @id @default(cuid()) @db.VarChar(64)
+  title       String   @db.VarChar(500)
+  body        String?  @db.Text
+  source      String   @db.VarChar(191)
+  updateType  String   @default("POSTED") @db.VarChar(30)
+  listingSlug String?  @db.VarChar(191)
+  status      String   @default("PUBLISHED") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([updateType])
+  @@index([status])
+  @@index([createdAt])
+}
+
 // ─── Listing ↔ Tag junction ───
 
 model ListingTag {

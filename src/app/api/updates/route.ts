@@ -13,43 +13,38 @@ function relativeTime(date: Date): string {
   return `${Math.floor(diffDay / 7)}w ago`;
 }
 
-function deadlineDays(deadline: Date): string {
-  const diff = Math.ceil((deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  if (diff <= 0) return "Closed";
-  if (diff === 1) return "1 day left";
-  if (diff <= 3) return `${diff} days left`;
-  return `${diff} days left`;
-}
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limit = Number(searchParams.get("limit")) || 8;
 
   try {
-    // Fetch latest active listings — these ARE the "updates"
-    const listings = await prisma.listing.findMany({
-      where: { status: "ACTIVE" },
-      include: { company: true },
+    const updates = await prisma.jobUpdate.findMany({
+      where: { status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
       take: limit,
     });
 
-    const updates = listings.map((l) => {
-      const isClosingSoon = l.deadline
-        ? Math.ceil((l.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) <= 3
-        : false;
+    const items = updates.map((u) => {
+      // Map DB updateType to the frontend display type
+      let displayType: "posted" | "shortlisted" | "deadline" | "closing" = "posted";
+      if (u.updateType === "SHORTLISTED") displayType = "shortlisted";
+      else if (u.updateType === "CLOSING_SOON") displayType = "closing";
+      else if (u.updateType === "DEADLINE_PASSED") displayType = "deadline";
+      else displayType = "posted";
 
       return {
-        id: l.id,
-        title: l.title,
-        source: l.company?.name || "Unknown",
-        type: isClosingSoon ? "closing" : ("posted" as const),
-        date: relativeTime(l.createdAt),
-        slug: l.slug,
+        id: u.id,
+        title: u.title,
+        body: u.body,
+        source: u.source,
+        type: displayType,
+        date: relativeTime(u.createdAt),
+        slug: u.listingSlug || "",
+        createdAt: u.createdAt.toISOString(),
       };
     });
 
-    return NextResponse.json({ updates });
+    return NextResponse.json({ updates: items });
   } catch (error) {
     console.error("[GET /api/updates] Error:", error);
     return NextResponse.json({ updates: [] });
