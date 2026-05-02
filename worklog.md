@@ -49,3 +49,25 @@ Stage Summary:
 - Opportunity type pages: 23 pre-rendered (/opportunities/*)
 - Government sub-pages: 3 pre-rendered (/government/*)
 - Total at build: 41 pages | Total potential: ~34,000+ (scaling with DB content)
+
+---
+Task ID: 3
+Agent: Main
+Task: Fix sidesheet not working — wire openJob() into all homepage job listing sections
+
+Work Log:
+- Diagnosed root cause: openJob() was never called from any component. Sidesheet infrastructure (Provider, Context, Sheet) was correctly wired but no component had onClick handlers
+- Created /src/lib/mock-jobs.ts — Full Job-type mock data (featuredHeroJob, featuredJobs, closingSoonJobs, nationalGovJobs, countyGovJobs, casualJobs, opportunityInternships, entryLevelJobs, internshipJobs, scholarshipJobs) with realistic descriptions, requirements, tags, deadlines, salary info
+- Created /src/components/fursa/JobClickable.tsx — Thin client wrapper that passes onClick={() => openJob(job)} to any children, with keyboard accessibility (Enter/Space)
+- Updated Featured.tsx — Replaced hardcoded {letter, title, company} with JobClickable + mock Job objects
+- Updated ClosingSoon.tsx — Replaced hardcoded {position, company, deadline} with JobClickable + mock Job objects, dynamic deadline calculation
+- Updated Government.tsx — Replaced hardcoded nationalJobs/countyJobs with JobClickable + mock Job objects, dynamic deadline formatting
+- Updated CasualJobs.tsx — Replaced hardcoded casualJobs with JobClickable + mock Job objects, salary formatting from Job type
+- Updated OpportunitiesHub.tsx — Wrapped internship listings with JobClickable, kept scholarship/university/entry-level cards as-is (they're summary cards, not individual job links)
+- Updated OpportunitiesTabs.tsx — Replaced hardcoded tab content with JobClickable + mock Job objects, removed local job arrays
+- Build verified: compiled successfully, 41 pages generated, zero errors
+
+Stage Summary:
+- Sidesheet now opens on click from all 6 homepage sections: Featured, Closing Soon, Government, Casual Jobs, Opportunities Hub (internships), Opportunities Tabs
+- Server component rendering preserved: only JobClickable is a client component, parent sections remain server components
+- Mock data provides rich sidesheet content (descriptions, requirements, salary, tags) for demo purposes

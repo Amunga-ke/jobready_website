@@ -1,13 +1,6 @@
 import SectionNumber from './SectionNumber';
-
-const casualJobs = [
-  { title: 'Waitstaff', location: 'Westlands', rate: 'Ksh 500/day', note: 'Immediate' },
-  { title: 'Delivery Rider', location: 'CBD', rate: 'Ksh 1,200/day', note: 'Own bike' },
-  { title: 'Farm Worker', location: 'Naivasha', rate: 'Ksh 700/day', note: 'Accom. provided' },
-  { title: 'Shop Assistant', location: 'Thika Rd', rate: 'Ksh 15k/mo', note: 'Part-time' },
-  { title: 'Cleaning Staff', location: 'Kilimani', rate: 'Ksh 600/day', note: 'Weekends' },
-  { title: 'Loader', location: 'Industrial Area', rate: 'Ksh 800/day', note: 'Morning shift' },
-];
+import JobClickable from './JobClickable';
+import { casualJobs } from '@/lib/mock-jobs';
 
 export default function CasualJobs() {
   return (
@@ -16,17 +9,22 @@ export default function CasualJobs() {
       <div className="max-w-6xl mx-auto px-5 relative">
         <h2 className="font-heading text-xl font-bold mb-5">Casual & Part-Time</h2>
         <div className="bg-surface border border-divider rounded-xl p-5 sm:p-6">
-          <div className="classifieds-text text-[12px] leading-[2.2]">
+          <div className="text-[12px] leading-[2.2]">
             {casualJobs.map((job, i) => (
-              <div
-                key={i}
+              <JobClickable
+                key={job.id}
+                job={job}
                 className={`group cursor-pointer ${i < casualJobs.length - 1 ? 'border-b border-subtle pb-1' : ''}`}
               >
                 <span className="text-ink group-hover:text-accent transition-colors">{job.title}</span>
-                <span className="text-muted/40"> — {job.location} — </span>
-                <span className="text-muted">{job.rate}</span>
-                <span className="text-muted/40"> — {job.note}</span>
-              </div>
+                <span className="text-muted/40"> — {job.location.split(",")[0]} — </span>
+                <span className="text-muted">
+                  {job.salaryCurrency}{" "}{job.salaryMin?.toLocaleString()}/{job.salaryPeriod}
+                </span>
+                {job.tags.length > 0 && (
+                  <span className="text-muted/40"> — {job.tags[job.tags.length > 2 ? 2 : job.tags.length - 1]}</span>
+                )}
+              </JobClickable>
             ))}
           </div>
         </div>

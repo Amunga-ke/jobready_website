@@ -1,4 +1,6 @@
 import SectionNumber from './SectionNumber';
+import JobClickable from './JobClickable';
+import { opportunityInternships } from '@/lib/mock-jobs';
 
 export default function OpportunitiesHub() {
   return (
@@ -8,12 +10,14 @@ export default function OpportunitiesHub() {
         <h2 className="font-heading text-xl font-bold mb-6">Opportunities Hub</h2>
         <div className="flex gap-3 overflow-x-auto pb-3 -mx-5 px-5 scrollbar-hide snap-x snap-mandatory">
           {/* Internships Card */}
-          <div className="snap-start shrink-0 w-64 border border-divider rounded-xl p-4 hover:border-ink/20 transition-colors cursor-pointer">
+          <div className="snap-start shrink-0 w-64 border border-divider rounded-xl p-4 hover:border-ink/20 transition-colors">
             <div className="font-mono text-[10px] text-accent uppercase tracking-widest mb-4">01 — Internships</div>
             <div className="space-y-2.5 border-t border-divider pt-3">
-              <p className="text-[13px] text-ink hover:text-accent-dark transition-colors cursor-pointer">Finance Intern — Equity Bank</p>
-              <p className="text-[13px] text-ink hover:text-accent-dark transition-colors cursor-pointer">Software Intern — Safaricom</p>
-              <p className="text-[13px] text-ink hover:text-accent-dark transition-colors cursor-pointer">Marketing Intern — EABL</p>
+              {opportunityInternships.map((job) => (
+                <JobClickable key={job.id} job={job} className="cursor-pointer">
+                  <p className="text-[13px] text-ink hover:text-accent-dark transition-colors">{job.title}</p>
+                </JobClickable>
+              ))}
             </div>
             <div className="border-t border-divider mt-3 pt-3">
               <span className="font-mono text-[11px] text-muted">+156 more</span>
