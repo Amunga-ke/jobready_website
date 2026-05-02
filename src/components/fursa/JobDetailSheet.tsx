@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { X, MapPin, Clock, Building2, ExternalLink, Share2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { X, MapPin, Clock, Building2, ExternalLink, Share2, Bookmark, BookmarkCheck } from "lucide-react";
 import { useJobModal } from "./JobModalContext";
 import { formatDateUTC } from "@/lib/format-date";
 import type { Job } from "@/types";
@@ -137,6 +137,61 @@ function ShareButton({ slug, title }: { slug: string; title: string }) {
     >
       <Share2 className="w-3.5 h-3.5" />
       Share
+    </button>
+  );
+}
+
+function SaveJobButton({ slug }: { slug: string }) {
+  const [saved, setSaved] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const stored = localStorage.getItem("saved-jobs");
+      if (stored) {
+        const slugs: string[] = JSON.parse(stored);
+        return slugs.includes(slug);
+      }
+    } catch {}
+    return false;
+  });
+
+  const toggleSave = () => {
+    try {
+      const stored = localStorage.getItem("saved-jobs");
+      const slugs: string[] = stored ? JSON.parse(stored) : [];
+
+      if (saved) {
+        const next = slugs.filter((s) => s !== slug);
+        localStorage.setItem("saved-jobs", JSON.stringify(next));
+        setSaved(false);
+      } else {
+        slugs.push(slug);
+        localStorage.setItem("saved-jobs", JSON.stringify(slugs));
+        setSaved(true);
+      }
+    } catch {}
+  };
+
+  if (saved) {
+    return (
+      <button
+        onClick={toggleSave}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-accent hover:bg-accent/[0.08] transition-colors"
+        title="Unsave this job"
+      >
+        <BookmarkCheck className="w-3.5 h-3.5" />
+        Saved
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={toggleSave}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-muted hover:text-ink hover:bg-ink/[0.04] transition-colors"
+      title="Save this job"
+    >
+      <Bookmark className="w-3.5 h-3.5" />
+      Save
     </button>
   );
 }
@@ -302,7 +357,10 @@ export default function JobDetailSheet() {
 
         {/* Footer */}
         <div className="px-5 py-4 border-t border-divider flex items-center justify-between gap-3">
-          <ShareButton slug={job.slug} title={job.title} />
+          <div className="flex items-center gap-1">
+            <ShareButton slug={job.slug} title={job.title} />
+            <SaveJobButton key={job.slug} slug={job.slug} />
+          </div>
           {job.applicationUrl ? (
             <a
               href={job.applicationUrl}

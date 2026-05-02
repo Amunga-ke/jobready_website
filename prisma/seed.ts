@@ -130,7 +130,8 @@ interface ListingTemplate {
   description: string;
   requirements?: string;
   instructions?: string;
-  deadline?: string;
+  deadline?: string; // DEPRECATED: use deadlineDaysFromNow instead
+  deadlineDaysFromNow?: number; // days from now for deadline
   featured: boolean;
   tags: string[];
   applyEmail?: string;
@@ -155,7 +156,7 @@ const LISTINGS: ListingTemplate[] = [
     description: "<p>Lead product strategy for M-Pesa, serving 30M+ active users across East Africa. You will own the product roadmap, work closely with a cross-functional team of 12+ engineers and designers, and drive key initiatives in financial inclusion, lending, and merchant payments.</p><ul><li>Define and execute the M-Pesa product vision and roadmap</li><li>Analyze market trends, user behavior, and competitive landscape</li><li>Collaborate with engineering, design, and business teams</li><li>Drive A/B testing and data-informed product decisions</li><li>Present product strategy to C-suite stakeholders</li></ul>",
     requirements: "<ul><li>7+ years in product management, ideally in fintech or mobile payments</li><li>Experience leading products with 1M+ active users</li><li>Strong analytical skills and data-driven decision making</li><li>Excellent communication and stakeholder management</li><li>Degree in Business, Computer Science, or related field</li></ul>",
     instructions: "<p>Submit your CV and a brief product case study (max 3 pages) to <strong>careers@safaricom.co.ke</strong> with subject line <strong>SPM-MPesa-2025</strong>.</p>",
-    deadline: "2025-07-15T23:59:00Z",
+    deadlineDaysFromNow: 45,
     featured: true,
     tags: ["Product Management", "Fintech", "Senior", "Featured"],
     daysAgo: 1,
@@ -209,7 +210,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nairobi",
     description: "<p>NCBA Group's 12-month Graduate Trainee Program offers recent graduates hands-on experience in banking operations, digital innovation, and leadership development. Successful candidates rotate across multiple departments.</p><ul><li>Rotate through Retail Banking, Corporate Banking, and Operations</li><li>Participate in leadership and professional development workshops</li><li>Contribute to digital transformation projects</li><li>Receive mentorship from senior executives</li></ul>",
     requirements: "<ul><li>Bachelor's degree (minimum Second Class Upper)</li><li>Graduated in 2024 or 2025</li><li>Strong analytical and communication skills</li><li>Passionate about the financial services industry</li><li>No prior work experience required</li></ul>",
-    deadline: "2025-07-20T23:59:00Z",
+    deadlineDaysFromNow: 50,
     featured: true,
     tags: ["Graduate", "Banking", "Entry Level", "Featured"],
     daysAgo: 2,
@@ -230,7 +231,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nairobi",
     salaryMin: 15000, salaryMax: 25000, salaryPeriod: "month",
     description: "<p>Join NCBA's Marketing department for a 3-month internship. Gain exposure to brand management, digital marketing campaigns, and corporate communications.</p><ul><li>Assist in planning and executing marketing campaigns</li><li>Create content for social media platforms</li><li>Support market research and competitor analysis</li><li>Help organize corporate events and sponsorships</li></ul>",
-    deadline: "2025-05-10T23:59:00Z",
+    deadlineDaysFromNow: 2,
     featured: false,
     tags: ["Marketing", "Internship", "Entry Level"],
     daysAgo: 10,
@@ -249,7 +250,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 180000, salaryMax: 280000, salaryPeriod: "month",
     description: "<p>Join Safaricom's Finance division as a Senior Accountant. Oversee financial reporting, tax compliance, and internal audit processes for one of East Africa's largest companies.</p>",
     requirements: "<ul><li>CPA(K) qualification mandatory</li><li>7+ years in accounting or auditing</li><li>IFRS knowledge and experience</li><li>Strong SAP or ERP experience</li></ul>",
-    deadline: "2025-05-12T23:59:00Z",
+    deadlineDaysFromNow: 1,
     featured: false,
     tags: ["Accounting", "Senior", "Banking"],
     daysAgo: 12,
@@ -267,7 +268,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 200000, salaryMax: 320000, salaryPeriod: "month",
     description: "<p>Lead the HR function for Equity Bank's Nairobi region, managing talent acquisition, employee relations, performance management, and organizational development for 500+ staff.</p>",
     requirements: "<ul><li>8+ years in HR management</li><li>CHRP certification preferred</li><li>Experience in banking or financial services HR</li><li>Strong labor law knowledge</li></ul>",
-    deadline: "2025-05-14T23:59:00Z",
+    deadlineDaysFromNow: 3,
     featured: false,
     tags: ["HR", "Management", "Senior"],
     daysAgo: 8,
@@ -286,7 +287,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 80000, salaryMax: 120000, salaryPeriod: "month",
     description: "<p>KCB Bank is looking for enthusiastic Junior Developers to join our technology team. You will work on internal tools, customer-facing applications, and gain exposure to enterprise software development.</p>",
     requirements: "<ul><li>Degree in Computer Science, IT, or related field</li><li>Proficiency in at least one programming language</li><li>Understanding of databases (SQL)</li><li>Problem-solving mindset</li></ul>",
-    deadline: "2025-05-15T23:59:00Z",
+    deadlineDaysFromNow: 2,
     featured: false,
     tags: ["Backend", "Entry Level", "Banking"],
     daysAgo: 15,
@@ -306,7 +307,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 100000, salaryMax: 160000, salaryPeriod: "month",
     description: "<p>KRA is seeking a Data Analyst to support revenue intelligence and compliance analytics. You will work with large datasets to identify tax compliance patterns and support policy decisions.</p>",
     requirements: "<ul><li>Degree in Statistics, Mathematics, Data Science, or related field</li><li>3+ years in data analysis</li><li>Proficiency in Python/R and SQL</li><li>Experience with BI tools (Power BI/Tableau)</li></ul>",
-    deadline: "2025-05-15T23:59:00Z",
+    deadlineDaysFromNow: 3,
     featured: false,
     tags: ["Data", "Government", "National"],
     daysAgo: 18,
@@ -327,7 +328,7 @@ const LISTINGS: ListingTemplate[] = [
     description: "<p>The Kenya Revenue Authority invites applications from qualified graduates for its 2025 Graduate Trainee Program. The program runs for 18 months and offers rotations across Customs, Domestic Taxes, and IT departments.</p><ul><li>Rotate through multiple KRA departments</li><li>Receive comprehensive training on tax administration</li><li>Work on real revenue collection projects</li><li>Get mentorship from senior officers</li></ul>",
     requirements: "<ul><li>Bachelor's degree (minimum Second Class Upper)</li><li>Graduated between 2023 and 2025</li><li>Must be a Kenyan citizen aged 35 and below</li><li>No criminal record</li></ul>",
     instructions: "<p>Apply online through the <strong>KRA recruitment portal</strong>. Attach certified copies of academic certificates, national ID, and a detailed CV.</p>",
-    deadline: "2025-06-30T23:59:00Z",
+    deadlineDaysFromNow: 60,
     featured: false,
     tags: ["Government", "Graduate", "National"],
     daysAgo: 20,
@@ -346,7 +347,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nairobi",
     description: "<p>The Teachers Service Commission has advertised 5,000 teaching positions for secondary schools across all 47 counties. Positions are available for various subject combinations.</p>",
     requirements: "<ul><li>Bachelor of Education degree</li><li>TSC registration certificate</li><li>Diploma or degree in relevant subject combination</li><li>Must be a Kenyan citizen</li></ul>",
-    deadline: "2025-07-15T23:59:00Z",
+    deadlineDaysFromNow: 75,
     featured: false,
     tags: ["Government", "Education", "National"],
     daysAgo: 14,
@@ -364,7 +365,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nairobi",
     description: "<p>The National Police Service is recruiting 10,000 police constables across all 47 counties. Successful candidates will undergo 9 months of training at Kiganjo Police Training College.</p>",
     requirements: "<ul><li>Kenyan citizen aged 18-28 years</li><li>Minimum KCSE mean grade D+ (plain)</li><li>Must be physically fit</li><li>No criminal record</li></ul>",
-    deadline: "2025-07-30T23:59:00Z",
+    deadlineDaysFromNow: 90,
     featured: false,
     tags: ["Government", "Security", "National"],
     daysAgo: 25,
@@ -384,7 +385,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 150000, salaryMax: 250000, salaryPeriod: "month",
     description: "<p>The Kenya National Highways Authority is recruiting a Senior Civil Engineer for the Nairobi-Mombasa highway expansion project.</p>",
     requirements: "<ul><li>BSc in Civil Engineering (Minimum Upper Second)</li><li>Registered with Engineers Board of Kenya</li><li>10+ years experience in highway construction</li><li>Project management certification (PMP preferred)</li></ul>",
-    deadline: "2025-06-20T23:59:00Z",
+    deadlineDaysFromNow: 50,
     featured: false,
     tags: ["Government", "Engineering", "Senior", "National"],
     daysAgo: 7,
@@ -403,7 +404,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 130000, salaryMax: 200000, salaryPeriod: "month",
     description: "<p>KEMRI is looking for a Research Scientist to lead epidemiological studies on malaria and vector-borne diseases in Western Kenya.</p>",
     requirements: "<ul><li>MSc or PhD in Epidemiology, Public Health, or related field</li><li>3+ years research experience</li><li>Publications in peer-reviewed journals</li><li>Experience with statistical software (Stata, R, SAS)</li></ul>",
-    deadline: "2025-06-15T23:59:00Z",
+    deadlineDaysFromNow: 45,
     featured: false,
     tags: ["Government", "Research", "Healthcare", "National"],
     daysAgo: 5,
@@ -423,7 +424,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nakuru",
     description: "<p>The County Government of Nakuru is recruiting for multiple positions across Health, Public Works, and Administration departments.</p>",
     requirements: "<ul><li>Relevant diploma or degree</li><li>Must be a resident of Nakuru County (where applicable)</li><li>Valid professional certifications</li></ul>",
-    deadline: "2025-06-10T23:59:00Z",
+    deadlineDaysFromNow: 40,
     featured: false,
     tags: ["Government", "County"],
     daysAgo: 10,
@@ -443,7 +444,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 60000, salaryMax: 90000, salaryPeriod: "month",
     description: "<p>Nairobi County is recruiting clinical officers, nurses, and public health officers for county health facilities.</p>",
     requirements: "<ul><li>Diploma or degree in relevant health discipline</li><li>Valid license from relevant professional body</li><li>2+ years experience in a clinical setting</li></ul>",
-    deadline: "2025-06-05T23:59:00Z",
+    deadlineDaysFromNow: 35,
     featured: false,
     tags: ["Government", "Healthcare", "County"],
     daysAgo: 12,
@@ -463,7 +464,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 80000, salaryMax: 140000, salaryPeriod: "month",
     description: "<p>Mombasa County is seeking Civil and Structural Engineers for infrastructure development projects including roads, drainage, and public buildings.</p>",
     requirements: "<ul><li>BSc in Civil/Structural Engineering</li><li>Registered with Engineers Board of Kenya</li><li>5+ years experience in construction projects</li></ul>",
-    deadline: "2025-06-15T23:59:00Z",
+    deadlineDaysFromNow: 45,
     featured: false,
     tags: ["Government", "Engineering", "County"],
     daysAgo: 8,
@@ -482,7 +483,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Kisumu",
     description: "<p>The County Government of Kisumu invites applications for County Director of Health Services — a senior leadership role responsible for planning and implementing county health policies.</p>",
     requirements: "<ul><li>Master's degree in Public Health, Medicine, or related field</li><li>10+ years in health services management</li><li>Registration with relevant professional body</li></ul>",
-    deadline: "2025-06-25T23:59:00Z",
+    deadlineDaysFromNow: 55,
     featured: false,
     tags: ["Government", "Healthcare", "Leadership", "County"],
     daysAgo: 3,
@@ -600,7 +601,7 @@ const LISTINGS: ListingTemplate[] = [
     location: "Nairobi",
     countyName: "Nairobi",
     description: "<p>3-month internship in Equity Bank's Finance department. Gain hands-on experience in financial analysis, reporting, and planning.</p>",
-    deadline: "2025-06-30T23:59:00Z",
+    deadlineDaysFromNow: 60,
     featured: false,
     tags: ["Internship", "Finance", "Banking"],
     daysAgo: 5,
@@ -618,7 +619,7 @@ const LISTINGS: ListingTemplate[] = [
     location: "Nairobi",
     countyName: "Nairobi",
     description: "<p>6-month software engineering internship at Safaricom's Innovation Lab. Work on cutting-edge projects in mobile, cloud, and AI.</p>",
-    deadline: "2025-06-25T23:59:00Z",
+    deadlineDaysFromNow: 55,
     featured: false,
     tags: ["Internship", "Technology", "Mobile"],
     daysAgo: 8,
@@ -636,7 +637,7 @@ const LISTINGS: ListingTemplate[] = [
     location: "Nairobi",
     countyName: "Nairobi",
     description: "<p>Join EABL's marketing team for a 3-month internship. Work on brand campaigns, digital marketing, and consumer engagement.</p>",
-    deadline: "2025-07-10T23:59:00Z",
+    deadlineDaysFromNow: 70,
     featured: false,
     tags: ["Internship", "Marketing", "FMCG"],
     daysAgo: 6,
@@ -654,7 +655,7 @@ const LISTINGS: ListingTemplate[] = [
     location: "Remote",
     countyName: "Nairobi",
     description: "<p>Google is offering a Data Science internship as part of the Africa Developer Program. Work with Google research teams on ML projects with African impact.</p>",
-    deadline: "2025-07-31T23:59:00Z",
+    deadlineDaysFromNow: 120,
     featured: false,
     tags: ["Internship", "Data", "Remote"],
     daysAgo: 2,
@@ -675,7 +676,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 0, salaryMax: 0,
     description: "<p>Full scholarship for undergraduate studies at the University of Nairobi. Covers tuition, accommodation, books, and a living stipend. Open to academically talented yet economically disadvantaged students from Kenya.</p>",
     requirements: "<ul><li>Strong academic record (mean grade A- or above in KCSE)</li><li>Demonstrated financial need</li><li>Leadership potential and community involvement</li><li>Applying for an undergraduate degree at UoN</li></ul>",
-    deadline: "2025-06-30T23:59:00Z",
+    deadlineDaysFromNow: 60,
     featured: false,
     tags: ["Scholarship", "Education"],
     daysAgo: 10,
@@ -692,7 +693,7 @@ const LISTINGS: ListingTemplate[] = [
     location: "Nairobi",
     countyName: "Nairobi",
     description: "<p>KCB Foundation offers tuition and stipend support for students pursuing diploma and degree programs in STEM, business, and agriculture at accredited Kenyan universities.</p>",
-    deadline: "2025-07-15T23:59:00Z",
+    deadlineDaysFromNow: 75,
     featured: false,
     tags: ["Scholarship", "Education"],
     daysAgo: 7,
@@ -710,7 +711,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nairobi",
     description: "<p>Google is offering the Africa Developer Scholarship program for 2025, providing free access to world-class training in Android, Web, and Google Cloud technologies.</p>",
     applicationUrl: "https://grow.google/africa/dev-scholarship/",
-    deadline: "2025-08-31T23:59:00Z",
+    deadlineDaysFromNow: 150,
     featured: true,
     tags: ["Scholarship", "Technology", "Remote"],
     daysAgo: 4,
@@ -729,7 +730,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nairobi",
     salaryMin: 60000, salaryMax: 90000, salaryPeriod: "month",
     description: "<p>Entry-level accounting position at Co-operative Bank. Handle day-to-day bookkeeping, reconciliation, and financial reporting.</p>",
-    deadline: "2025-07-15T23:59:00Z",
+    deadlineDaysFromNow: 75,
     featured: false,
     tags: ["Entry Level", "Banking"],
     daysAgo: 3,
@@ -746,7 +747,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nairobi",
     salaryMin: 40000, salaryMax: 60000, salaryPeriod: "month",
     description: "<p>Handle customer inquiries via phone, chat, and email. Resolve issues related to M-Pesa, data, and voice services.</p>",
-    deadline: "2025-07-20T23:59:00Z",
+    deadlineDaysFromNow: 80,
     featured: false,
     tags: ["Entry Level", "Technology"],
     daysAgo: 1,
@@ -800,7 +801,7 @@ const LISTINGS: ListingTemplate[] = [
     salaryMin: 50000, salaryMax: 75000, salaryPeriod: "month",
     description: "<p>Kisumu County Hospital is seeking registered nurses for its medical, surgical, and pediatric wards.</p>",
     requirements: "<ul><li>KRCHN or BSc Nursing</li><li>Valid Nursing Council of Kenya license</li><li>2+ years clinical experience</li></ul>",
-    deadline: "2025-06-30T23:59:00Z",
+    deadlineDaysFromNow: 60,
     featured: false,
     tags: ["Healthcare", "Entry Level"],
     daysAgo: 5,
@@ -836,7 +837,7 @@ const LISTINGS: ListingTemplate[] = [
     countyName: "Nakuru",
     salaryMin: 120000, salaryMax: 180000, salaryPeriod: "month",
     description: "<p>KeNHA needs Civil Engineers for the Nakuru-Mai Mahiu road expansion project. 18-month contract.</p>",
-    deadline: "2025-06-20T23:59:00Z",
+    deadlineDaysFromNow: 50,
     featured: false,
     tags: ["Government", "Engineering", "National"],
     daysAgo: 6,
@@ -856,7 +857,7 @@ const LISTINGS: ListingTemplate[] = [
     description: "<p>Join Microsoft's Africa Development Centre as a UI/UX Designer. Design experiences for Azure, Teams, and other enterprise products used by millions globally.</p>",
     requirements: "<ul><li>4+ years product design experience</li><li>Proficiency in Figma, Adobe XD, or Sketch</li><li>Portfolio demonstrating complex enterprise UX</li><li>Understanding of design systems and accessibility</li></ul>",
     applicationUrl: "https://careers.microsoft.com",
-    deadline: "2025-07-31T23:59:00Z",
+    deadlineDaysFromNow: 120,
     featured: true,
     tags: ["Design", "Technology", "Remote"],
     daysAgo: 1,
@@ -995,7 +996,15 @@ async function main() {
       .filter((tag) => tagMap.has(tag))
       .map((tag) => ({ tagId: tagMap.get(tag)! }));
 
-    const deadline = t.deadline ? new Date(t.deadline) : null;
+    // Compute deadline — prefer deadlineDaysFromNow over hardcoded deadline string
+    let deadline: Date | null = null;
+    if (t.deadlineDaysFromNow !== undefined) {
+      deadline = new Date();
+      deadline.setDate(deadline.getDate() + t.deadlineDaysFromNow);
+      deadline.setHours(23, 59, 0, 0);
+    } else if (t.deadline) {
+      deadline = new Date(t.deadline);
+    }
 
     // Determine if urgent (deadline within 48h)
     const isUrgent = deadline ? (deadline.getTime() - Date.now()) < 48 * 60 * 60 * 1000 : false;

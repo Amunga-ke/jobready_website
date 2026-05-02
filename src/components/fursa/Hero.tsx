@@ -1,4 +1,7 @@
 import Link from "next/link";
+import JobClickable from "./JobClickable";
+import { formatDateShortUTC } from "@/lib/format-date";
+import type { Job } from "@/types";
 
 const QUICK_LINKS = [
   { label: "Remote", href: "/jobs?mode=REMOTE" },
@@ -8,7 +11,13 @@ const QUICK_LINKS = [
   { label: "Internships", href: "/opportunities/internship" },
 ];
 
-export default function Hero() {
+interface HeroProps {
+  jobs: Job[];
+}
+
+export default function Hero({ jobs }: HeroProps) {
+  const justPosted = jobs.slice(0, 4);
+
   return (
     <section className="pt-8 pb-16 lg:pt-12 lg:pb-24 border-b border-divider">
       <div className="max-w-6xl mx-auto px-5">
@@ -58,10 +67,32 @@ export default function Hero() {
                 View all →
               </Link>
             </div>
-            <p className="text-[12px] text-muted/60 mb-4">See the latest jobs from verified employers across Kenya.</p>
+
+            {justPosted.length > 0 ? (
+              <div className="divide-y divide-divider">
+                {justPosted.map((job) => (
+                  <JobClickable
+                    key={job.id}
+                    job={job}
+                    className="flex items-center gap-3 py-3 group cursor-pointer hover:bg-ink/[0.03] rounded-lg -mx-1 px-1 transition-colors"
+                  >
+                    <div className="w-9 h-9 border border-divider rounded-lg flex items-center justify-center shrink-0 font-heading font-bold text-[12px] text-muted">
+                      {job.companyName.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">{job.title}</p>
+                      <p className="text-[11px] text-muted">{job.companyName} · {formatDateShortUTC(job.createdAt)}</p>
+                    </div>
+                  </JobClickable>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[12px] text-muted/60 mb-4">See the latest jobs from verified employers across Kenya.</p>
+            )}
+
             <Link
               href="/jobs?sort=latest"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-white text-[13px] font-medium rounded-lg hover:bg-ink/90 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-white text-[13px] font-medium rounded-lg hover:bg-ink/90 transition-colors mt-2"
             >
               Browse all latest jobs
             </Link>
