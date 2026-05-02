@@ -1,31 +1,30 @@
 // ─── JobReady Database Schema ───
-// Provider: sqlite (dev) → mysql (production)
-// Just change provider + DATABASE_URL to switch
+// Provider: mysql (production via Vercel)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 // ─── Companies / Employers ───
 
 model Company {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  name        String
-  logo        String?
+  id          String    @id @default(cuid()) @db.VarChar(64)
+  slug        String    @unique @db.VarChar(191)
+  name        String    @db.VarChar(191)
+  logo        String?   @db.VarChar(500)
   verified    Boolean   @default(false)
-  orgType     String    @default("PRIVATE") // NATIONAL_GOV, COUNTY_GOV, STATE_CORPORATION, SME, NGO, INTERNATIONAL, STARTUP, ACADEMIC, PARASTATAL, OTHER
-  industry    String?
-  description String?
-  website     String?
-  location    String?
-  county      String?
-  country     String    @default("Kenya")
+  orgType     String    @default("PRIVATE") @db.VarChar(30)
+  industry    String?   @db.VarChar(100)
+  description String?   @db.Text
+  website     String?   @db.VarChar(500)
+  location    String?   @db.VarChar(191)
+  county      String?   @db.VarChar(100)
+  country     String    @default("Kenya") @db.VarChar(100)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -35,10 +34,10 @@ model Company {
 // ─── Job Categories ───
 
 model Category {
-  id        String        @id @default(cuid())
-  slug      String        @unique
-  name      String
-  icon      String?       // emoji or icon name
+  id        String        @id @default(cuid()) @db.VarChar(64)
+  slug      String        @unique @db.VarChar(191)
+  name      String        @db.VarChar(191)
+  icon      String?       @db.VarChar(50)
   sortOrder Int           @default(0)
   active    Boolean       @default(true)
 
@@ -49,10 +48,10 @@ model Category {
 // ─── Subcategories ───
 
 model Subcategory {
-  id         String   @id @default(cuid())
-  slug       String   @unique
-  name       String
-  categoryId String
+  id         String   @id @default(cuid()) @db.VarChar(64)
+  slug       String   @unique @db.VarChar(191)
+  name       String   @db.VarChar(191)
+  categoryId String   @db.VarChar(64)
   sortOrder  Int      @default(0)
   active     Boolean  @default(true)
 
@@ -63,10 +62,10 @@ model Subcategory {
 // ─── Counties ───
 
 model County {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  name      String
-  code      String?  // e.g. "047" for Nairobi
+  id        String   @id @default(cuid()) @db.VarChar(64)
+  slug      String   @unique @db.VarChar(191)
+  name      String   @db.VarChar(100)
+  code      String?  @db.VarChar(10)
   active    Boolean  @default(true)
 
   listings Listing[]
@@ -75,8 +74,8 @@ model County {
 // ─── Tags ───
 
 model Tag {
-  id   String @id @default(cuid())
-  name String @unique
+  id   String @id @default(cuid()) @db.VarChar(64)
+  name String @unique @db.VarChar(100)
 
   listings ListingTag[]
 }
@@ -84,62 +83,62 @@ model Tag {
 // ─── Listings (Jobs / Government / Casual / Opportunities) ───
 
 model Listing {
-  id              String       @id @default(cuid())
-  slug            String       @unique
-  title           String
-  description     String       @default("") // HTML content
-  requirements    String?      // HTML content
-  instructions    String?      // HTML content
+  id              String       @id @default(cuid()) @db.VarChar(64)
+  slug            String       @unique @db.VarChar(191)
+  title           String       @db.VarChar(300)
+  description     String       @default("") @db.Text
+  requirements    String?      @db.Text
+  instructions    String?      @db.Text
 
   // Type
-  listingType     String       @default("JOB") // JOB, GOVERNMENT, CASUAL, OPPORTUNITY
-  governmentLevel String?      // NATIONAL, COUNTY, STATE_CORPORATION
-  opportunityType String?      // INTERNSHIP, SCHOLARSHIP, FELLOWSHIP, etc.
+  listingType     String       @default("JOB") @db.VarChar(20)
+  governmentLevel String?      @db.VarChar(30)
+  opportunityType String?      @db.VarChar(30)
 
   // Employer
-  companyId       String
+  companyId       String       @db.VarChar(64)
   company         Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   // Classification
-  categoryId      String?
+  categoryId      String?      @db.VarChar(64)
   category        Category?    @relation(fields: [categoryId], references: [id])
-  subcategoryId   String?
+  subcategoryId   String?      @db.VarChar(64)
   subcategory     Subcategory? @relation(fields: [subcategoryId], references: [id])
 
   // Location
-  location        String       @default("")
-  countyId        String?
+  location        String       @default("") @db.VarChar(191)
+  countyId        String?      @db.VarChar(64)
   county          County?      @relation(fields: [countyId], references: [id])
-  countyName      String       @default("") // denormalized for easy querying
-  country         String       @default("Kenya")
+  countyName      String       @default("") @db.VarChar(100)
+  country         String       @default("Kenya") @db.VarChar(100)
 
   // Employment details
-  employmentType  String       @default("Full-time") // Full-time, Part-time, Contract, Internship, Volunteer, Temporary
-  experienceLevel String       @default("Mid-level") // Entry-level, Junior, Mid-level, Senior, Director, Executive
-  workMode        String       @default("ONSITE") // ONSITE, REMOTE, HYBRID
+  employmentType  String       @default("Full-time") @db.VarChar(20)
+  experienceLevel String       @default("Mid-level") @db.VarChar(20)
+  workMode        String       @default("ONSITE") @db.VarChar(20)
 
   // Salary
   salaryMin       Int?
   salaryMax       Int?
-  salaryCurrency  String       @default("KES")
-  salaryPeriod    String?      // month, year, day, hour, project
+  salaryCurrency  String       @default("KES") @db.VarChar(10)
+  salaryPeriod    String?      @db.VarChar(10)
 
   // AI-predicted salary (shown when salary not disclosed)
-  predictedSalary  String?
+  predictedSalary  String?     @db.VarChar(100)
   isPredictedSalary Boolean @default(false)
 
   // Status & visibility
-  status          String       @default("ACTIVE") // ACTIVE, CLOSED, EXPIRED, DRAFT, PAUSED
+  status          String       @default("ACTIVE") @db.VarChar(20)
   featured        Boolean      @default(false)
-  isUrgent        Boolean      @default(false) // closing within 48h
+  isUrgent        Boolean      @default(false)
 
   // Application
-  applicationUrl  String?
-  applyEmail      String?      // apply via email
+  applicationUrl  String?      @db.VarChar(500)
+  applyEmail      String?      @db.VarChar(191)
   applyCount      Int          @default(0)
 
   // Metadata
-  source          String?      // where the listing was scraped/imported from
+  source          String?      @db.VarChar(191)
   viewCount       Int          @default(0)
 
   // Dates
@@ -171,8 +170,8 @@ model Listing {
 // ─── Listing ↔ Tag junction ───
 
 model ListingTag {
-  listingId String
-  tagId     String
+  listingId String @db.VarChar(64)
+  tagId     String @db.VarChar(64)
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
   tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)

@@ -12,28 +12,28 @@ function slugify(text: string): string {
 
 // ─── Categories ───
 const CATEGORIES = [
-  { name: "Technology & IT", icon: "💻", order: 1 },
-  { name: "Finance & Accounting", icon: "💰", order: 2 },
-  { name: "Sales & Business Development", icon: "📊", order: 3 },
-  { name: "Marketing & Communications", icon: "📢", order: 4 },
-  { name: "Human Resources", icon: "👥", order: 5 },
-  { name: "Engineering & Construction", icon: "🏗️", order: 6 },
-  { name: "Healthcare & Medical", icon: "🏥", order: 7 },
-  { name: "Education & Training", icon: "📚", order: 8 },
-  { name: "Government & Public Service", icon: "🏛️", order: 9 },
-  { name: "Administration & Office", icon: "📋", order: 10 },
-  { name: "Logistics & Transport", icon: "🚚", order: 11 },
-  { name: "Hospitality & Tourism", icon: "🏨", order: 12 },
-  { name: "Legal & Compliance", icon: "⚖️", order: 13 },
-  { name: "Creative Arts & Design", icon: "🎨", order: 14 },
-  { name: "Data Science & Analytics", icon: "📈", order: 15 },
-  { name: "Customer Service", icon: "🎧", order: 16 },
-  { name: "Agriculture & Farming", icon: "🌾", order: 17 },
-  { name: "Retail & Wholesale", icon: "🛒", order: 18 },
-  { name: "Security & Law Enforcement", icon: "🛡️", order: 19 },
-  { name: "Cleaning & Maintenance", icon: "🧹", order: 20 },
-  { name: "Graduate Programs", icon: "🎓", order: 21 },
-  { name: "Research & Development", icon: "🔬", order: 22 },
+  { name: "Technology & IT", icon: "laptop", order: 1 },
+  { name: "Finance & Accounting", icon: "banknote", order: 2 },
+  { name: "Sales & Business Development", icon: "trending-up", order: 3 },
+  { name: "Marketing & Communications", icon: "megaphone", order: 4 },
+  { name: "Human Resources", icon: "users", order: 5 },
+  { name: "Engineering & Construction", icon: "hard-hat", order: 6 },
+  { name: "Healthcare & Medical", icon: "heart-pulse", order: 7 },
+  { name: "Education & Training", icon: "book-open", order: 8 },
+  { name: "Government & Public Service", icon: "landmark", order: 9 },
+  { name: "Administration & Office", icon: "clipboard-list", order: 10 },
+  { name: "Logistics & Transport", icon: "truck", order: 11 },
+  { name: "Hospitality & Tourism", icon: "bed", order: 12 },
+  { name: "Legal & Compliance", icon: "scale", order: 13 },
+  { name: "Creative Arts & Design", icon: "palette", order: 14 },
+  { name: "Data Science & Analytics", icon: "bar-chart", order: 15 },
+  { name: "Customer Service", icon: "headphones", order: 16 },
+  { name: "Agriculture & Farming", icon: "wheat", order: 17 },
+  { name: "Retail & Wholesale", icon: "shopping-cart", order: 18 },
+  { name: "Security & Law Enforcement", icon: "shield", order: 19 },
+  { name: "Cleaning & Maintenance", icon: "sparkles", order: 20 },
+  { name: "Graduate Programs", icon: "graduation-cap", order: 21 },
+  { name: "Research & Development", icon: "flask", order: 22 },
 ];
 
 const SUBCATEGORIES_BY_CATEGORY: Record<string, string[]> = {
@@ -901,152 +901,213 @@ const LISTINGS: ListingTemplate[] = [
 ];
 
 // ─── Main seed function ───
+
+// ─── Main seed function (optimized for slow remote MySQL) ───
+
+const DAY_MS = 86_400_000;
+
 async function main() {
   console.log("🌱 Seeding database...\n");
 
-  // 1. Categories
-  console.log("  Creating categories...");
-  const categoryMap = new Map<string, string>();
-  for (const cat of CATEGORIES) {
-    const record = await prisma.category.create({
-      data: { slug: slugify(cat.name), name: cat.name, icon: cat.icon, sortOrder: cat.order },
-    });
-    categoryMap.set(cat.name, record.id);
-  }
-  console.log(`  ✅ ${CATEGORIES.length} categories created`);
+  // ─── 0. Clean existing data (FK order) ───
+  console.log("  Clearing existing data...");
+  await prisma.listingTag.deleteMany();
+  await prisma.listing.deleteMany();
+  await prisma.tag.deleteMany();
+  await prisma.subcategory.deleteMany();
+  await prisma.county.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.company.deleteMany();
+  console.log("  ✅ Existing data cleared\n");
 
-  // 2. Subcategories
+  // ─── 1. Categories (bulk insert) ───
+  console.log("  Creating categories...");
+  await prisma.category.createMany({
+    data: CATEGORIES.map((cat) => ({
+      slug: slugify(cat.name),
+      name: cat.name,
+      icon: cat.icon,
+      sortOrder: cat.order,
+      active: true,
+    })),
+  });
+  const dbCategories = await prisma.category.findMany();
+  const categoryMap = new Map(dbCategories.map((c) => [c.name, c.id]));
+  console.log(`  ✅ ${dbCategories.length} categories created`);
+
+  // ─── 2. Subcategories (bulk insert) ───
   console.log("  Creating subcategories...");
-  let subcatCount = 0;
-  const subcategoryMap = new Map<string, string>();
+  const subcategoryRows: { slug: string; name: string; categoryId: string; sortOrder: number; active: boolean }[] = [];
+  let subcatOrder = 0;
   for (const [catName, subs] of Object.entries(SUBCATEGORIES_BY_CATEGORY)) {
     const catId = categoryMap.get(catName)!;
     for (const subName of subs) {
-      const record = await prisma.subcategory.create({
-        data: { slug: slugify(subName), name: subName, categoryId: catId },
+      subcatOrder++;
+      subcategoryRows.push({
+        slug: slugify(subName),
+        name: subName,
+        categoryId: catId,
+        sortOrder: subcatOrder,
+        active: true,
       });
-      subcategoryMap.set(subName, record.id);
-      subcatCount++;
     }
   }
-  console.log(`  ✅ ${subcatCount} subcategories created`);
+  if (subcategoryRows.length > 0) {
+    // MySQL limit for bulk insert — batch if needed
+    const BATCH_SIZE = 500;
+    for (let i = 0; i < subcategoryRows.length; i += BATCH_SIZE) {
+      await prisma.subcategory.createMany({
+        data: subcategoryRows.slice(i, i + BATCH_SIZE),
+      });
+    }
+  }
+  const dbSubcategories = await prisma.subcategory.findMany();
+  const subcategoryMap = new Map(dbSubcategories.map((s) => [s.name, s.id]));
+  console.log(`  ✅ ${dbSubcategories.length} subcategories created`);
 
-  // 3. Counties
+  // ─── 3. Counties (bulk insert) ───
   console.log("  Creating counties...");
-  const countyMap = new Map<string, string>();
-  for (const county of COUNTIES) {
-    const record = await prisma.county.create({
-      data: { slug: slugify(county), name: county },
-    });
-    countyMap.set(county, record.id);
-  }
-  console.log(`  ✅ ${COUNTIES.length} counties created`);
+  await prisma.county.createMany({
+    data: COUNTIES.map((name, idx) => ({
+      slug: slugify(name),
+      name,
+      code: String(idx + 1).padStart(3, "0"),
+      active: true,
+    })),
+  });
+  const dbCounties = await prisma.county.findMany();
+  const countyMap = new Map(dbCounties.map((c) => [c.name, c.id]));
+  console.log(`  ✅ ${dbCounties.length} counties created`);
 
-  // 4. Companies
+  // ─── 4. Companies (bulk insert) ───
   console.log("  Creating companies...");
-  const companyMap = new Map<number, string>();
-  for (let i = 0; i < COMPANIES.length; i++) {
-    const c = COMPANIES[i];
-    const record = await prisma.company.create({
-      data: {
-        slug: slugify(c.name),
-        name: c.name,
-        orgType: c.orgType,
-        industry: c.industry,
-        verified: c.verified,
-        county: c.county,
-        country: "Kenya",
-      },
-    });
-    companyMap.set(i, record.id);
-  }
-  console.log(`  ✅ ${COMPANIES.length} companies created`);
+  await prisma.company.createMany({
+    data: COMPANIES.map((c) => ({
+      slug: slugify(c.name),
+      name: c.name,
+      orgType: c.orgType,
+      industry: c.industry,
+      verified: c.verified,
+      county: c.county,
+      country: "Kenya",
+    })),
+  });
+  const dbCompanies = await prisma.company.findMany();
+  const companyMap = new Map(dbCompanies.map((c) => [c.slug, c.id]));
+  console.log(`  ✅ ${dbCompanies.length} companies created`);
 
-  // 5. Tags
+  // ─── 5. Tags (bulk insert) ───
   console.log("  Creating tags...");
-  const tagMap = new Map<string, string>();
-  for (const tagName of TAGS) {
-    const record = await prisma.tag.create({
-      data: { name: tagName },
-    });
-    tagMap.set(tagName, record.id);
-  }
-  console.log(`  ✅ ${TAGS.length} tags created`);
+  await prisma.tag.createMany({
+    data: TAGS.map((name) => ({ name })),
+  });
+  const dbTags = await prisma.tag.findMany();
+  const tagMap = new Map(dbTags.map((t) => [t.name, t.id]));
+  console.log(`  ✅ ${dbTags.length} tags created`);
 
-  // 6. Listings
+  // ─── 6. Listings (bulk insert) ───
   console.log("  Creating listings...");
-  for (const t of LISTINGS) {
-    const companyId = companyMap.get(t.companyIdx)!;
-    const categoryId = categoryMap.get(t.category);
-    const subcategoryId = t.subcategory ? subcategoryMap.get(t.subcategory) : undefined;
-    const countyId = countyMap.get(t.countyName);
+  const listingRows: any[] = [];
 
-    // Generate createdAt from daysAgo
-    const createdAt = new Date();
-    if (t.daysAgo !== undefined) {
-      createdAt.setDate(createdAt.getDate() - t.daysAgo);
-      createdAt.setHours(Math.floor(Math.random() * 12) + 7, Math.floor(Math.random() * 60));
-    }
+  for (let li = 0; li < LISTINGS.length; li++) {
+    const t = LISTINGS[li];
+    const company = COMPANIES[t.companyIdx];
+    const companyId = companyMap.get(slugify(company.name))!;
+    const categoryId = categoryMap.get(t.category) || null;
+    const subcategoryId = t.subcategory ? (subcategoryMap.get(t.subcategory) || null) : null;
+    const countyId = countyMap.get(t.countyName) || null;
 
-    // Build slug
+    const createdAt = new Date(Date.now() - (t.daysAgo ?? 0) * DAY_MS);
+    // Add random hours 7-18 for realistic timestamps
+    createdAt.setHours(Math.floor(Math.random() * 12) + 7, Math.floor(Math.random() * 60), 0, 0);
+
     const slug = slugify(t.title) + (t.countyName !== "Nairobi" ? `-${slugify(t.countyName)}` : "");
 
-    // Build listing tags
-    const listingTags = t.tags
-      .filter((tag) => tagMap.has(tag))
-      .map((tag) => ({ tagId: tagMap.get(tag)! }));
-
-    // Compute deadline — prefer deadlineDaysFromNow over hardcoded deadline string
     let deadline: Date | null = null;
     if (t.deadlineDaysFromNow !== undefined) {
-      deadline = new Date();
-      deadline.setDate(deadline.getDate() + t.deadlineDaysFromNow);
+      deadline = new Date(Date.now() + t.deadlineDaysFromNow * DAY_MS);
       deadline.setHours(23, 59, 0, 0);
     } else if (t.deadline) {
       deadline = new Date(t.deadline);
     }
 
-    // Determine if urgent (deadline within 48h)
     const isUrgent = deadline ? (deadline.getTime() - Date.now()) < 48 * 60 * 60 * 1000 : false;
 
-    await prisma.listing.create({
-      data: {
-        slug,
-        title: t.title,
-        description: t.description,
-        requirements: t.requirements || null,
-        instructions: t.instructions || null,
-        listingType: t.listingType,
-        governmentLevel: t.governmentLevel || null,
-        opportunityType: t.opportunityType || null,
-        companyId,
-        categoryId: categoryId || null,
-        subcategoryId: subcategoryId || null,
-        location: t.location,
-        countyId: countyId || null,
-        countyName: t.countyName,
-        country: "Kenya",
-        employmentType: t.employmentType,
-        experienceLevel: t.experienceLevel,
-        workMode: t.workMode,
-        salaryMin: t.salaryMin,
-        salaryMax: t.salaryMax,
-        salaryCurrency: "KES",
-        salaryPeriod: t.salaryPeriod || null,
-        status: "ACTIVE",
-        featured: t.featured,
-        isUrgent,
-        applicationUrl: t.applicationUrl || null,
-        applyEmail: t.applyEmail || null,
-        deadline,
-        createdAt,
-        tags: { create: listingTags },
-      },
+    listingRows.push({
+      slug,
+      title: t.title,
+      description: t.description,
+      requirements: t.requirements || null,
+      instructions: t.instructions || null,
+      listingType: t.listingType,
+      governmentLevel: t.governmentLevel || null,
+      opportunityType: t.opportunityType || null,
+      companyId,
+      categoryId,
+      subcategoryId,
+      location: t.location,
+      countyId,
+      countyName: t.countyName,
+      country: "Kenya",
+      employmentType: t.employmentType,
+      experienceLevel: t.experienceLevel,
+      workMode: t.workMode,
+      salaryMin: t.salaryMin,
+      salaryMax: t.salaryMax,
+      salaryCurrency: "KES",
+      salaryPeriod: t.salaryPeriod || null,
+      status: "ACTIVE",
+      featured: t.featured,
+      isUrgent,
+      applicationUrl: t.applicationUrl || null,
+      applyEmail: t.applyEmail || null,
+      deadline,
+      createdAt,
+      updatedAt: createdAt,
     });
   }
-  console.log(`  ✅ ${LISTINGS.length} listings created`);
 
-  // Summary
+  // Bulk insert listings in batches
+  const LISTING_BATCH = 100;
+  for (let i = 0; i < listingRows.length; i += LISTING_BATCH) {
+    await prisma.listing.createMany({
+      data: listingRows.slice(i, i + LISTING_BATCH),
+    });
+  }
+  console.log(`  ✅ ${listingRows.length} listings created`);
+
+  // ─── 7. ListingTag junction (bulk insert) ───
+  console.log("  Creating listing-tag relations...");
+  const dbListings = await prisma.listing.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, slug: true },
+  });
+  const listingIdBySlug = new Map(dbListings.map((l) => [l.slug, l.id]));
+
+  const listingTagRows: { listingId: string; tagId: string }[] = [];
+  for (const t of LISTINGS) {
+    const slug = slugify(t.title) + (t.countyName !== "Nairobi" ? `-${slugify(t.countyName)}` : "");
+    const listingId = listingIdBySlug.get(slug);
+    if (!listingId) continue;
+    for (const tagName of t.tags) {
+      const tagId = tagMap.get(tagName);
+      if (tagId) {
+        listingTagRows.push({ listingId, tagId });
+      }
+    }
+  }
+
+  if (listingTagRows.length > 0) {
+    const TAG_BATCH = 1000;
+    for (let i = 0; i < listingTagRows.length; i += TAG_BATCH) {
+      await prisma.listingTag.createMany({
+        data: listingTagRows.slice(i, i + TAG_BATCH),
+      });
+    }
+  }
+  console.log(`  ✅ ${listingTagRows.length} listing-tag relations created`);
+
+  // ─── Summary ───
   const totalListings = await prisma.listing.count();
   const totalFeatured = await prisma.listing.count({ where: { featured: true } });
   const totalGovt = await prisma.listing.count({ where: { listingType: "GOVERNMENT" } });
