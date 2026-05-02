@@ -152,3 +152,27 @@ Stage Summary:
 - Counties: 47 (all Kenya counties with codes)
 - Tags: 82 (comprehensive job tagging vocabulary)
 - Seed script: prisma/seed-lookup.ts (run with npx tsx prisma/seed-lookup.ts)
+
+---
+Task ID: 7
+Agent: Main Agent
+Task: Seed content data + wire subcategories
+
+Work Log:
+- Created prisma/seed-content.ts — comprehensive content seed with 33 companies and 36 listings
+- Listings breakdown: 15 jobs (featured + regular), 6 government (national + county), 6 casual, 9 opportunities (internships + scholarships + fellowships)
+- Companies: Safaricom, Equity, KCB, NCBA, Co-op Bank, KRA, TSC, NPS, Google, Microsoft, Deloitte, PwC, etc.
+- All listings properly linked to categories, subcategories, counties, companies, and tags via foreign keys
+- Updated transforms.ts: now populates category and subcategory names from DB relations (not hardcoded)
+- Updated all data.ts queries to include category and subcategory in Prisma includes
+- Rewrote /jobs/category/[slug]/page.tsx: now queries real DB for subcategories with listing counts, displays actual job listings
+- Category pages show: breadcrumbs, salary context, real job listings, subcategory grid with counts, county drill-down, related categories
+- Build passes: 49 pages, 0 errors
+- Committed and pushed to GitHub (commit f202b3f)
+
+Stage Summary:
+- Companies: 33 (25 verified, 8 unverified)
+- Listings: 36 (15 jobs, 6 gov, 6 casual, 9 opportunities, 7 featured)
+- Subcategories: now wired into category pages with real DB counts
+- Category pages: show real listings + subcategory drill-down grid
+- All data.ts queries: include category + subcategory relations
