@@ -313,3 +313,35 @@ Stage Summary:
 - 6 client pages: DONE (layout wrappers with metadata)
 - OpenGraph URLs: NOW ABSOLUTE (via metadataBase)
 - Twitter Cards: ADDED site-wide (summary_large_image)
+
+---
+Task ID: 12
+Agent: Main Agent
+Task: Fix connection pooling, replace stub functions, SEO hardening
+
+Work Log:
+- Fixed Prisma connection pooling to prevent max_user_connections errors:
+  - Consolidated src/lib/db.ts to re-export from src/lib/prisma.ts (eliminates duplicate client)
+  - Added connection_limit=5&pool_timeout=10 to DATABASE_URL
+  - Removed query logging from production (was logging every Prisma query via log: ['query'])
+- Replaced 3 hardcoded getListingCount() stubs (returning 0) with real DB queries:
+  - /jobs/in-[county]: getJobCountByCounty() + getJobsByCounty() — now shows actual jobs per county with clickable rows, deadline indicators, "View all" link for 20+
+  - /jobs/category/[slug]/in-[county]: getJobCountByCategoryAndCounty() + getJobsByCategoryAndCounty() — now shows actual category×county jobs
+  - /opportunities/[type]: direct prisma.listing.count() with opportunityType — now shows real counts in metadata
+- Fixed all relative OpenGraph URLs to absolute across 6 page types:
+  - /jobs/[slug], /jobs/category/[slug], /jobs/category/[slug]/in-[county], /jobs/in-[county], /government/[level], /opportunities/[type]
+- Added Twitter Card meta to all dynamic pages that were missing it:
+  - Job detail, category, county, category×county, government level, opportunity type, update detail
+- Added generateMetadata to /updates/[slug] with OG + Twitter + publishedTime
+- Enhanced sitemap.xml to include subcategory pages (category/subcategory) from DB
+- Build passes: 51 pages, 0 errors
+- Committed and pushed to GitHub (commit 617e3a2)
+
+Stage Summary:
+- Connection pooling: FIXED (single Prisma client, connection_limit=5)
+- County pages: NOW SHOW REAL JOBS from DB (was hardcoded 0)
+- Category×County pages: NOW SHOW REAL JOBS from DB (was hardcoded 0)
+- Opportunity type pages: NOW SHOW REAL COUNTS (was hardcoded 0)
+- OpenGraph URLs: ALL ABSOLUTE across every page
+- Twitter Cards: COMPLETE on all dynamic pages
+- Sitemap: ENHANCED with subcategory pages
