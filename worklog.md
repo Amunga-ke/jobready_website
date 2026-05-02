@@ -452,3 +452,38 @@ Stage Summary:
 - Test users: seeker@test.com + employer@test.com (password: password123)
 - Build: PASSES
 - Commit: 3ca2908 → https://github.com/Amunga-ke/jobready_website.git
+
+---
+Task ID: 14
+Agent: Full-Stack Developer
+Task: Build complete Job Seekers Dashboard with authentication
+
+Work Log:
+- Added 4 Prisma models: User (auth), SavedJob (bookmarks), Application (tracking), JobAlert (search alerts)
+- Added savedJobs[] and applications[] relations to existing Listing model
+- Installed NextAuth.js v4 + bcryptjs for authentication
+- Created CredentialsProvider with JWT strategy (no session table needed for shared MySQL)
+- Created auth middleware protecting /dashboard/* routes
+- Created Providers client wrapper for SessionProvider in root layout
+- Built 3 auth pages: /auth/login, /auth/register, /auth/forgot-password
+- Built dashboard layout with sidebar nav (desktop) + hamburger drawer + bottom tabs (mobile)
+- Built 6 dashboard pages: Overview, Saved Jobs, Applications, Profile, Alerts, Settings
+- Created 15 API routes for dashboard data (stats, saved-jobs CRUD, applications CRUD, profile, CV upload, alerts CRUD, settings)
+- Migrated SaveJobButton: authenticated users save to DB, guests use localStorage
+- Updated Navbar to show Dashboard button when signed in
+- Seeded 2 test users (seeker@test.com, employer@test.com)
+- Build: 61 pages compiled, 0 errors
+- Pushed to GitHub (commit 3ca2908, worklog b59b9d4)
+
+Stage Summary:
+- Authentication: DONE (NextAuth Credentials + JWT)
+- Dashboard Layout: DONE (sidebar + mobile nav)
+- Overview: DONE (stats cards, recent activity, quick actions)
+- Saved Jobs: DONE (sort, notes, unsave, apply)
+- Applications: DONE (7 status colors, filter tabs, withdraw)
+- Profile: DONE (edit info, CV upload, change password, delete account)
+- Alerts: DONE (create with filters, pause, delete)
+- Settings: DONE (notification toggles, privacy)
+- API Routes: DONE (15 endpoints)
+- SaveJobButton: DONE (DB-backed for auth users, localStorage for guests)
+- Test Users: seeker@test.com / employer@test.com (password: password123)
