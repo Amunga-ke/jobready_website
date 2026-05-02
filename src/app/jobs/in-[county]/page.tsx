@@ -5,8 +5,8 @@ import { KE_COUNTIES, slugifyCounty, JOB_CATEGORIES, getCountyBySlug } from "@/l
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCountyIntro, getNearbyCounties, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
+import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { getJobCountByCounty, getJobsByCounty } from "@/lib/data";
-import { formatDateShortUTC } from "@/lib/format-date";
 
 export async function generateMetadata({
   params,
@@ -97,37 +97,39 @@ export default async function CountyPage({
                   : null;
                 const urgent = dl !== null && dl <= 3 && dl > 0;
                 return (
-                  <Link key={job.id} href={`/jobs/${job.slug}`} className="block">
-                    <div className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors">
-                      <div className="col-span-12 sm:col-span-5 min-w-0">
-                        <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
-                          {job.title}
-                        </p>
-                        <div className="sm:hidden flex items-center gap-2 mt-0.5">
-                          <span className="text-[11px] text-muted">{job.companyName}</span>
-                          <span className="text-[11px] text-subtle">·</span>
-                          <span className="text-[11px] text-muted">{job.location}</span>
-                        </div>
-                      </div>
-                      <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">
-                        {job.companyName}
-                      </div>
-                      <div className="col-span-6 sm:col-span-2 flex items-center">
-                        <span className="text-[11px] text-muted">
-                          {job.listingType === "GOVERNMENT" ? "Gov" : job.listingType === "CASUAL" ? "Casual" : job.employmentType || "Job"}
-                        </span>
-                      </div>
-                      <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
-                        {dl !== null ? (
-                          <span className={`font-mono text-[12px] font-medium tabular-nums ${dl <= 0 ? "text-muted/40" : urgent ? "text-accent" : "text-muted"}`}>
-                            {dl <= 0 ? "Closed" : `${dl}d left`}
-                          </span>
-                        ) : (
-                          <span className="text-[11px] text-muted/50">—</span>
-                        )}
+                  <JobRowClickable
+                    key={job.id}
+                    slug={job.slug}
+                    className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors"
+                  >
+                    <div className="col-span-12 sm:col-span-5 min-w-0">
+                      <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
+                        {job.title}
+                      </p>
+                      <div className="sm:hidden flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] text-muted">{job.companyName}</span>
+                        <span className="text-[11px] text-subtle">·</span>
+                        <span className="text-[11px] text-muted">{job.location}</span>
                       </div>
                     </div>
-                  </Link>
+                    <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">
+                      {job.companyName}
+                    </div>
+                    <div className="col-span-6 sm:col-span-2 flex items-center">
+                      <span className="text-[11px] text-muted">
+                        {job.listingType === "GOVERNMENT" ? "Gov" : job.listingType === "CASUAL" ? "Casual" : job.employmentType || "Job"}
+                      </span>
+                    </div>
+                    <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
+                      {dl !== null ? (
+                        <span className={`font-mono text-[12px] font-medium tabular-nums ${dl <= 0 ? "text-muted/40" : urgent ? "text-accent" : "text-muted"}`}>
+                          {dl <= 0 ? "Closed" : `${dl}d left`}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-muted/50">—</span>
+                      )}
+                    </div>
+                  </JobRowClickable>
                 );
               })}
             </div>

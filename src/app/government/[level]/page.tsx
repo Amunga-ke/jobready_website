@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { KE_COUNTIES, slugifyCounty } from "@/lib/constants";
 import { getGovernmentJobsByLevel } from "@/lib/data";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
+import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { formatDateShortUTC } from "@/lib/format-date";
 import type { Job } from "@/types";
 
@@ -197,11 +198,11 @@ export default async function GovernmentLevelPage({
   );
 }
 
-/* ── Government job row (server component) ── */
+/* ── Government job row (opens sidesheet) ── */
 function GovJobRow({ job }: { job: Job }) {
   return (
-    <Link
-      href={`/jobs/${job.slug}`}
+    <JobRowClickable
+      slug={job.slug}
       className="flex items-center justify-between py-3 group cursor-pointer rounded-lg hover:bg-white/60 -mx-2 px-2 transition-colors"
     >
       <div className="min-w-0 flex-1">
@@ -233,6 +234,6 @@ function GovJobRow({ job }: { job: Job }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </div>
-    </Link>
+    </JobRowClickable>
   );
 }
