@@ -131,3 +131,24 @@ Stage Summary:
 - Global Footer: DONE (appears on all pages via layout.tsx)
 - Database: RESET (clean schema, ready for fresh seed)
 - Build: PASSES (49 pages, 0 errors)
+
+---
+Task ID: 6
+Agent: Main Agent
+Task: Add lookup tables (categories, subcategories, counties, tags)
+
+Work Log:
+- Created prisma/seed-lookup.ts — optimized seed script using createMany + skipDuplicates
+- Seeded 9 categories from JOB_CATEGORIES in constants.ts (Technology, Finance, Sales, Marketing, HR, Engineering, Healthcare, Education, Government)
+- Seeded 155 subcategories (18 per category average) linked to their parent categories
+- Seeded all 47 Kenya counties with ISO-like 2-letter codes
+- Seeded 82 tags covering work modes, skills, industries, opportunity types, and status flags
+- Used idempotent upsert/createMany so script can be run repeatedly safely
+- Verified all data via database query
+
+Stage Summary:
+- Categories: 9 (with icons and sort order)
+- Subcategories: 155 (linked to parent categories)
+- Counties: 47 (all Kenya counties with codes)
+- Tags: 82 (comprehensive job tagging vocabulary)
+- Seed script: prisma/seed-lookup.ts (run with npx tsx prisma/seed-lookup.ts)
