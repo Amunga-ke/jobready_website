@@ -3,6 +3,8 @@ import { Playfair_Display, Space_Grotesk, Inter, JetBrains_Mono } from "next/fon
 import "./globals.css";
 import { JobModalProvider } from "@/components/jobready/JobModalContext";
 import JobDetailSheet from "@/components/jobready/JobDetailSheet";
+import Navbar from "@/components/jobready/Navbar";
+import Footer from "@/components/jobready/Footer";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -47,8 +49,12 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${spaceGrotesk.variable} ${inter.variable} ${jetbrains.variable} font-inter antialiased bg-surface text-ink`}
       >
+        <Navbar />
         <JobModalProvider>
-          {children}
+          <div className="min-h-screen">
+            {children}
+          </div>
+          <Footer />
           <JobDetailSheet />
         </JobModalProvider>
       </body>

@@ -90,7 +90,7 @@ export default async function JobsPage({
   else if (sort === "closing") headingText = "Jobs Closing Soon";
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="bg-surface">
       <div className="max-w-6xl mx-auto px-5 py-10">
         {/* Header */}
         <div className="mb-8">

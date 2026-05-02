@@ -1,4 +1,3 @@
-import Navbar from '@/components/jobready/Navbar';
 import Hero from '@/components/jobready/Hero';
 import TrustedBy from '@/components/jobready/TrustedBy';
 import JobUpdates from '@/components/jobready/JobUpdates';
@@ -14,7 +13,6 @@ import CVBanner from '@/components/jobready/CVBanner';
 import CasualJobs from '@/components/jobready/CasualJobs';
 import CareerResources from '@/components/jobready/CareerResources';
 import Newsletter from '@/components/jobready/Newsletter';
-import Footer from '@/components/jobready/Footer';
 import StickyNewsletter from '@/components/jobready/StickyNewsletter';
 import type { Job } from '@/types';
 import type { Category, County } from '@prisma/client';
@@ -55,7 +53,6 @@ export default async function Home() {
 
   return (
     <>
-      <Navbar />
       <Hero jobs={justPosted} />
       <TrustedBy />
       <JobUpdates />
@@ -72,7 +69,6 @@ export default async function Home() {
       <CareerResources />
       <CVBanner variant="dark" />
       <Newsletter />
-      <Footer />
       <StickyNewsletter />
     </>
   );

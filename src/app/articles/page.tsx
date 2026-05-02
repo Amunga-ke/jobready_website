@@ -116,7 +116,7 @@ export default function ArticlesPage() {
   }, [activeCategory]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* Header */}
       <div className="border-b border-divider">
         <div className="max-w-6xl mx-auto px-5 pt-10 pb-8">

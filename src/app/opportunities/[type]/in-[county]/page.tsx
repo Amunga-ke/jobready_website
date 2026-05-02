@@ -53,7 +53,7 @@ export default async function OpportunityCountyPage({
   const otherTypes = OPPORTUNITY_TYPES.filter((t) => t.slug !== typeSlug).slice(0, 8);
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="bg-surface">
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

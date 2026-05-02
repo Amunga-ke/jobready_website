@@ -71,7 +71,7 @@ export default function CasualPage() {
   const uniqueLocations = Array.from(new Set(jobs.map((j) => j.location))).sort();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* Header */}
       <div className="border-b border-divider">
         <div className="max-w-6xl mx-auto px-5 pt-10 pb-8">
