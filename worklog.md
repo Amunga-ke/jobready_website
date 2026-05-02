@@ -110,3 +110,24 @@ Stage Summary:
 - Database re-seeded with 41 active listings including featured, government, casual, and opportunities
 - All previously reported issues (empty sections, missing Save Job button) were already fixed in commit 9f51836
 - Build passes successfully
+
+---
+Task ID: 5
+Agent: Main Agent
+Task: Global navbar + footer across all pages, reset database
+
+Work Log:
+- Moved Navbar and Footer from homepage (page.tsx) into root layout.tsx
+- Now every page in the app shows consistent navigation bar and footer
+- Removed Navbar/Footer imports from homepage page.tsx
+- Removed redundant min-h-screen from 14 inner page files (jobs, casual, opportunities, government, companies, articles, SEO pages, slug pages)
+- Layout now wraps children in min-h-screen div, with Navbar above and Footer below
+- Reset MySQL database with prisma db push --force-reset (fresh schema, no data)
+- Verified build: all 49 pages compile, zero errors
+- Committed and pushed to GitHub (commit 97383f6)
+
+Stage Summary:
+- Global Navbar: DONE (appears on all pages via layout.tsx)
+- Global Footer: DONE (appears on all pages via layout.tsx)
+- Database: RESET (clean schema, ready for fresh seed)
+- Build: PASSES (49 pages, 0 errors)
