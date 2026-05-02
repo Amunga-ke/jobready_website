@@ -19,24 +19,24 @@ export async function generateMetadata({
   const category = getCategoryBySlug(slug);
   const county = getCountyBySlug(countySlug);
 
-  if (!category || !county) return { title: "Not Found | FursaKE" };
+  if (!category || !county) return { title: "Not Found | JobReady" };
 
   const count = await getListingCount(slug, countySlug);
   const robots = getRobotsMeta(count, "CAT_COUNTY" as SeoTier);
 
   return {
-    title: `${category.label} Jobs in ${county} (${count || ""} Openings) | FursaKE`,
+    title: `${category.label} Jobs in ${county} (${count || ""} Openings) | JobReady`,
     description: getComboIntro(category, county),
     robots,
     alternates: {
-      canonical: `https://fursake.co.ke/jobs/category/${slug}/in-${countySlug}`,
+      canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/in-${countySlug}`,
     },
     openGraph: {
-      title: `${category.label} Jobs in ${county} | FursaKE`,
+      title: `${category.label} Jobs in ${county} | JobReady`,
       description: getComboIntro(category, county),
       url: `/jobs/category/${slug}/in-${countySlug}`,
       type: "website",
-      siteName: "FursaKE",
+      siteName: "JobReady",
     },
   };
 }

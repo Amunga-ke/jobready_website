@@ -2,26 +2,11 @@
 
 import { useRef } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import SectionNumber from './SectionNumber';
+import type { Category } from '@prisma/client';
 
-const categories = [
-  { name: 'Technology & IT', count: '2,300 jobs', dark: true },
-  { name: 'Finance & Accounting', count: '1,800 jobs' },
-  { name: 'Sales & Business Dev', count: '1,200 jobs' },
-  { name: 'Marketing & Comms', count: '980 jobs' },
-  { name: 'Human Resources', count: '760 jobs' },
-  { name: 'Engineering', count: '690 jobs' },
-  { name: 'Healthcare & Medical', count: '540 jobs' },
-  { name: 'Education & Training', count: '480 jobs' },
-  { name: 'Operations & Admin', count: '420 jobs' },
-  { name: 'Logistics & Supply Chain', count: '310 jobs' },
-  { name: 'Hospitality & Tourism', count: '240 jobs' },
-  { name: 'Legal & Compliance', count: '210 jobs' },
-  { name: 'Creative Arts & Design', count: '190 jobs' },
-  { name: 'Government & Public', count: '180 jobs' },
-];
-
-export default function Categories() {
+export default function Categories({ categories }: { categories: (Category & { _count: { listings: number } })[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (dir: number) => {
@@ -36,9 +21,9 @@ export default function Categories() {
       <div className="max-w-6xl mx-auto px-5 relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading text-xl font-bold">Categories</h2>
-          <a href="#" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
-            40+ →
-          </a>
+          <Link href="/jobs" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
+            All categories →
+          </Link>
         </div>
         <div className="relative">
           <button
@@ -57,25 +42,25 @@ export default function Categories() {
             ref={scrollRef}
             className="flex gap-2.5 overflow-x-auto pb-3 px-1 scrollbar-hide snap-x snap-mandatory"
           >
-            {categories.map((cat, i) => (
-              <button
-                key={i}
-                className={`snap-start shrink-0 px-5 py-4 text-[13px] font-medium rounded-xl transition-colors text-left ${
-                  cat.dark
-                    ? 'bg-ink text-white hover:bg-ink/90'
-                    : 'bg-surface text-ink border border-divider hover:border-ink/30'
-                }`}
-              >
-                <div
-                  className={`font-mono text-[10px] mb-1 ${
-                    cat.dark ? 'text-white/40' : 'text-muted'
+            {categories.slice(0, 14).map((cat, i) => {
+              const count = cat._count.listings;
+              return (
+                <Link
+                  key={cat.id}
+                  href={`/jobs/category/${cat.slug}`}
+                  className={`snap-start shrink-0 px-5 py-4 text-[13px] font-medium rounded-xl transition-colors text-left ${
+                    i === 0
+                      ? 'bg-ink text-white hover:bg-ink/90'
+                      : 'bg-surface text-ink border border-divider hover:border-ink/30'
                   }`}
                 >
-                  {cat.count}
-                </div>
-                {cat.name}
-              </button>
-            ))}
+                  <div className={`font-mono text-[10px] mb-1 ${i === 0 ? 'text-white/40' : 'text-muted'}`}>
+                    {count.toLocaleString()} jobs
+                  </div>
+                  {cat.name}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

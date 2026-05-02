@@ -18,24 +18,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const category = getCategoryBySlug(slug);
-  if (!category) return { title: "Not Found | FursaKE" };
+  if (!category) return { title: "Not Found | JobReady" };
 
   const count = await getListingCount(slug);
   const robots = getRobotsMeta(count, "CATEGORY" as SeoTier);
 
   return {
-    title: `${category.label} Jobs in Kenya (${count || ""} Openings) | FursaKE`,
+    title: `${category.label} Jobs in Kenya (${count || ""} Openings) | JobReady`,
     description: getCategoryIntro(category),
     robots,
     alternates: {
-      canonical: `https://fursake.co.ke/jobs/category/${slug}`,
+      canonical: `https://jobreadyke.co.ke/jobs/category/${slug}`,
     },
     openGraph: {
-      title: `${category.label} Jobs in Kenya | FursaKE`,
+      title: `${category.label} Jobs in Kenya | JobReady`,
       description: getCategoryIntro(category),
       url: `/jobs/category/${slug}`,
       type: "website",
-      siteName: "FursaKE",
+      siteName: "JobReady",
     },
   };
 }

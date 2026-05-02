@@ -1,30 +1,46 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import SectionNumber from './SectionNumber';
 import JobClickable from './JobClickable';
-import { entryLevelJobs, internshipJobs, scholarshipJobs } from '@/lib/mock-jobs';
 import { formatDateShortUTC } from '@/lib/format-date';
 import type { Job } from '@/types';
 
 type TabKey = 'e' | 'i' | 's';
 
-const tabs: { key: TabKey; label: string; count: string }[] = [
-  { key: 'e', label: 'Entry Level', count: '340' },
-  { key: 'i', label: 'Internships', count: '156' },
-  { key: 's', label: 'Scholarships', count: '23' },
-];
+interface TabDef {
+  key: TabKey;
+  label: string;
+  count: number;
+  href: string;
+}
 
-const tabContent: Record<TabKey, { jobs: Job[]; total: number }> = {
-  e: { jobs: entryLevelJobs, total: 340 },
-  i: { jobs: internshipJobs, total: 156 },
-  s: { jobs: scholarshipJobs, total: 23 },
-};
+interface OpportunitiesData {
+  internships: Job[];
+  scholarships: Job[];
+  entryLevel: Job[];
+  internshipCount: number;
+  scholarshipCount: number;
+  entryLevelCount: number;
+}
 
-export default function OpportunitiesTabs() {
+export default function OpportunitiesTabs({ opportunities }: { opportunities: OpportunitiesData }) {
   const [activeTab, setActiveTab] = useState<TabKey>('e');
 
-  const current = tabContent[activeTab];
+  const tabs: TabDef[] = [
+    { key: 'e', label: 'Entry Level', count: opportunities.entryLevelCount, href: '/jobs?experience=Entry-level' },
+    { key: 'i', label: 'Internships', count: opportunities.internshipCount, href: '/opportunities/internship' },
+    { key: 's', label: 'Scholarships', count: opportunities.scholarshipCount, href: '/opportunities/scholarship' },
+  ];
+
+  const currentJobs = activeTab === 'e'
+    ? opportunities.entryLevel
+    : activeTab === 'i'
+    ? opportunities.internships
+    : opportunities.scholarships;
+
+  const currentTab = tabs.find(t => t.key === activeTab)!;
 
   return (
     <section className="py-14 bg-white border-t border-b border-divider relative overflow-hidden">
@@ -53,33 +69,39 @@ export default function OpportunitiesTabs() {
           ))}
         </div>
         <div className="py-5">
-          <div className="divide-y divide-subtle">
-            {current.jobs.map((job) => (
-              <JobClickable
-                key={job.id}
-                job={job}
-                className="flex items-center justify-between py-3 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
+          {currentJobs.length === 0 ? (
+            <p className="text-sm text-muted text-center py-8">No opportunities in this category yet.</p>
+          ) : (
+            <>
+              <div className="divide-y divide-subtle">
+                {currentJobs.map((job) => (
+                  <JobClickable
+                    key={job.id}
+                    job={job}
+                    className="flex items-center justify-between py-3 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm font-medium group-hover:text-accent transition-colors">{job.title}</p>
+                      <p className="text-[11px] text-muted mt-0.5">{job.companyName}</p>
+                    </div>
+                    {job.deadline && (
+                      <span className={`font-mono text-[11px] shrink-0 ml-3 ${
+                        job.opportunityType === 'SCHOLARSHIP' ? 'text-accent font-medium' : 'text-muted'
+                      }`}>
+                        {formatDateShortUTC(job.deadline)}
+                      </span>
+                    )}
+                  </JobClickable>
+                ))}
+              </div>
+              <Link
+                href={currentTab.href}
+                className="inline-flex items-center gap-1 text-[13px] font-medium text-ink hover:text-accent mt-4 transition-colors"
               >
-                <div>
-                  <p className="text-sm font-medium group-hover:text-accent transition-colors">{job.title}</p>
-                  <p className="text-[11px] text-muted mt-0.5">{job.companyName}</p>
-                </div>
-                {job.deadline && (
-                  <span className={`font-mono text-[11px] shrink-0 ml-3 ${
-                    job.opportunityType === 'SCHOLARSHIP' ? 'text-accent font-medium' : 'text-muted'
-                  }`}>
-                    {formatDateShortUTC(job.deadline)}
-                  </span>
-                )}
-              </JobClickable>
-            ))}
-          </div>
-          <a
-            href="#"
-            className="inline-flex items-center gap-1 text-[13px] font-medium text-ink hover:text-accent mt-4 transition-colors"
-          >
-            View all {current.total} →
-          </a>
+                View all {currentTab.count} →
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </section>

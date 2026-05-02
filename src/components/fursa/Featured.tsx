@@ -1,8 +1,13 @@
 import SectionNumber from './SectionNumber';
 import JobClickable from './JobClickable';
-import { featuredHeroJob, featuredJobs } from '@/lib/mock-jobs';
+import type { Job } from '@/types';
 
-export default function Featured() {
+export default function Featured({ jobs }: { jobs: Job[] }) {
+  if (jobs.length === 0) return null;
+
+  const heroJob = jobs[0];
+  const restJobs = jobs.slice(1);
+
   return (
     <section className="py-14 border-t border-divider relative overflow-hidden">
       <SectionNumber num="03" />
@@ -14,31 +19,29 @@ export default function Featured() {
 
         {/* Hero featured job */}
         <JobClickable
-          job={featuredHeroJob}
+          job={heroJob}
           className="border-l-2 border-accent pl-6 sm:pl-8 mb-10 group cursor-pointer"
         >
           <p className="font-mono text-[10px] text-muted uppercase tracking-[0.15em] mb-3">
-            {featuredHeroJob.companyName} · Telecommunications
+            {heroJob.companyName}
           </p>
           <h3 className="font-heading text-2xl sm:text-3xl font-bold leading-tight mb-3 group-hover:text-accent-dark transition-colors">
-            {featuredHeroJob.title}
+            {heroJob.title}
           </h3>
           <p className="text-sm text-muted leading-relaxed max-w-xl mb-4">
-            Lead product strategy for 30M+ active users across East Africa. Work with a cross-functional team of 12+ engineers and designers.
+            {heroJob.description.replace(/<[^>]*>/g, '').slice(0, 150)}...
           </p>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
-            <span className="text-[11px] text-muted">{featuredHeroJob.location}</span>
+            <span className="text-[11px] text-muted">{heroJob.location}</span>
             <span className="text-[11px] text-subtle">·</span>
-            <span className="text-[11px] text-muted">{featuredHeroJob.employmentType}</span>
+            <span className="text-[11px] text-muted">{heroJob.employmentType}</span>
             <span className="text-[11px] text-subtle">·</span>
-            <span className="text-[11px] text-muted">{featuredHeroJob.experienceLevel}</span>
-            <span className="text-[11px] text-subtle">·</span>
-            <span className="text-[11px] text-muted">30M+ users</span>
+            <span className="text-[11px] text-muted">{heroJob.experienceLevel}</span>
           </div>
         </JobClickable>
 
         <div className="divide-y divide-divider">
-          {featuredJobs.map((job) => (
+          {restJobs.map((job) => (
             <JobClickable
               key={job.id}
               job={job}

@@ -3,118 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Clock, Building2, ExternalLink, Share2 } from "lucide-react";
 import { formatDateUTC } from "@/lib/format-date";
-import type { Job } from "@/types";
-
-// ─── Mock data until DB is connected ───
-// In production, this would fetch from the database via Prisma
-const MOCK_JOBS: Job[] = [
-  {
-    id: "1",
-    slug: "senior-software-engineer-safaricom-nairobi",
-    title: "Senior Software Engineer",
-    companyName: "Safaricom PLC",
-    companyLogo: null,
-    companyVerified: true,
-    location: "Nairobi, Kenya",
-    county: "Nairobi",
-    country: "Kenya",
-    category: "TECHNOLOGY",
-    subcategory: "SOFTWARE_ENGINEERING",
-    listingType: "JOB",
-    employmentType: "FULL_TIME",
-    experienceLevel: "SENIOR",
-    workMode: "HYBRID",
-    salaryMin: 250000,
-    salaryMax: 400000,
-    salaryCurrency: "KES",
-    salaryPeriod: "month",
-    description:
-      "<p>Safaricom is looking for a Senior Software Engineer to join our Digital Services team. You will be responsible for designing, developing, and maintaining scalable software solutions that serve over 30 million customers across Kenya.</p><p>The ideal candidate has strong experience in modern web and mobile technologies, with a passion for building products that make a difference in people's lives.</p>",
-    requirements:
-      "<ul><li>BSc in Computer Science, Software Engineering, or related field</li><li>5+ years of professional software development experience</li><li>Strong proficiency in TypeScript, React, Node.js, and cloud services (AWS/Azure)</li><li>Experience with microservices architecture and RESTful APIs</li><li>Familiarity with DevOps practices and CI/CD pipelines</li></ul>",
-    instructions:
-      "<p>Interested candidates should submit their application through the Safaricom careers portal. Include your updated CV and a cover letter detailing your relevant experience.</p><p>Applications close on the deadline date. Only shortlisted candidates will be contacted.</p>",
-    tags: ["typescript", "react", "nodejs", "aws", "mobile"],
-    createdAt: "2025-05-01T10:00:00Z",
-    deadline: "2025-06-15T23:59:59Z",
-    source: "safaricom.co.ke",
-    applicationUrl: "https://safaricom.co.ke/careers",
-    applyCount: 142,
-    featured: true,
-  },
-  {
-    id: "2",
-    slug: "county-director-of-health-kisumu",
-    title: "County Director of Health Services",
-    companyName: "County Government of Kisumu",
-    companyLogo: null,
-    companyVerified: true,
-    location: "Kisumu, Kenya",
-    county: "Kisumu",
-    country: "Kenya",
-    category: "GOVERNMENT_PUBLIC_SECTOR",
-    subcategory: "PUBLIC_ADMINISTRATION",
-    listingType: "GOVERNMENT",
-    governmentLevel: "COUNTY",
-    employmentType: "FULL_TIME",
-    experienceLevel: "DIRECTOR",
-    workMode: "ONSITE",
-    salaryMin: null,
-    salaryMax: null,
-    predictedSalary: "KES 180,000 – 350,000 / month",
-    isPredictedSalary: true,
-    description:
-      "<p>The County Government of Kisumu invites applications from qualified Kenyan citizens for the position of County Director of Health Services.</p><p>This is a senior leadership role responsible for planning, coordinating, and implementing county health policies and programs in alignment with the national health agenda.</p>",
-    requirements:
-      "<ul><li>Master's degree in Public Health, Medicine, or related field</li><li>10+ years of experience in health services management</li><li>Registration with relevant professional body</li><li>Demonstrated leadership in public health administration</li></ul>",
-    instructions:
-      "<p>Applications should be submitted to:</p><p><strong>The County Secretary</strong><br/>County Government of Kisumu<br/>P.O. Box 2901-40100<br/>Kisumu, Kenya</p><p>Include: Application letter, CV, copies of certificates, and national ID. Clearly mark the envelope with the position applied for.</p>",
-    tags: ["health", "government", "county", "leadership"],
-    createdAt: "2025-04-28T08:00:00Z",
-    deadline: "2025-05-30T17:00:00Z",
-    source: "kisumu.go.ke",
-    applicationUrl: null,
-    applyCount: 67,
-    featured: false,
-  },
-  {
-    id: "3",
-    slug: "google-developer-scholarship-2025",
-    title: "Google Africa Developer Scholarship 2025",
-    companyName: "Google",
-    companyLogo: null,
-    companyVerified: true,
-    location: "Remote, Kenya",
-    county: "Nairobi",
-    country: "Kenya",
-    category: "TECHNOLOGY",
-    subcategory: "AI_MACHINE_LEARNING",
-    listingType: "OPPORTUNITY",
-    opportunityType: "SCHOLARSHIP",
-    employmentType: "FULL_TIME",
-    experienceLevel: "ENTRY_LEVEL",
-    workMode: "REMOTE",
-    salaryMin: null,
-    salaryMax: null,
-    description:
-      "<p>Google is offering the Africa Developer Scholarship program for 2025, aimed at aspiring and intermediate software developers across Africa. The program provides free access to world-class training in Android, Web, and Google Cloud technologies.</p><p>Selected scholars will gain access to the Pluralsight platform, peer-to-peer learning communities, and mentorship from Google engineers.</p>",
-    requirements:
-      "<ul><li>Must be a resident of an African country</li><li>Basic knowledge of programming (any language)</li><li>Access to a computer and reliable internet</li><li>Commitment to completing the program within the specified timeline</li></ul>",
-    instructions:
-      "<p>Apply through the official Google Africa Developer Scholarship website. You will need to complete a short assessment as part of the application process.</p>",
-    tags: ["google", "scholarship", "developer", "remote", "free"],
-    createdAt: "2025-04-25T12:00:00Z",
-    deadline: "2025-07-31T23:59:59Z",
-    source: "grow.google",
-    applicationUrl: "https://grow.google/africa/dev-scholarship/",
-    applyCount: 2340,
-    featured: true,
-  },
-];
-
-function getJobBySlug(slug: string): Job | undefined {
-  return MOCK_JOBS.find((j) => j.slug === slug);
-}
+import { getJobBySlug } from "@/lib/data";
+import prisma from "@/lib/prisma";
 
 // ─── Dynamic metadata for SEO ───
 export async function generateMetadata({
@@ -123,18 +13,18 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const job = getJobBySlug(slug);
-  if (!job) return { title: "Job Not Found | FursaKE" };
+  const job = await getJobBySlug(slug);
+  if (!job) return { title: "Job Not Found | JobReady" };
 
   return {
-    title: `${job.title} at ${job.companyName} | FursaKE`,
-    description: `Apply for ${job.title} at ${job.companyName} in ${job.location}. ${job.listingType === "JOB" ? "Job" : "Opportunity"} posted on FursaKE — Kenya's most trusted job board.`,
+    title: `${job.title} at ${job.companyName} | JobReady`,
+    description: `Apply for ${job.title} at ${job.companyName} in ${job.location}. ${job.listingType === "JOB" ? "Job" : "Opportunity"} posted on JobReady — Kenya's most trusted job board.`,
     openGraph: {
       title: `${job.title} at ${job.companyName}`,
-      description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on FursaKE`,
+      description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`,
       url: `/jobs/${slug}`,
       type: "article",
-      siteName: "FursaKE",
+      siteName: "JobReady",
     },
   };
 }
@@ -146,7 +36,7 @@ export default async function JobDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const job = getJobBySlug(slug);
+  const job = await getJobBySlug(slug);
 
   if (!job) {
     notFound();
@@ -158,7 +48,7 @@ export default async function JobDetailPage({
       <div className="border-b border-divider bg-white/60 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-5 py-3 flex items-center gap-3">
           <Link
-            href="/jobs"
+            href="/"
             className="inline-flex items-center gap-1 text-[13px] text-muted hover:text-ink transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -202,10 +92,10 @@ export default async function JobDetailPage({
           </span>
           <span className="inline-flex items-center gap-1.5">
             <Building2 className="w-4 h-4" />
-            {job.employmentType.replace(/_/g, " ")}
+            {job.employmentType}
           </span>
           <span>{job.workMode}</span>
-          <span>{job.experienceLevel.replace(/_/g, " ")}</span>
+          <span>{job.experienceLevel}</span>
           {job.deadline && (
             <span className="text-accent font-medium">
               Deadline: {formatDateUTC(job.deadline)}
@@ -216,7 +106,13 @@ export default async function JobDetailPage({
         {/* Type badges */}
         <div className="flex flex-wrap gap-2">
           <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-medium bg-ink/[0.05] text-ink/70">
-            {job.category.replace(/_/g, " ")}
+            {job.listingType === "JOB"
+              ? "Job"
+              : job.listingType === "GOVERNMENT"
+              ? "Government"
+              : job.listingType === "CASUAL"
+              ? "Casual"
+              : "Opportunity"}
           </span>
           {job.governmentLevel && (
             <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
@@ -232,6 +128,11 @@ export default async function JobDetailPage({
               {job.opportunityType.replace(/_/g, " ")}
             </span>
           )}
+          {job.tags.map((tag) => (
+            <span key={tag} className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-medium bg-surface text-muted border border-subtle">
+              #{tag}
+            </span>
+          ))}
         </div>
 
         {/* Salary */}
@@ -266,17 +167,19 @@ export default async function JobDetailPage({
         </div>
 
         {/* Description */}
-        <div>
-          <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-3">
-            Description
-          </h2>
-          <div
-            className="text-[14px] text-ink/80 leading-relaxed
-              [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
-              [&_li]:mb-1.5 [&_p]:mb-3 [&_strong]:font-semibold [&_strong]:text-ink"
-            dangerouslySetInnerHTML={{ __html: job.description }}
-          />
-        </div>
+        {job.description && (
+          <div>
+            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-3">
+              Description
+            </h2>
+            <div
+              className="text-[14px] text-ink/80 leading-relaxed
+                [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
+                [&_li]:mb-1.5 [&_p]:mb-3 [&_strong]:font-semibold [&_strong]:text-ink"
+              dangerouslySetInnerHTML={{ __html: job.description }}
+            />
+          </div>
+        )}
 
         {/* Requirements */}
         {job.requirements && (
@@ -305,20 +208,6 @@ export default async function JobDetailPage({
                 [&_li]:mb-1.5 [&_p]:mb-3 [&_strong]:font-semibold [&_strong]:text-ink"
               dangerouslySetInnerHTML={{ __html: job.instructions }}
             />
-          </div>
-        )}
-
-        {/* Tags */}
-        {job.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {job.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-[12px] text-muted bg-ink/[0.03] px-2 py-0.5 rounded"
-              >
-                #{tag}
-              </span>
-            ))}
           </div>
         )}
 
