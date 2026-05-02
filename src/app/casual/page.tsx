@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useJobModal } from '@/components/fursa/JobModalContext';
+import { useJobModal } from '@/components/jobready/JobModalContext';
 import { Search, MapPin, X, Hammer, AlertCircle } from 'lucide-react';
 import type { CasualJobEntry } from '@/types';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useJobModal } from '@/components/fursa/JobModalContext';
+import { useJobModal } from '@/components/jobready/JobModalContext';
 import { Building2, Search, X, MapPin, Briefcase, Hash, CheckCircle } from 'lucide-react';
 
 /* ── Static company data ── */

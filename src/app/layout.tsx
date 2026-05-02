@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { JobModalProvider } from "@/components/fursa/JobModalContext";
-import JobDetailSheet from "@/components/fursa/JobDetailSheet";
+import { JobModalProvider } from "@/components/jobready/JobModalContext";
+import JobDetailSheet from "@/components/jobready/JobDetailSheet";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",

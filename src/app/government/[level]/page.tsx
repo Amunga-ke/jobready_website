@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { KE_COUNTIES, slugifyCounty } from "@/lib/constants";
-import { SeoPageHeader, RichFallback } from "@/components/fursa/SeoPageLayout";
+import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 
 const GOV_LEVELS = [
   {

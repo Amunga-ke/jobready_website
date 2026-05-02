@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { OPPORTUNITY_TYPES, KE_COUNTIES, slugifyCounty } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getOpportunityIntro } from "@/lib/seo/fallback-content";
-import { SeoPageHeader, RichFallback } from "@/components/fursa/SeoPageLayout";
+import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 
 async function getListingCount(typeSlug: string) {
   return 0;
