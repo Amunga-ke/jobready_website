@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import Providers from "@/components/Providers";
 import { JobModalProvider } from "@/components/jobready/JobModalContext";
 import JobDetailSheet from "@/components/jobready/JobDetailSheet";
 import { UpdateModalProvider } from "@/components/jobready/UpdateModalContext";
@@ -64,6 +65,7 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${spaceGrotesk.variable} ${inter.variable} ${jetbrains.variable} font-inter antialiased bg-surface text-ink`}
       >
+        <Providers>
         <Navbar />
         <JobModalProvider>
           <UpdateModalProvider>
@@ -75,6 +77,7 @@ export default function RootLayout({
             <UpdateDetailSheet />
           </UpdateModalProvider>
         </JobModalProvider>
+        </Providers>
       </body>
     </html>
   );

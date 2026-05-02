@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, MapPin, Clock, Building2, ExternalLink, Share2, Bookmark, BookmarkCheck } from "lucide-react";
+import { X, MapPin, Clock, Building2, ExternalLink, Share2, Bookmark, BookmarkCheck, LogIn } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useJobModal } from "./JobModalContext";
 import { formatDateUTC } from "@/lib/format-date";
 import type { Job } from "@/types";
@@ -141,58 +142,119 @@ function ShareButton({ slug, title }: { slug: string; title: string }) {
   );
 }
 
-function SaveJobButton({ slug }: { slug: string }) {
-  const [saved, setSaved] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      const stored = localStorage.getItem("saved-jobs");
-      if (stored) {
-        const slugs: string[] = JSON.parse(stored);
-        return slugs.includes(slug);
+function SaveJobButton({ slug, jobId }: { slug: string; jobId: string }) {
+  const { data: session } = useSession();
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showLoginHint, setShowLoginHint] = useState(false);
+
+  // Initialize saved state based on auth
+  useEffect(() => {
+    if (!session) {
+      // Fallback: check localStorage for non-authenticated users
+      try {
+        const stored = localStorage.getItem("saved-jobs");
+        if (stored) {
+          const slugs: string[] = JSON.parse(stored);
+          setSaved(slugs.includes(slug));
+        }
+      } catch {}
+    } else {
+      // Check DB via API
+      async function checkSaved() {
+        try {
+          const res = await fetch("/api/dashboard/saved-jobs");
+          if (res.ok) {
+            const data = await res.json();
+            setSaved(data.some((sj: { job: { id: string } }) => sj.job.id === jobId));
+          }
+        } catch {}
       }
-    } catch {}
-    return false;
-  });
+      checkSaved();
+    }
+  }, [session, slug, jobId]);
 
-  const toggleSave = () => {
+  const toggleSave = async () => {
+    if (!session) {
+      setShowLoginHint(true);
+      setTimeout(() => setShowLoginHint(false), 3000);
+      return;
+    }
+
+    setLoading(true);
     try {
-      const stored = localStorage.getItem("saved-jobs");
-      const slugs: string[] = stored ? JSON.parse(stored) : [];
-
       if (saved) {
-        const next = slugs.filter((s) => s !== slug);
-        localStorage.setItem("saved-jobs", JSON.stringify(next));
-        setSaved(false);
+        const res = await fetch(`/api/dashboard/saved-jobs?listingId=${jobId}`, { method: "DELETE" });
+        if (res.ok) setSaved(false);
       } else {
-        slugs.push(slug);
-        localStorage.setItem("saved-jobs", JSON.stringify(slugs));
-        setSaved(true);
+        const res = await fetch("/api/dashboard/saved-jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ listingId: jobId }),
+        });
+        if (res.ok) setSaved(true);
       }
-    } catch {}
+    } catch {
+      // Fallback to localStorage
+      try {
+        const stored = localStorage.getItem("saved-jobs");
+        const slugs: string[] = stored ? JSON.parse(stored) : [];
+        if (saved) {
+          localStorage.setItem("saved-jobs", JSON.stringify(slugs.filter((s) => s !== slug)));
+          setSaved(false);
+        } else {
+          slugs.push(slug);
+          localStorage.setItem("saved-jobs", JSON.stringify(slugs));
+          setSaved(true);
+        }
+      } catch {}
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (saved) {
     return (
-      <button
-        onClick={toggleSave}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-accent hover:bg-accent/[0.08] transition-colors"
-        title="Unsave this job"
-      >
-        <BookmarkCheck className="w-3.5 h-3.5" />
-        Saved
-      </button>
+      <div className="relative">
+        <button
+          onClick={toggleSave}
+          disabled={loading}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-accent hover:bg-accent/[0.08] transition-colors disabled:opacity-50"
+          title="Unsave this job"
+        >
+          <BookmarkCheck className="w-3.5 h-3.5" />
+          Saved
+        </button>
+        {showLoginHint && (
+          <div className="absolute top-full right-0 mt-1 px-2.5 py-1.5 bg-ink text-white text-[11px] rounded-lg whitespace-nowrap shadow-lg z-10">
+            <a href="/auth/login" className="inline-flex items-center gap-1 hover:underline">
+              <LogIn className="w-3 h-3" /> Sign in to save jobs
+            </a>
+          </div>
+        )}
+      </div>
     );
   }
 
   return (
-    <button
-      onClick={toggleSave}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-muted hover:text-ink hover:bg-ink/[0.04] transition-colors"
-      title="Save this job"
-    >
-      <Bookmark className="w-3.5 h-3.5" />
-      Save
-    </button>
+    <div className="relative">
+      <button
+        onClick={toggleSave}
+        disabled={loading}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-muted hover:text-ink hover:bg-ink/[0.04] transition-colors disabled:opacity-50"
+        title="Save this job"
+      >
+        <Bookmark className="w-3.5 h-3.5" />
+        Save
+      </button>
+      {showLoginHint && (
+        <div className="absolute top-full right-0 mt-1 px-2.5 py-1.5 bg-ink text-white text-[11px] rounded-lg whitespace-nowrap shadow-lg z-10">
+          <a href="/auth/login" className="inline-flex items-center gap-1 hover:underline">
+            <LogIn className="w-3 h-3" /> Sign in to save jobs
+          </a>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -359,7 +421,7 @@ export default function JobDetailSheet() {
         <div className="px-5 py-4 border-t border-divider flex items-center justify-between gap-3">
           <div className="flex items-center gap-1">
             <ShareButton slug={job.slug} title={job.title} />
-            <SaveJobButton key={job.slug} slug={job.slug} />
+            <SaveJobButton key={job.slug} slug={job.slug} jobId={job.id} />
           </div>
           {job.applicationUrl ? (
             <a
