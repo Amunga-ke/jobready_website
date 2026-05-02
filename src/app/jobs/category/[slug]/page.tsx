@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import prisma from "@/lib/prisma";
 import { JOB_CATEGORIES, getCategoryBySlug, KE_COUNTIES, slugifyCounty } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
-import { getCategoryIntro, getSalaryContext, getRelatedCategoriesForCounty } from "@/lib/seo/fallback-content";
-import { SeoPageHeader, SubcategoryGrid, CountyGrid, RichFallback } from "@/components/jobready/SeoPageLayout";
-
-// Mock: in production this queries DB
-async function getListingCount(categorySlug: string, countySlug?: string) {
-  return 0;
-}
+import { getCategoryIntro, getSalaryContext } from "@/lib/seo/fallback-content";
+import { SeoPageHeader, CountyGrid } from "@/components/jobready/SeoPageLayout";
 
 export async function generateMetadata({
   params,
@@ -20,16 +16,19 @@ export async function generateMetadata({
   const category = getCategoryBySlug(slug);
   if (!category) return { title: "Not Found | JobReady" };
 
-  const count = await getListingCount(slug);
+  // Query real count
+  const catRecord = await prisma.category.findUnique({ where: { slug } });
+  const count = catRecord
+    ? await prisma.listing.count({ where: { categoryId: catRecord.id, status: "ACTIVE" } })
+    : 0;
+
   const robots = getRobotsMeta(count, "CATEGORY" as SeoTier);
 
   return {
     title: `${category.label} Jobs in Kenya (${count || ""} Openings) | JobReady`,
     description: getCategoryIntro(category),
     robots,
-    alternates: {
-      canonical: `https://jobreadyke.co.ke/jobs/category/${slug}`,
-    },
+    alternates: { canonical: `https://jobreadyke.co.ke/jobs/category/${slug}` },
     openGraph: {
       title: `${category.label} Jobs in Kenya | JobReady`,
       description: getCategoryIntro(category),
@@ -54,10 +53,30 @@ export default async function CategoryPage({
 
   if (!category) notFound();
 
-  const count = await getListingCount(slug);
+  // Fetch from DB: category, subcategories with counts, listings
+  const dbCategory = await prisma.category.findUnique({
+    where: { slug },
+    include: {
+      subcategories: {
+        where: { active: true },
+        orderBy: { sortOrder: "asc" },
+        include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
+      },
+      _count: { select: { listings: { where: { status: "ACTIVE" } } } },
+    },
+  });
+
+  const count = dbCategory?._count.listings || 0;
   const salaryContext = getSalaryContext(category.value);
-  const nearbyCounties = KE_COUNTIES.slice(0, 8) as unknown as string[];
   const relatedCategories = JOB_CATEGORIES.filter((c) => c.slug !== slug).slice(0, 6);
+
+  // Fetch actual job listings for this category
+  const listings = await prisma.listing.findMany({
+    where: { categoryId: dbCategory?.id, status: "ACTIVE" },
+    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
 
   return (
     <main className="bg-surface">
@@ -86,28 +105,113 @@ export default async function CategoryPage({
           </div>
         )}
 
-        {/* Listings placeholder or fallback */}
-        {count > 0 ? (
+        {/* Job listings */}
+        {listings.length > 0 ? (
           <div className="mb-10">
-            <p className="text-[14px] text-muted">
-              Showing {count} {category.label.toLowerCase()} jobs. Database connection coming soon.
-            </p>
+            <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest mb-1">
+              <div className="col-span-5">Position</div>
+              <div className="col-span-3">Company</div>
+              <div className="col-span-2">Type</div>
+              <div className="col-span-2 text-right">Deadline</div>
+            </div>
+            <div className="divide-y divide-subtle">
+              {listings.map((job) => {
+                const dl = job.deadline
+                  ? Math.ceil((job.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                  : null;
+                const urgent = dl !== null && dl <= 3 && dl > 0;
+                return (
+                  <Link
+                    key={job.id}
+                    href={`/jobs/${job.slug}`}
+                    className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors"
+                  >
+                    <div className="col-span-12 sm:col-span-5 min-w-0">
+                      <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
+                        {job.title}
+                      </p>
+                      <div className="sm:hidden flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] text-muted">{job.company.name}</span>
+                        <span className="text-[11px] text-subtle">·</span>
+                        <span className="text-[11px] text-muted">{job.location}</span>
+                      </div>
+                    </div>
+                    <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">
+                      {job.company.name}
+                    </div>
+                    <div className="col-span-6 sm:col-span-2 flex items-center">
+                      <span className="text-[11px] text-muted">
+                        {job.subcategory?.name || job.listingType}
+                      </span>
+                    </div>
+                    <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
+                      {dl !== null ? (
+                        <span
+                          className={`font-mono text-[12px] font-medium tabular-nums ${
+                            dl <= 0 ? "text-muted/40" : urgent ? "text-accent" : "text-muted"
+                          }`}
+                        >
+                          {dl <= 0 ? "Closed" : `${dl}d left`}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-muted/50">—</span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            {count > 20 && (
+              <Link
+                href={`/jobs?category=${dbCategory?.id}`}
+                className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors mt-4"
+              >
+                View all {count} {category.label.toLowerCase()} jobs →
+              </Link>
+            )}
           </div>
         ) : (
-          <div className="mb-10">
-            <RichFallback
-              category={category}
-              listingCount={count}
-              nearbyCounties={nearbyCounties}
-              relatedCategories={relatedCategories}
-            />
+          <div className="mb-10 text-center py-12">
+            <p className="text-[14px] text-muted">
+              No {category.label.toLowerCase()} jobs listed at the moment. Check back soon.
+            </p>
           </div>
         )}
 
-        {/* Subcategory grid */}
-        <div className="mb-10">
-          <SubcategoryGrid category={category} />
-        </div>
+        {/* Subcategory grid with real counts */}
+        {dbCategory?.subcategories && dbCategory.subcategories.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+              {category.label} Subcategories
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              {dbCategory.subcategories.map((sub) => (
+                <Link
+                  key={sub.slug}
+                  href={`/jobs/category/${slug}/${sub.slug}`}
+                  className="group flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all"
+                >
+                  <div className="min-w-0">
+                    <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink transition-colors">
+                      {sub.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {sub._count.listings > 0 && (
+                      <span className="text-[11px] font-mono text-accent">{sub._count.listings}</span>
+                    )}
+                    <svg
+                      className="w-4 h-4 text-muted group-hover:text-accent transition-colors"
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Browse by county */}
         <div className="mb-10">
@@ -115,10 +219,7 @@ export default async function CategoryPage({
             <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider">
               {category.label} Jobs by County
             </h2>
-            <Link
-              href="/jobs"
-              className="text-[12px] text-muted hover:text-ink transition-colors"
-            >
+            <Link href="/jobs" className="text-[12px] text-muted hover:text-ink transition-colors">
               View all counties
             </Link>
           </div>
@@ -153,12 +254,7 @@ export default async function CategoryPage({
                 <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink">
                   {cat.label}
                 </span>
-                <svg
-                  className="w-4 h-4 text-muted group-hover:text-accent"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-4 h-4 text-muted group-hover:text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>

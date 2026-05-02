@@ -8,6 +8,8 @@ import type { Listing } from "@prisma/client";
 export function listingToJob(
   listing: Listing & {
     company?: { id: string; name: string; logo?: string | null; verified: boolean } | null;
+    category?: { id: string; name: string; slug: string } | null;
+    subcategory?: { id: string; name: string; slug: string } | null;
     tags?: { tag: { id: string; name: string } }[];
   }
 ): Job {
@@ -21,14 +23,15 @@ export function listingToJob(
     location: listing.location,
     county: listing.countyName,
     country: listing.country,
-    category: listing.listingType === "JOB"
-      ? "Job"
-      : listing.listingType === "GOVERNMENT"
-      ? "Government"
-      : listing.listingType === "CASUAL"
-      ? "Casual"
-      : "Opportunity",
-    subcategory: undefined, // populated from Category relation if needed
+    category: listing.category?.name
+      ?? (listing.listingType === "JOB"
+        ? "Job"
+        : listing.listingType === "GOVERNMENT"
+        ? "Government"
+        : listing.listingType === "CASUAL"
+        ? "Casual"
+        : "Opportunity"),
+    subcategory: listing.subcategory?.name ?? undefined,
     listingType: listing.listingType as Job["listingType"],
     governmentLevel: (listing.governmentLevel as Job["governmentLevel"]) ?? undefined,
     opportunityType: listing.opportunityType ?? undefined,

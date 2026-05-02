@@ -6,7 +6,7 @@ import type { Job } from "@/types";
 export async function getFeaturedJobs(): Promise<Job[]> {
   const listings = await prisma.listing.findMany({
     where: { featured: true, status: "ACTIVE" },
-    include: { company: true, tags: { include: { tag: true } } },
+    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
     take: 6,
   });
@@ -17,7 +17,7 @@ export async function getFeaturedJobs(): Promise<Job[]> {
 export async function getJustPosted(): Promise<Job[]> {
   const listings = await prisma.listing.findMany({
     where: { status: "ACTIVE", listingType: { in: ["JOB", "GOVERNMENT"] } },
-    include: { company: true, tags: { include: { tag: true } } },
+    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
     take: 4,
   });
@@ -34,7 +34,7 @@ export async function getClosingSoon(): Promise<Job[]> {
       status: "ACTIVE",
       deadline: { gt: now, lte: threeDaysFromNow },
     },
-    include: { company: true, tags: { include: { tag: true } } },
+    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { deadline: "asc" },
     take: 10,
   });
@@ -46,13 +46,13 @@ export async function getGovernmentJobs() {
   const [national, county] = await Promise.all([
     prisma.listing.findMany({
       where: { status: "ACTIVE", listingType: "GOVERNMENT", governmentLevel: "NATIONAL" },
-      include: { company: true, tags: { include: { tag: true } } },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
     prisma.listing.findMany({
       where: { status: "ACTIVE", listingType: "GOVERNMENT", governmentLevel: "COUNTY" },
-      include: { company: true, tags: { include: { tag: true } } },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
@@ -80,19 +80,19 @@ export async function getOpportunities() {
   const [internships, scholarships, entryLevel] = await Promise.all([
     prisma.listing.findMany({
       where: { status: "ACTIVE", opportunityType: "INTERNSHIP" },
-      include: { company: true, tags: { include: { tag: true } } },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
     prisma.listing.findMany({
       where: { status: "ACTIVE", opportunityType: "SCHOLARSHIP" },
-      include: { company: true, tags: { include: { tag: true } } },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
     prisma.listing.findMany({
       where: { status: "ACTIVE", experienceLevel: "Entry-level", listingType: { in: ["JOB", "OPPORTUNITY"] } },
-      include: { company: true, tags: { include: { tag: true } } },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
@@ -213,7 +213,7 @@ export async function getJobs(params: {
   const [listings, total] = await Promise.all([
     prisma.listing.findMany({
       where,
-      include: { company: true, tags: { include: { tag: true } } },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy,
       skip: (page - 1) * limit,
       take: limit,
