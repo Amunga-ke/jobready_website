@@ -6,6 +6,7 @@ import { JOB_CATEGORIES, getCategoryBySlug, KE_COUNTIES, slugifyCounty } from "@
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCategoryIntro, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, CountyGrid } from "@/components/jobready/SeoPageLayout";
+import JobRowClickable from "@/components/jobready/JobRowClickable";
 
 export async function generateMetadata({
   params,
@@ -121,9 +122,9 @@ export default async function CategoryPage({
                   : null;
                 const urgent = dl !== null && dl <= 3 && dl > 0;
                 return (
-                  <Link
+                  <JobRowClickable
                     key={job.id}
-                    href={`/jobs/${job.slug}`}
+                    slug={job.slug}
                     className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors"
                   >
                     <div className="col-span-12 sm:col-span-5 min-w-0">
@@ -157,7 +158,7 @@ export default async function CategoryPage({
                         <span className="text-[11px] text-muted/50">—</span>
                       )}
                     </div>
-                  </Link>
+                  </JobRowClickable>
                 );
               })}
             </div>
