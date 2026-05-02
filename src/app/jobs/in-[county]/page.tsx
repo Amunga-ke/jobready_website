@@ -5,10 +5,8 @@ import { KE_COUNTIES, slugifyCounty, JOB_CATEGORIES, getCountyBySlug } from "@/l
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCountyIntro, getNearbyCounties, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
-
-async function getListingCount(countySlug: string) {
-  return 0;
-}
+import { getJobCountByCounty, getJobsByCounty } from "@/lib/data";
+import { formatDateShortUTC } from "@/lib/format-date";
 
 export async function generateMetadata({
   params,
@@ -20,7 +18,7 @@ export async function generateMetadata({
 
   if (!countyName) return { title: "Not Found | JobReady" };
 
-  const count = await getListingCount(countySlug);
+  const count = await getJobCountByCounty(countySlug);
   const robots = getRobotsMeta(count, "COUNTY" as SeoTier);
 
   return {
@@ -33,9 +31,14 @@ export async function generateMetadata({
     openGraph: {
       title: `Jobs in ${countyName} | JobReady`,
       description: getCountyIntro(countyName),
-      url: `/jobs/in-${countySlug}`,
+      url: `https://jobreadyke.co.ke/jobs/in-${countySlug}`,
       type: "website",
       siteName: "JobReady",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Jobs in ${countyName} | JobReady`,
+      description: getCountyIntro(countyName),
     },
   };
 }
@@ -56,9 +59,13 @@ export default async function CountyPage({
 
   if (!countyName) notFound();
 
-  const count = await getListingCount(countySlug);
-  const nearby = getNearbyCounties(countyName);
-  const relatedCategories = JOB_CATEGORIES.slice(0, 8);
+  const [countResult, nearby, relatedCategories] = await Promise.all([
+    getJobsByCounty(countySlug, 20),
+    Promise.resolve(getNearbyCounties(countyName)),
+    Promise.resolve(JOB_CATEGORIES.slice(0, 8)),
+  ]);
+  const count = countResult.count;
+  const countyJobs = countResult.jobs;
 
   return (
     <main className="bg-surface">
@@ -75,11 +82,63 @@ export default async function CountyPage({
         />
 
         {/* Listings or fallback */}
-        {count > 0 ? (
+        {countyJobs.length > 0 ? (
           <div className="mb-10">
-            <p className="text-[14px] text-muted">
-              Showing {count} jobs in {countyName}. Database connection coming soon.
-            </p>
+            <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest mb-1">
+              <div className="col-span-5">Position</div>
+              <div className="col-span-3">Company</div>
+              <div className="col-span-2">Type</div>
+              <div className="col-span-2 text-right">Deadline</div>
+            </div>
+            <div className="divide-y divide-subtle">
+              {countyJobs.map((job) => {
+                const dl = job.deadline
+                  ? Math.ceil((new Date(job.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                  : null;
+                const urgent = dl !== null && dl <= 3 && dl > 0;
+                return (
+                  <Link key={job.id} href={`/jobs/${job.slug}`} className="block">
+                    <div className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors">
+                      <div className="col-span-12 sm:col-span-5 min-w-0">
+                        <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
+                          {job.title}
+                        </p>
+                        <div className="sm:hidden flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] text-muted">{job.companyName}</span>
+                          <span className="text-[11px] text-subtle">·</span>
+                          <span className="text-[11px] text-muted">{job.location}</span>
+                        </div>
+                      </div>
+                      <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">
+                        {job.companyName}
+                      </div>
+                      <div className="col-span-6 sm:col-span-2 flex items-center">
+                        <span className="text-[11px] text-muted">
+                          {job.listingType === "GOVERNMENT" ? "Gov" : job.listingType === "CASUAL" ? "Casual" : job.employmentType || "Job"}
+                        </span>
+                      </div>
+                      <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
+                        {dl !== null ? (
+                          <span className={`font-mono text-[12px] font-medium tabular-nums ${dl <= 0 ? "text-muted/40" : urgent ? "text-accent" : "text-muted"}`}>
+                            {dl <= 0 ? "Closed" : `${dl}d left`}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-muted/50">—</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            {count > 20 && (
+              <Link
+                href={`/jobs?county=${countySlug}`}
+                className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors mt-4"
+              >
+                View all {count} jobs in {countyName} →
+              </Link>
+            )}
           </div>
         ) : (
           <div className="mb-10">
