@@ -41,7 +41,18 @@ export async function getClosingSoon(): Promise<Job[]> {
   return listings.map(listingToJob);
 }
 
-// ─── Government Jobs ───
+// ─── Government Jobs by Level (for /government/[level] pages) ───
+export async function getGovernmentJobsByLevel(level: "NATIONAL" | "COUNTY" | "STATE_CORPORATION") {
+  const listings = await prisma.listing.findMany({
+    where: { status: "ACTIVE", listingType: "GOVERNMENT", governmentLevel: level },
+    include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+  return listings.map(listingToJob);
+}
+
+// ─── Government Jobs (homepage) ───
 export async function getGovernmentJobs() {
   const [national, county] = await Promise.all([
     prisma.listing.findMany({
