@@ -199,3 +199,35 @@ Stage Summary:
 - JobUpdates section: DONE (own DB table, expand/collapse, type icons, Official badge)
 - Category page sidesheet: DONE (JobRowClickable replaces Link, opens sidesheet on job click)
 - /jobs/[slug] fallback: VERIFIED (works for direct URL access)
+
+---
+Task ID: 9
+Agent: Main Agent
+Task: Rework Job Updates — sidesheet, /updates page, slug routing, PDF support
+
+Work Log:
+- Updated JobUpdate schema: added slug (unique), pdfUrl, imageUrl, postedBy fields
+- Changed default updateType from POSTED to ANNOUNCEMENT
+- New updateType values: SHORTLISTED, INTERVIEW_SCHEDULE, CLOSING_SOON, ANNOUNCEMENT, DEADLINE_PASSED
+- Created UpdateModalContext.tsx — mirrors JobModalContext pattern (openUpdate, openUpdateBySlug, closeUpdate, nativePushState URL sync, popstate handling)
+- Created UpdateDetailSheet.tsx — sidesheet with type badge, posted-by indicator, body text, image preview, PDF download card, related job listing link, footer with Download PDF CTA
+- Created /api/updates/[slug]/route.ts — fetches single update by slug from DB
+- Updated /api/updates/route.ts — added pagination (page/limit params), type filtering, total count
+- Created /updates/page.tsx — Suspense wrapper for client component
+- Created /updates/UpdatesFeed.tsx — full updates page with filter tabs (All, Shortlists, Interviews, Closing Soon, Announcements, Closed), paginated feed, type-specific icons and badges, PDF indicator
+- Created /updates/[slug]/page.tsx — SSR fallback page for direct URL access
+- Created /updates/[slug]/UpdateDetailPage.tsx — full detail page with breadcrumbs, meta, body text, PDF download, related job link
+- Redesigned homepage JobUpdates.tsx — removed accordion, now simple 5-item feed with clickable rows that open sidesheet via openUpdateBySlug, type-specific icons, PDF indicator, "View all" links to /updates
+- Wired UpdateModalProvider + UpdateDetailSheet in root layout.tsx (nested inside JobModalProvider)
+- Created prisma/seed-job-updates.ts with 12 realistic Kenyan updates (TSC, PSC, KRA, Ministry of Health, Safaricom, Equity Bank, etc.) with proper slugs, PDF URLs, and postedBy values
+- Build passes: all 51 routes compile clean
+- Committed and pushed to GitHub (commit 9d7ffee)
+
+Stage Summary:
+- JobUpdate schema: UPDATED (slug, pdfUrl, imageUrl, postedBy added)
+- Sidesheet: DONE (UpdateModalContext + UpdateDetailSheet, same pattern as jobs)
+- /updates page: DONE (filter tabs, paginated feed, sidesheet on click)
+- /updates/[slug]: DONE (SSR fallback for direct URL access)
+- Homepage feed: DONE (5 items, no accordion, opens sidesheet)
+- View All: NOW links to /updates (dedicated page)
+- Seed data: 12 records with realistic Kenyan content
