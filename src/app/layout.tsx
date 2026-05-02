@@ -3,6 +3,8 @@ import { Playfair_Display, Space_Grotesk, Inter, JetBrains_Mono } from "next/fon
 import "./globals.css";
 import { JobModalProvider } from "@/components/jobready/JobModalContext";
 import JobDetailSheet from "@/components/jobready/JobDetailSheet";
+import { UpdateModalProvider } from "@/components/jobready/UpdateModalContext";
+import UpdateDetailSheet from "@/components/jobready/UpdateDetailSheet";
 import Navbar from "@/components/jobready/Navbar";
 import Footer from "@/components/jobready/Footer";
 
@@ -51,11 +53,14 @@ export default function RootLayout({
       >
         <Navbar />
         <JobModalProvider>
-          <div className="min-h-screen">
-            {children}
-          </div>
-          <Footer />
-          <JobDetailSheet />
+          <UpdateModalProvider>
+            <div className="min-h-screen">
+              {children}
+            </div>
+            <Footer />
+            <JobDetailSheet />
+            <UpdateDetailSheet />
+          </UpdateModalProvider>
         </JobModalProvider>
       </body>
     </html>

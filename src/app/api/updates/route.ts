@@ -15,38 +15,53 @@ function relativeTime(date: Date): string {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const limit = Number(searchParams.get("limit")) || 8;
+  const limit = Math.min(Number(searchParams.get("limit")) || 10, 50);
+  const page = Number(searchParams.get("page")) || 1;
+  const type = searchParams.get("type"); // filter by updateType
+  const offset = (page - 1) * limit;
 
   try {
-    const updates = await prisma.jobUpdate.findMany({
-      where: { status: "PUBLISHED" },
-      orderBy: { createdAt: "desc" },
-      take: limit,
+    const where: Record<string, unknown> = { status: "PUBLISHED" };
+    if (type && type !== "ALL") {
+      where.updateType = type;
+    }
+
+    const [updates, total] = await Promise.all([
+      prisma.jobUpdate.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.jobUpdate.count({ where }),
+    ]);
+
+    const items = updates.map((u) => ({
+      id: u.id,
+      slug: u.slug,
+      title: u.title,
+      body: u.body,
+      source: u.source,
+      updateType: u.updateType,
+      pdfUrl: u.pdfUrl,
+      imageUrl: u.imageUrl,
+      listingSlug: u.listingSlug,
+      postedBy: u.postedBy,
+      date: relativeTime(u.createdAt),
+      createdAt: u.createdAt.toISOString(),
+    }));
+
+    return NextResponse.json({
+      updates: items,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
-
-    const items = updates.map((u) => {
-      // Map DB updateType to the frontend display type
-      let displayType: "posted" | "shortlisted" | "deadline" | "closing" = "posted";
-      if (u.updateType === "SHORTLISTED") displayType = "shortlisted";
-      else if (u.updateType === "CLOSING_SOON") displayType = "closing";
-      else if (u.updateType === "DEADLINE_PASSED") displayType = "deadline";
-      else displayType = "posted";
-
-      return {
-        id: u.id,
-        title: u.title,
-        body: u.body,
-        source: u.source,
-        type: displayType,
-        date: relativeTime(u.createdAt),
-        slug: u.listingSlug || "",
-        createdAt: u.createdAt.toISOString(),
-      };
-    });
-
-    return NextResponse.json({ updates: items });
   } catch (error) {
     console.error("[GET /api/updates] Error:", error);
-    return NextResponse.json({ updates: [] });
+    return NextResponse.json({ updates: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } });
   }
 }

@@ -2,76 +2,78 @@
 
 import { useEffect, useState } from "react";
 import SectionNumber from "./SectionNumber";
-import { Rss, ChevronRight, Clock, Megaphone, ClipboardCheck, AlertTriangle } from "lucide-react";
+import { useUpdateModal } from "./UpdateModalContext";
+import type { UpdateData } from "./UpdateModalContext";
+import {
+  Rss,
+  ChevronRight,
+  Clock,
+  FileText,
+  Download,
+} from "lucide-react";
 
-interface UpdateItem {
-  id: string;
-  title: string;
-  body?: string;
-  source: string;
-  type: "posted" | "shortlisted" | "deadline" | "closing";
-  date: string;
-  slug: string;
-  createdAt: string;
+function getTypeBadge(type: string) {
+  const config: Record<string, { label: string; className: string }> = {
+    SHORTLISTED: {
+      label: "Shortlist",
+      className: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    },
+    INTERVIEW_SCHEDULE: {
+      label: "Interview",
+      className: "bg-blue-50 text-blue-700 border-blue-100",
+    },
+    CLOSING_SOON: {
+      label: "Closing Soon",
+      className: "bg-amber-50 text-amber-700 border-amber-100",
+    },
+    DEADLINE_PASSED: {
+      label: "Closed",
+      className: "bg-red-50 text-red-400 border-red-100",
+    },
+    ANNOUNCEMENT: {
+      label: "New",
+      className: "bg-violet-50 text-violet-700 border-violet-100",
+    },
+  };
+
+  const c = config[type] || { label: "Announcement", className: "bg-violet-50 text-violet-700 border-violet-100" };
+  return (
+    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${c.className}`}>
+      {c.label}
+    </span>
+  );
 }
 
-function getTypeIcon(type: UpdateItem["type"]) {
+function getTypeIcon(type: string) {
   switch (type) {
-    case "shortlisted":
-      return <ClipboardCheck className="w-4 h-4 text-emerald-500" />;
-    case "closing":
-      return <AlertTriangle className="w-4 h-4 text-amber-500" />;
-    case "deadline":
-      return <AlertTriangle className="w-4 h-4 text-red-500" />;
+    case "SHORTLISTED":
+      return <FileText className="w-4 h-4 text-emerald-500" />;
+    case "INTERVIEW_SCHEDULE":
+      return <Clock className="w-4 h-4 text-blue-500" />;
+    case "CLOSING_SOON":
+      return <Clock className="w-4 h-4 text-amber-500" />;
+    case "DEADLINE_PASSED":
+      return <FileText className="w-4 h-4 text-red-400" />;
     default:
-      return <Megaphone className="w-4 h-4 text-blue-500" />;
-  }
-}
-
-function getTypeBadge(type: UpdateItem["type"]) {
-  switch (type) {
-    case "shortlisted":
-      return (
-        <span className="text-[9px] font-mono bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-100">
-          SHORTLISTED
-        </span>
-      );
-    case "closing":
-      return (
-        <span className="text-[9px] font-mono bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded border border-amber-100">
-          CLOSING SOON
-        </span>
-      );
-    case "deadline":
-      return (
-        <span className="text-[9px] font-mono bg-red-50 text-red-600 px-1.5 py-0.5 rounded border border-red-100">
-          DEADLINE PASSED
-        </span>
-      );
-    default:
-      return (
-        <span className="text-[9px] font-mono bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100">
-          NEW POSTING
-        </span>
-      );
+      return <FileText className="w-4 h-4 text-violet-500" />;
   }
 }
 
 export default function JobUpdates() {
-  const [updates, setUpdates] = useState<UpdateItem[]>([]);
+  const { openUpdateBySlug } = useUpdateModal();
+  const [updates, setUpdates] = useState<UpdateData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchUpdates() {
       try {
-        const res = await fetch("/api/updates?limit=10");
+        const res = await fetch("/api/updates?limit=5");
         if (res.ok) {
           const data = await res.json();
           setUpdates(data.updates || []);
         }
       } catch {
-        // Silently fail — show empty state
+        // Silently fail
       } finally {
         setLoading(false);
       }
@@ -90,8 +92,11 @@ export default function JobUpdates() {
               Official
             </span>
           </div>
-          <a href="/jobs?sort=latest" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
-            View all →
+          <a
+            href="/updates"
+            className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider"
+          >
+            View all &rarr;
           </a>
         </div>
         <p className="text-[12px] text-muted mb-6">
@@ -99,9 +104,9 @@ export default function JobUpdates() {
         </p>
 
         {loading ? (
-          <div className="space-y-0 divide-y divide-subtle">
+          <div className="divide-y divide-subtle">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="py-4 animate-pulse">
+              <div key={i} className="py-3.5 animate-pulse">
                 <div className="h-3.5 bg-subtle rounded w-3/4 mb-2" />
                 <div className="h-3 bg-subtle rounded w-1/3" />
               </div>
@@ -118,57 +123,43 @@ export default function JobUpdates() {
             </p>
           </div>
         ) : (
-          <div className="space-y-0 divide-y divide-subtle">
+          <div className="divide-y divide-subtle">
             {updates.map((item) => (
-              <div
+              <button
                 key={item.id}
-                className="py-4 group"
+                onClick={() => openUpdateBySlug(item.slug)}
+                className="py-3.5 w-full text-left group hover:bg-surface -mx-2 px-2 rounded-lg transition-colors"
               >
-                <button
-                  onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
-                  className="flex items-start gap-4 w-full text-left hover:bg-surface -mx-2 px-2 rounded-lg transition-colors"
-                >
-                  <div className="w-10 h-10 border border-divider rounded-lg flex items-center justify-center shrink-0 bg-ink/[0.02]">
-                    {getTypeIcon(item.type)}
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 border border-divider rounded-lg flex items-center justify-center shrink-0 bg-ink/[0.02] mt-0.5">
+                    {getTypeIcon(item.updateType)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-ink group-hover:text-accent transition-colors">
+                    <p className="text-[13px] font-medium text-ink group-hover:text-accent transition-colors leading-snug">
                       {item.title}
                     </p>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      {getTypeBadge(item.updateType)}
                       <span className="text-[11px] text-muted">{item.source}</span>
-                      <span className="text-[11px] text-subtle">·</span>
-                      <span className="text-[11px] text-muted flex items-center gap-1">
+                      <span className="text-[11px] text-subtle">&middot;</span>
+                      <span className="text-[11px] text-muted inline-flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {item.date}
                       </span>
-                      {getTypeBadge(item.type)}
+                      {item.pdfUrl && (
+                        <>
+                          <span className="text-[11px] text-subtle">&middot;</span>
+                          <span className="text-[11px] text-muted inline-flex items-center gap-0.5">
+                            <Download className="w-3 h-3" />
+                            PDF
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <ChevronRight
-                    className={`w-4 h-4 text-muted/30 group-hover:text-muted shrink-0 mt-1 transition-transform ${
-                      expandedId === item.id ? "rotate-90" : ""
-                    }`}
-                  />
-                </button>
-                {/* Expanded body */}
-                {expandedId === item.id && item.body && (
-                  <div className="mt-2 ml-14 text-[13px] text-ink/70 leading-relaxed pb-1">
-                    {item.body}
-                  </div>
-                )}
-                {/* Link to listing if available */}
-                {expandedId === item.id && item.slug && (
-                  <div className="mt-1 ml-14">
-                    <a
-                      href={`/jobs/${item.slug}`}
-                      className="text-[12px] font-medium text-accent hover:text-accent-dark transition-colors inline-flex items-center gap-1"
-                    >
-                      View listing <ChevronRight className="w-3 h-3" />
-                    </a>
-                  </div>
-                )}
-              </div>
+                  <ChevronRight className="w-4 h-4 text-muted/20 group-hover:text-muted/50 shrink-0 mt-2 transition-colors" />
+                </div>
+              </button>
             ))}
           </div>
         )}

@@ -171,11 +171,15 @@ model Listing {
 
 model JobUpdate {
   id          String   @id @default(cuid()) @db.VarChar(64)
+  slug        String   @unique @db.VarChar(191)
   title       String   @db.VarChar(500)
   body        String?  @db.Text
   source      String   @db.VarChar(191)
-  updateType  String   @default("POSTED") @db.VarChar(30)
+  updateType  String   @default("ANNOUNCEMENT") @db.VarChar(30)
+  pdfUrl      String?  @db.VarChar(500)
+  imageUrl    String?  @db.VarChar(500)
   listingSlug String?  @db.VarChar(191)
+  postedBy    String   @default("admin") @db.VarChar(191)
   status      String   @default("PUBLISHED") @db.VarChar(20)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -183,6 +187,7 @@ model JobUpdate {
   @@index([updateType])
   @@index([status])
   @@index([createdAt])
+  @@index([slug])
 }
 
 // ─── Listing ↔ Tag junction ───
