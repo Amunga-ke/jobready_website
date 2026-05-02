@@ -2,25 +2,11 @@
 
 import { useState } from 'react';
 import SectionNumber from './SectionNumber';
+import JobClickable from './JobClickable';
+import { entryLevelJobs, internshipJobs, scholarshipJobs } from '@/lib/mock-jobs';
+import type { Job } from '@/types';
 
 type TabKey = 'e' | 'i' | 's';
-
-const entryLevelJobs = [
-  { title: 'Junior Accountant', company: 'Co-operative Bank · Nairobi', type: 'Full-time' },
-  { title: 'Customer Service Representative', company: 'Safaricom · Nairobi', type: 'Full-time' },
-  { title: 'Data Entry Clerk', company: 'KRA · Nairobi', type: 'Contract' },
-  { title: 'Marketing Assistant', company: 'EABL · Nairobi', type: 'Full-time' },
-];
-
-const internshipJobs = [
-  { title: 'Finance Intern', company: 'Equity Bank · Nairobi', type: '3 months' },
-  { title: 'Software Engineering Intern', company: 'Safaricom · Nairobi', type: '6 months' },
-];
-
-const scholarshipJobs = [
-  { title: 'Mastercard Foundation Scholars', company: 'Univ. of Nairobi · Full Scholarship', type: '28 Feb', accent: true },
-  { title: 'KCB Foundation Scholarship', company: 'KCB Group · Tuition + Stipend', type: '15 Mar' },
-];
 
 const tabs: { key: TabKey; label: string; count: string }[] = [
   { key: 'e', label: 'Entry Level', count: '340' },
@@ -28,7 +14,7 @@ const tabs: { key: TabKey; label: string; count: string }[] = [
   { key: 's', label: 'Scholarships', count: '23' },
 ];
 
-const tabContent: Record<TabKey, { jobs: typeof entryLevelJobs; total: number }> = {
+const tabContent: Record<TabKey, { jobs: Job[]; total: number }> = {
   e: { jobs: entryLevelJobs, total: 340 },
   i: { jobs: internshipJobs, total: 156 },
   s: { jobs: scholarshipJobs, total: 23 },
@@ -67,23 +53,24 @@ export default function OpportunitiesTabs() {
         </div>
         <div className="py-5">
           <div className="divide-y divide-subtle">
-            {current.jobs.map((job, i) => (
-              <div
-                key={`${activeTab}-${i}`}
+            {current.jobs.map((job) => (
+              <JobClickable
+                key={job.id}
+                job={job}
                 className="flex items-center justify-between py-3 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors"
               >
                 <div>
                   <p className="text-sm font-medium group-hover:text-accent transition-colors">{job.title}</p>
-                  <p className="text-[11px] text-muted mt-0.5">{job.company}</p>
+                  <p className="text-[11px] text-muted mt-0.5">{job.companyName}</p>
                 </div>
-                <span
-                  className={`font-mono text-[11px] shrink-0 ml-3 ${
-                    'accent' in job && job.accent ? 'text-accent font-medium' : 'text-muted'
-                  }`}
-                >
-                  {job.type}
-                </span>
-              </div>
+                {job.deadline && (
+                  <span className={`font-mono text-[11px] shrink-0 ml-3 ${
+                    job.opportunityType === 'SCHOLARSHIP' ? 'text-accent font-medium' : 'text-muted'
+                  }`}>
+                    {new Date(job.deadline).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
+                  </span>
+                )}
+              </JobClickable>
             ))}
           </div>
           <a
