@@ -57,7 +57,7 @@ export default async function OpportunityTypePage({
   const nearbyCounties = KE_COUNTIES.slice(0, 8) as unknown as string[];
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="bg-surface">
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

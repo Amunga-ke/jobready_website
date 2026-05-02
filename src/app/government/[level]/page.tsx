@@ -72,7 +72,7 @@ export default async function GovernmentLevelPage({
   const otherLevels = GOV_LEVELS.filter((g) => g.slug !== level);
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="bg-surface">
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

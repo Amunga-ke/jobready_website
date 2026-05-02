@@ -108,7 +108,7 @@ function OpportunitiesContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       {/* Header */}
       <div className="border-b border-divider">
         <div className="max-w-6xl mx-auto px-5 pt-10 pb-8">
@@ -232,7 +232,7 @@ export default function OpportunitiesPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-white">
+        <div className="bg-white">
           <div className="max-w-6xl mx-auto px-5 pt-10 pb-8">
             <div className="h-10 bg-subtle rounded w-48 animate-pulse mb-3" />
             <div className="h-4 bg-subtle rounded w-72 animate-pulse" />

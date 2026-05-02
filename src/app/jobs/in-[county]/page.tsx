@@ -61,7 +61,7 @@ export default async function CountyPage({
   const relatedCategories = JOB_CATEGORIES.slice(0, 8);
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="bg-surface">
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

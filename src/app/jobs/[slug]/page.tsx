@@ -43,7 +43,7 @@ export default async function JobDetailPage({
   }
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="bg-surface">
       {/* Top bar */}
       <div className="border-b border-divider bg-white/60 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-5 py-3 flex items-center gap-3">

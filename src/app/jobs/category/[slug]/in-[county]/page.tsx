@@ -74,7 +74,7 @@ export default async function CategoryCountyPage({
   const relatedCategories = JOB_CATEGORIES.filter((c) => c.slug !== slug).slice(0, 6);
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="bg-surface">
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[
