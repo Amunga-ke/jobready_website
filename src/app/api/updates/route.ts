@@ -32,8 +32,8 @@ export async function GET(request: Request) {
         orderBy: { createdAt: "desc" },
         take: limit,
         skip: offset,
-      }),
-      prisma.jobUpdate.count({ where }),
+      }).catch(() => []),
+      prisma.jobUpdate.count({ where }).catch(() => 0),
     ]);
 
     const items = updates.map((u) => ({
