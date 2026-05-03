@@ -15,17 +15,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, subcategory: subSlug } = await params;
 
-  const category = await prisma.category.findUnique({ where: { slug } });
+  const category = await prisma.category
+    .findUnique({ where: { slug } })
+    .catch(() => null);
   if (!category) return { title: "Not Found | JobReady" };
 
-  const sub = await prisma.subcategory.findFirst({
-    where: { slug: subSlug, categoryId: category.id },
-  });
+  const sub = await prisma.subcategory
+    .findFirst({
+      where: { slug: subSlug, categoryId: category.id },
+    })
+    .catch(() => null);
   if (!sub) return { title: "Not Found | JobReady" };
 
-  const count = await prisma.listing.count({
-    where: { subcategoryId: sub.id, status: "ACTIVE" },
-  });
+  const count = await prisma.listing
+    .count({
+      where: { subcategoryId: sub.id, status: "ACTIVE" },
+    })
+    .catch(() => 0);
 
   const title = `${sub.name} Jobs in Kenya${count > 0 ? ` (${count})` : ""} | JobReady`;
   const description = `Browse ${count} ${sub.name.toLowerCase()} job openings across Kenya on JobReady.`;
@@ -47,16 +53,20 @@ export default async function SubcategoryPage({
   const { slug, subcategory: subSlug } = await params;
 
   // Look up category from DB
-  const category = await prisma.category.findUnique({ where: { slug } });
+  const category = await prisma.category
+    .findUnique({ where: { slug } })
+    .catch(() => null);
   if (!category) notFound();
 
   // Look up subcategory from DB
-  const sub = await prisma.subcategory.findFirst({
-    where: { slug: subSlug, categoryId: category.id },
-    include: {
-      _count: { select: { listings: { where: { status: "ACTIVE" } } } },
-    },
-  });
+  const sub = await prisma.subcategory
+    .findFirst({
+      where: { slug: subSlug, categoryId: category.id },
+      include: {
+        _count: { select: { listings: { where: { status: "ACTIVE" } } } },
+      },
+    })
+    .catch(() => null);
   if (!sub) notFound();
 
   const count = sub._count.listings;
