@@ -18,15 +18,19 @@ export async function generateMetadata({
   const { slug } = await params;
 
   // Look up category from DB first, fall back to hardcoded constants
-  const dbCategory = await prisma.category.findUnique({ where: { slug } });
+  const dbCategory = await prisma.category
+    .findUnique({ where: { slug } })
+    .catch(() => null);
   if (!dbCategory) return { title: "Not Found | JobReady" };
 
   const fallbackCategory = getCategoryBySlug(slug);
   const label = dbCategory.name;
 
-  const count = await prisma.listing.count({
-    where: { categoryId: dbCategory.id, status: "ACTIVE" },
-  });
+  const count = await prisma.listing
+    .count({
+      where: { categoryId: dbCategory.id, status: "ACTIVE" },
+    })
+    .catch(() => 0);
   const robots = getRobotsMeta(count, "CATEGORY" as SeoTier);
 
   const description = fallbackCategory
@@ -63,17 +67,19 @@ export default async function CategoryPage({
   const { slug } = await params;
 
   // Look up category from DB — this is the source of truth
-  const dbCategory = await prisma.category.findUnique({
-    where: { slug },
-    include: {
-      subcategories: {
-        where: { active: true },
-        orderBy: { sortOrder: "asc" },
-        include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
+  const dbCategory = await prisma.category
+    .findUnique({
+      where: { slug },
+      include: {
+        subcategories: {
+          where: { active: true },
+          orderBy: { sortOrder: "asc" },
+          include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
+        },
+        _count: { select: { listings: { where: { status: "ACTIVE" } } } },
       },
-      _count: { select: { listings: { where: { status: "ACTIVE" } } } },
-    },
-  });
+    })
+    .catch(() => null);
 
   if (!dbCategory) notFound();
 

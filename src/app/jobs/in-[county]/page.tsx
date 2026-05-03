@@ -8,6 +8,8 @@ import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { getJobCountByCounty, getJobsByCounty } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
@@ -43,11 +45,7 @@ export async function generateMetadata({
   };
 }
 
-export async function generateStaticParams() {
-  return KE_COUNTIES.map((county) => ({
-    county: slugifyCounty(county),
-  }));
-}
+// No generateStaticParams — page is force-dynamic
 
 export default async function CountyPage({
   params,

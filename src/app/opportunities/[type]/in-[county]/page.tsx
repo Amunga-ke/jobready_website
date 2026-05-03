@@ -11,43 +11,55 @@ import { listingToJob } from "@/lib/transforms";
 import type { Job } from "@/types";
 
 async function getOpportunityCountByCounty(typeSlug: string, countySlug: string): Promise<number> {
-  const countyRecord = await prisma.county.findUnique({
-    where: { slug: countySlug },
-    select: { id: true },
-  });
+  const countyRecord = await prisma.county
+    .findUnique({
+      where: { slug: countySlug },
+      select: { id: true },
+    })
+    .catch(() => null);
   if (!countyRecord) return 0;
 
-  return prisma.listing.count({
-    where: {
-      status: "ACTIVE",
-      opportunityType: typeSlug.toUpperCase().replace(/-/g, "_"),
-      countyId: countyRecord.id,
-    },
-  });
+  return prisma.listing
+    .count({
+      where: {
+        status: "ACTIVE",
+        opportunityType: typeSlug.toUpperCase().replace(/-/g, "_"),
+        countyId: countyRecord.id,
+      },
+    })
+    .catch(() => 0);
 }
 
 async function getOpportunitiesByCounty(typeSlug: string, countySlug: string, limit = 20) {
-  const countyRecord = await prisma.county.findUnique({
-    where: { slug: countySlug },
-    select: { id: true },
-  });
+  const countyRecord = await prisma.county
+    .findUnique({
+      where: { slug: countySlug },
+      select: { id: true },
+    })
+    .catch(() => null);
   if (!countyRecord) return { jobs: [] as Job[], count: 0 };
 
   const oppType = typeSlug.toUpperCase().replace(/-/g, "_");
   const [listings, count] = await Promise.all([
-    prisma.listing.findMany({
-      where: { status: "ACTIVE", opportunityType: oppType, countyId: countyRecord.id },
-      include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
-      orderBy: { createdAt: "desc" },
-      take: limit,
-    }),
-    prisma.listing.count({
-      where: { status: "ACTIVE", opportunityType: oppType, countyId: countyRecord.id },
-    }),
+    prisma.listing
+      .findMany({
+        where: { status: "ACTIVE", opportunityType: oppType, countyId: countyRecord.id },
+        include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      })
+      .catch(() => []),
+    prisma.listing
+      .count({
+        where: { status: "ACTIVE", opportunityType: oppType, countyId: countyRecord.id },
+      })
+      .catch(() => 0),
   ]);
 
   return { jobs: listings.map(listingToJob), count };
 }
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -84,10 +96,7 @@ export async function generateMetadata({
   };
 }
 
-// Only pre-generate when DB confirms ≥3 listings
-export async function generateStaticParams() {
-  return [];
-}
+// No generateStaticParams — page is force-dynamic
 
 export default async function OpportunityCountyPage({
   params,
