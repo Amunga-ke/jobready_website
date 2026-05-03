@@ -11,7 +11,7 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
-import { KE_COUNTIES, JOB_CATEGORIES } from "@/lib/constants";
+import { KE_COUNTIES } from "@/lib/constants";
 
 interface JobAlert {
   id: string;
@@ -37,8 +37,16 @@ const FREQUENCY_LABELS: Record<string, string> = {
   INSTANT: "Instant",
 };
 
+interface DBCategory {
+  id: string;
+  slug: string;
+  name: string;
+  icon: string | null;
+}
+
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<JobAlert[]>([]);
+  const [categories, setCategories] = useState<DBCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -67,6 +75,11 @@ export default function AlertsPage() {
 
   useEffect(() => {
     loadAlerts();
+    // Fetch categories from DB
+    fetch("/api/categories")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setCategories(data.categories || []))
+      .catch(() => {});
   }, [loadAlerts]);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -120,8 +133,8 @@ export default function AlertsPage() {
       const parts: string[] = [];
       if (q.q) parts.push(`"${q.q}"`);
       if (q.category) {
-        const cat = JOB_CATEGORIES.find((c) => c.slug === q.category);
-        parts.push(cat?.label || q.category);
+        const cat = categories.find((c) => c.slug === q.category);
+        parts.push(cat?.name || q.category);
       }
       if (q.county) parts.push(q.county);
       return parts.length > 0 ? parts.join(" · ") : "All jobs";
@@ -200,8 +213,8 @@ export default function AlertsPage() {
                     className="w-full px-3 py-2 rounded-lg border border-divider bg-surface text-[13px] text-ink focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
                   >
                     <option value="">All categories</option>
-                    {JOB_CATEGORIES.map((c) => (
-                      <option key={c.slug} value={c.slug}>{c.label}</option>
+                    {categories.map((c) => (
+                      <option key={c.slug} value={c.slug}>{c.name}</option>
                     ))}
                   </select>
                 </div>

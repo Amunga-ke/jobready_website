@@ -6,8 +6,7 @@ import { JobModalProvider } from "@/components/jobready/JobModalContext";
 import JobDetailSheet from "@/components/jobready/JobDetailSheet";
 import { UpdateModalProvider } from "@/components/jobready/UpdateModalContext";
 import UpdateDetailSheet from "@/components/jobready/UpdateDetailSheet";
-import Navbar from "@/components/jobready/Navbar";
-import Footer from "@/components/jobready/Footer";
+import PublicLayout from "@/components/PublicLayout";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -66,13 +65,11 @@ export default function RootLayout({
         className={`${playfair.variable} ${spaceGrotesk.variable} ${inter.variable} ${jetbrains.variable} font-inter antialiased bg-surface text-ink`}
       >
         <Providers>
-        <Navbar />
         <JobModalProvider>
           <UpdateModalProvider>
-            <div className="min-h-screen">
-              {children}
-            </div>
-            <Footer />
+            <PublicLayout>
+            {children}
+            </PublicLayout>
             <JobDetailSheet />
             <UpdateDetailSheet />
           </UpdateModalProvider>

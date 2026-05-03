@@ -1,40 +1,25 @@
-import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { mapToCategories } from '@/lib/data-mapper';
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // Fetch root categories (no parent) with type JOB, ordered by listing count.
-    // Include their subcategories (children) for the hierarchical structure.
-    const categories = await db.category.findMany({
-      where: {
-        parentId: null,
-        isActive: true,
-        type: 'JOB',
+    const categories = await prisma.category.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        icon: true,
       },
-      include: {
-        children: {
-          where: { isActive: true },
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            listingCount: true,
-          },
-          orderBy: { listingCount: 'desc' },
-        },
-      },
-      orderBy: { listingCount: 'desc' },
     });
 
-    return NextResponse.json({
-      categories: mapToCategories(categories as any),
-    });
+    return NextResponse.json({ categories });
   } catch (error) {
-    console.error('[GET /api/categories] Error:', error);
+    console.error("[GET /api/categories] Error:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch categories' },
-      { status: 500 },
+      { error: "Failed to fetch categories" },
+      { status: 500 }
     );
   }
 }

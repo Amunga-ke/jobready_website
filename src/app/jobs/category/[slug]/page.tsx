@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { JOB_CATEGORIES, getCategoryBySlug, KE_COUNTIES, slugifyCounty } from "@/lib/constants";
+import { getCategoryBySlug } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCategoryIntro, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
@@ -84,7 +84,20 @@ export default async function CategoryPage({
     orderBy: { name: "asc" },
     select: { slug: true, name: true, _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
   });
-  const relatedCategories = allCategories.slice(0, 6);
+  const relatedCategories = allCategories
+    .filter(c => c._count.listings > 0)
+    .sort((a, b) => b._count.listings - a._count.listings)
+    .slice(0, 6);
+
+  // Fetch county-level job counts for this category from actual listings
+  const countiesWithCounts = await prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
+    SELECT l.countyName, COUNT(*) as _count
+    FROM Listing l
+    WHERE l.status = 'ACTIVE' AND l.categoryId = ${dbCategory.id} AND l.countyName IS NOT NULL AND l.countyName != ''
+    GROUP BY l.countyName
+    ORDER BY _count DESC
+  `;
+  const countyMap = new Map(countiesWithCounts.map(c => [c.countyName, Number(c._count)]));
 
   // Fetch actual job listings for this category
   const listings = await prisma.listing.findMany({
@@ -231,7 +244,8 @@ export default async function CategoryPage({
           </div>
         )}
 
-        {/* Browse by county */}
+        {/* Browse by county (only counties with jobs in this category) */}
+        {countyMap.size > 0 && (
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider">
@@ -242,20 +256,22 @@ export default async function CategoryPage({
             </Link>
           </div>
           <div className="flex flex-wrap gap-2">
-            {KE_COUNTIES.map((county) => {
-              const countySlug = slugifyCounty(county);
+            {Array.from(countyMap.entries()).map(([countyName, jobCount]) => {
+              const countySlug = countyName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
               return (
                 <Link
-                  key={countySlug}
+                  key={countyName}
                   href={`/jobs/category/${slug}/in-${countySlug}`}
-                  className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors"
+                  className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors inline-flex items-center gap-1.5"
                 >
-                  {county}
+                  {countyName}
+                  <span className="text-[10px] font-mono text-accent">{jobCount}</span>
                 </Link>
               );
             })}
           </div>
         </div>
+        )}
 
         {/* Related categories */}
         <div>
