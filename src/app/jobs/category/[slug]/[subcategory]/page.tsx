@@ -61,33 +61,29 @@ export default async function SubcategoryPage({
 
   const count = sub._count.listings;
 
-  // Fetch sibling subcategories
-  const siblings = await prisma.subcategory.findMany({
-    where: { categoryId: category.id, active: true, id: { not: sub.id } },
-    orderBy: { sortOrder: "asc" },
-    include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
-  });
-
-  // Fetch listings for this subcategory
-  const listings = await prisma.listing.findMany({
-    where: { subcategoryId: sub.id, status: "ACTIVE" },
-    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
-
-  // Fetch top counties for this subcategory
-  const countiesWithCounts = await prisma.$queryRaw<
-    Array<{ countyName: string; _count: bigint }>
-  >`
-    SELECT l.countyName, COUNT(*) as _count
-    FROM Listing l
-    WHERE l.status = 'ACTIVE' AND l.subcategoryId = ${sub.id}
-      AND l.countyName IS NOT NULL AND l.countyName != ''
-    GROUP BY l.countyName
-    ORDER BY _count DESC
-    LIMIT 15
-  `;
+  // Fetch all secondary data in parallel with error fallbacks
+  const [siblings, listings, countiesWithCounts] = await Promise.all([
+    prisma.subcategory.findMany({
+      where: { categoryId: category.id, active: true, id: { not: sub.id } },
+      orderBy: { sortOrder: "asc" },
+      include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
+    }).catch(() => []),
+    prisma.listing.findMany({
+      where: { subcategoryId: sub.id, status: "ACTIVE" },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }).catch(() => []),
+    prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
+      SELECT l.countyName, COUNT(*) as _count
+      FROM Listing l
+      WHERE l.status = 'ACTIVE' AND l.subcategoryId = ${sub.id}
+        AND l.countyName IS NOT NULL AND l.countyName != ''
+      GROUP BY l.countyName
+      ORDER BY _count DESC
+      LIMIT 15
+    `.catch(() => []),
+  ]);
 
   return (
     <main className="bg-surface">

@@ -53,14 +53,7 @@ export async function generateMetadata({
   };
 }
 
-export async function generateStaticParams() {
-  // Generate static params from DB categories
-  const categories = await prisma.category.findMany({
-    where: { active: true },
-    select: { slug: true },
-  });
-  return categories.map((cat) => ({ slug: cat.slug }));
-}
+// No generateStaticParams — page is force-dynamic, all slugs handled at runtime
 
 export default async function CategoryPage({
   params,
@@ -96,32 +89,31 @@ export default async function CategoryPage({
 
   const count = dbCategory._count.listings;
 
-  // Fetch actual job listings for this category
-  const listings = await prisma.listing.findMany({
-    where: { categoryId: dbCategory.id, status: "ACTIVE" },
-    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
-
-  // Fetch county job counts for this category (only counties with jobs)
-  const countiesWithCounts = await prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
-    SELECT l.countyName, COUNT(*) as _count
-    FROM Listing l
-    WHERE l.status = 'ACTIVE' AND l.categoryId = ${dbCategory.id}
-      AND l.countyName IS NOT NULL AND l.countyName != ''
-    GROUP BY l.countyName
-    ORDER BY _count DESC
-    LIMIT 15
-  `;
-
-  // Fetch related categories with real job counts
-  const relatedCategoriesWithCounts = await prisma.category.findMany({
-    where: { active: true, id: { not: dbCategory.id } },
-    orderBy: { sortOrder: "asc" },
-    take: 6,
-    include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
-  });
+  // Fetch secondary data in parallel with error fallbacks
+  // If any query fails (e.g. connection exhaustion), that section renders empty
+  const [listings, countiesWithCounts, relatedCategoriesWithCounts] = await Promise.all([
+    prisma.listing.findMany({
+      where: { categoryId: dbCategory.id, status: "ACTIVE" },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }).catch(() => []),
+    prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
+      SELECT l.countyName, COUNT(*) as _count
+      FROM Listing l
+      WHERE l.status = 'ACTIVE' AND l.categoryId = ${dbCategory.id}
+        AND l.countyName IS NOT NULL AND l.countyName != ''
+      GROUP BY l.countyName
+      ORDER BY _count DESC
+      LIMIT 15
+    `.catch(() => []),
+    prisma.category.findMany({
+      where: { active: true, id: { not: dbCategory.id } },
+      orderBy: { sortOrder: "asc" },
+      take: 6,
+      include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
+    }).catch(() => []),
+  ]);
 
   return (
     <main className="bg-surface">
