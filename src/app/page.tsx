@@ -54,7 +54,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  // Fetch all homepage data in parallel
+  // Fetch all homepage data in parallel — wrapped with error fallbacks
+  // so a single DB connection failure doesn't crash the whole page
   const [
     featuredJobs,
     justPosted,
@@ -65,14 +66,21 @@ export default async function Home() {
     categories,
     counties,
   ] = await Promise.all([
-    getFeaturedJobs(),
-    getJustPosted(),
-    getClosingSoon(),
-    getGovernmentJobs(),
-    getCasualJobs(),
-    getOpportunities(),
-    getCategories(),
-    getCounties(),
+    getFeaturedJobs().catch(() => [] as Job[]),
+    getJustPosted().catch(() => [] as Job[]),
+    getClosingSoon().catch(() => [] as Job[]),
+    getGovernmentJobs().catch(() => ({ national: [] as Job[], county: [] as Job[] })),
+    getCasualJobs().catch(() => [] as Job[]),
+    getOpportunities().catch(() => ({
+      internships: [] as Job[],
+      scholarships: [] as Job[],
+      entryLevel: [] as Job[],
+      internshipCount: 0,
+      scholarshipCount: 0,
+      entryLevelCount: 0,
+    })),
+    getCategories().catch(() => [] as Category[]),
+    getCounties().catch(() => [] as County[]),
   ]);
 
   return (
