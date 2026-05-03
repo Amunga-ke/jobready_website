@@ -60,7 +60,7 @@ export async function getClosingSoon(): Promise<Job[]> {
 export async function getGovernmentJobsByLevel(level: "NATIONAL" | "COUNTY" | "STATE_CORPORATION") {
   const listings = await prisma.listing.findMany({
     where: { status: "ACTIVE", listingType: "GOVERNMENT", governmentLevel: level },
-    include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
+    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
     take: 50,
   });
@@ -163,15 +163,28 @@ export async function getCategories() {
 
 // ─── Counties with listing counts ───
 export async function getCounties() {
-  return prisma.county.findMany({
-    where: { active: true },
-    orderBy: { name: "asc" },
-    include: {
-      _count: {
-        select: { listings: { where: { status: "ACTIVE" } } },
-      },
-    },
-  }).catch(() => []);
+  const counties = await prisma.county
+    .findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+    })
+    .catch(() => []);
+
+  // Count active listings grouped by county name
+  const counts = await prisma.listing
+    .groupBy({
+      by: ["county"],
+      where: { status: "ACTIVE", county: { not: "" } },
+      _count: true,
+    })
+    .catch(() => []);
+
+  const countMap = new Map(counts.map((c) => [c.county, c._count]));
+
+  return counties.map((c) => ({
+    ...c,
+    _count: { listings: countMap.get(c.name) || 0 },
+  }));
 }
 
 // ─── Job by slug (for detail pages) ───
@@ -182,7 +195,6 @@ export async function getJobBySlug(slug: string) {
       company: true,
       category: true,
       subcategory: true,
-      county: true,
       tags: { include: { tag: true } },
     },
   });
@@ -191,10 +203,15 @@ export async function getJobBySlug(slug: string) {
 
 // ─── Job count by county slug (for /jobs/in-[county] pages) ───
 export async function getJobCountByCounty(countySlug: string): Promise<number> {
+  const county = await prisma.county.findUnique({
+    where: { slug: countySlug },
+    select: { name: true },
+  });
+  if (!county) return 0;
   return prisma.listing.count({
     where: {
       status: "ACTIVE",
-      county: { slug: countySlug },
+      county: county.name,
     },
   });
 }
@@ -203,7 +220,7 @@ export async function getJobCountByCounty(countySlug: string): Promise<number> {
 export async function getJobCountByCategoryAndCounty(categorySlug: string, countySlug: string): Promise<number> {
   const [catRecord, countyRecord] = await Promise.all([
     prisma.category.findUnique({ where: { slug: categorySlug }, select: { id: true } }),
-    prisma.county.findUnique({ where: { slug: countySlug }, select: { id: true } }),
+    prisma.county.findUnique({ where: { slug: countySlug }, select: { name: true } }),
   ]);
 
   if (!catRecord || !countyRecord) return 0;
@@ -212,7 +229,7 @@ export async function getJobCountByCategoryAndCounty(categorySlug: string, count
     where: {
       status: "ACTIVE",
       categoryId: catRecord.id,
-      countyId: countyRecord.id,
+      county: countyRecord.name,
     },
   });
 }
@@ -221,19 +238,19 @@ export async function getJobCountByCategoryAndCounty(categorySlug: string, count
 export async function getJobsByCounty(countySlug: string, limit = 20) {
   const countyRecord = await prisma.county.findUnique({
     where: { slug: countySlug },
-    select: { id: true },
+    select: { name: true },
   });
   if (!countyRecord) return { jobs: [] as Job[], count: 0 };
 
   const [listings, count] = await Promise.all([
     prisma.listing.findMany({
-      where: { status: "ACTIVE", countyId: countyRecord.id },
-      include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
+      where: { status: "ACTIVE", county: countyRecord.name },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: limit,
     }),
     prisma.listing.count({
-      where: { status: "ACTIVE", countyId: countyRecord.id },
+      where: { status: "ACTIVE", county: countyRecord.name },
     }),
   ]);
 
@@ -244,20 +261,20 @@ export async function getJobsByCounty(countySlug: string, limit = 20) {
 export async function getJobsByCategoryAndCounty(categorySlug: string, countySlug: string, limit = 20) {
   const [catRecord, countyRecord] = await Promise.all([
     prisma.category.findUnique({ where: { slug: categorySlug }, select: { id: true } }),
-    prisma.county.findUnique({ where: { slug: countySlug }, select: { id: true } }),
+    prisma.county.findUnique({ where: { slug: countySlug }, select: { name: true } }),
   ]);
 
   if (!catRecord || !countyRecord) return { jobs: [] as Job[], count: 0 };
 
   const [listings, count] = await Promise.all([
     prisma.listing.findMany({
-      where: { status: "ACTIVE", categoryId: catRecord.id, countyId: countyRecord.id },
-      include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
+      where: { status: "ACTIVE", categoryId: catRecord.id, county: countyRecord.name },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: limit,
     }),
     prisma.listing.count({
-      where: { status: "ACTIVE", categoryId: catRecord.id, countyId: countyRecord.id },
+      where: { status: "ACTIVE", categoryId: catRecord.id, county: countyRecord.name },
     }),
   ]);
 
@@ -304,7 +321,7 @@ export async function getJobs(params: {
     ];
   }
   if (category) where.categoryId = category;
-  if (county) where.countyId = county;
+  if (county) where.county = county;
   if (listingType) where.listingType = listingType;
   if (employmentType) where.employmentType = employmentType;
   if (experienceLevel) where.experienceLevel = experienceLevel;

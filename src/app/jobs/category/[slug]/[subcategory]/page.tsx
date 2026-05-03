@@ -42,7 +42,7 @@ export async function generateMetadata({
 
       const count = await prisma.listing
         .count({
-          where: { categoryId: category.id, status: "ACTIVE", countyName: county },
+          where: { categoryId: category.id, status: "ACTIVE", county: county },
         })
         .catch(() => 0);
       const robots = getRobotsMeta(count, "CATEGORY_COUNTY" as SeoTier);
@@ -129,7 +129,7 @@ async function CategoryCountyView({
   const [listings, subcategories, countiesWithCounts] = await Promise.all([
     prisma.listing
       .findMany({
-        where: { categoryId: category.id, status: "ACTIVE", countyName: county },
+        where: { categoryId: category.id, status: "ACTIVE", county: county },
         include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
         orderBy: { createdAt: "desc" },
         take: 20,
@@ -142,12 +142,12 @@ async function CategoryCountyView({
         include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
       })
       .catch(() => []),
-    prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
-      SELECT l.countyName, COUNT(*) as _count
+    prisma.$queryRaw<Array<{ county: string; _count: bigint }>>`
+      SELECT l.county, COUNT(*) as _count
       FROM Listing l
       WHERE l.status = 'ACTIVE' AND l.categoryId = ${category.id}
-        AND l.countyName IS NOT NULL AND l.countyName != ''
-      GROUP BY l.countyName
+        AND l.county IS NOT NULL AND l.county != ''
+      GROUP BY l.county
       ORDER BY _count DESC
       LIMIT 15
     `.catch(() => []),
@@ -225,7 +225,7 @@ async function CategoryCountyView({
         {(() => {
           const countyCounts = new Map<string, number>();
           for (const c of countiesWithCounts) {
-            countyCounts.set(c.countyName, Number(c._count));
+            countyCounts.set(c.county, Number(c._count));
           }
           const sorted = [...KE_COUNTIES].sort((a, b) => {
             const ca = countyCounts.get(a) || 0;
@@ -320,12 +320,12 @@ async function SubcategoryView({ slug, subSlug }: { slug: string; subSlug: strin
         take: 20,
       })
       .catch(() => []),
-    prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
-      SELECT l.countyName, COUNT(*) as _count
+    prisma.$queryRaw<Array<{ county: string; _count: bigint }>>`
+      SELECT l.county, COUNT(*) as _count
       FROM Listing l
       WHERE l.status = 'ACTIVE' AND l.subcategoryId = ${sub.id}
-        AND l.countyName IS NOT NULL AND l.countyName != ''
-      GROUP BY l.countyName
+        AND l.county IS NOT NULL AND l.county != ''
+      GROUP BY l.county
       ORDER BY _count DESC
       LIMIT 15
     `.catch(() => []),
@@ -382,7 +382,7 @@ async function SubcategoryView({ slug, subSlug }: { slug: string; subSlug: strin
           // Build a lookup map from DB results
           const countyCounts = new Map<string, number>();
           for (const c of countiesWithCounts) {
-            countyCounts.set(c.countyName, Number(c._count));
+            countyCounts.set(c.county, Number(c._count));
           }
           // Sort: counties with listings first (by count desc), then the rest alphabetically
           const sorted = [...KE_COUNTIES].sort((a, b) => {

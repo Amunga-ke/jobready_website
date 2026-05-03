@@ -37,7 +37,7 @@ export async function generateMetadata({
         where: {
           status: "ACTIVE",
           opportunityType: dbType,
-          countyName: county,
+          county: county,
         },
       })
       .catch(() => 0);
@@ -90,13 +90,12 @@ export default async function OpportunityCountyPage({
           where: {
             status: "ACTIVE",
             opportunityType: dbType,
-            countyName: county,
+            county: county,
           },
           include: {
             company: true,
             category: true,
             subcategory: true,
-            county: true,
             tags: { include: { tag: true } },
           },
           orderBy: { createdAt: "desc" },
@@ -108,7 +107,7 @@ export default async function OpportunityCountyPage({
           where: {
             status: "ACTIVE",
             opportunityType: dbType,
-            countyName: county,
+            county: county,
           },
         })
         .catch(() => 0),

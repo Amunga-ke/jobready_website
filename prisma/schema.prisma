@@ -68,7 +68,6 @@ model County {
   code      String?  @db.VarChar(10)
   active    Boolean  @default(true)
 
-  listings Listing[]
 }
 
 // ─── Tags ───
@@ -104,10 +103,8 @@ model Listing {
   subcategory     Subcategory? @relation(fields: [subcategoryId], references: [id])
 
   // Location
-  location        String       @default("") @db.VarChar(191)
-  countyId        String?      @db.VarChar(64)
-  county          County?      @relation(fields: [countyId], references: [id])
-  countyName      String       @default("") @db.VarChar(100)
+  town            String       @default("") @db.VarChar(191)
+  county          String       @default("") @db.VarChar(100)
 
   // Employment details
   employmentType  String       @default("Full-time") @db.VarChar(20)
@@ -147,8 +144,7 @@ model Listing {
 
   @@index([listingType])
   @@index([categoryId])
-  @@index([countyId])
-  @@index([countyName])
+  @@index([county])
   @@index([companyId])
   @@index([status])
   @@index([featured])
@@ -160,7 +156,7 @@ model Listing {
   @@index([experienceLevel])
   @@index([workMode])
   @@index([listingType, status])
-  @@index([listingType, countyName])
+  @@index([listingType, county])
 }
 
 // ─── Job Updates (official announcements from ministries, employers) ───

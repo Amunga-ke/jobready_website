@@ -46,23 +46,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }).catch(() => []),
     // Get counts for all category × county combos to filter thin pages
     prisma.listing.groupBy({
-      by: ["categoryId", "countyId"],
-      where: { status: "ACTIVE" },
+      by: ["categoryId", "county"],
+      where: { status: "ACTIVE", county: { not: "" } },
       _count: true,
     }).catch(() => []),
     // Get counts for all opportunity × county combos to filter thin pages
     prisma.listing.groupBy({
-      by: ["opportunityType", "countyId"],
-      where: { status: "ACTIVE", opportunityType: { not: null } },
+      by: ["opportunityType", "county"],
+      where: { status: "ACTIVE", opportunityType: { not: null }, county: { not: "" } },
       _count: true,
     }).catch(() => []),
   ]);
 
-  // Fetch county IDs for slug lookup
+  // Build county name → slug map for sitemap URL generation
   const allCounties = await prisma.county
-    .findMany({ select: { id: true, slug: true } })
+    .findMany({ select: { name: true, slug: true } })
     .catch(() => []);
-  const countyIdMap = new Map(allCounties.map((c) => [c.id, c.slug]));
+  const countyNameToSlug = new Map(allCounties.map((c) => [c.name, c.slug]));
 
   // Fetch category IDs for slug lookup
   const allCategories = await prisma.category
@@ -134,9 +134,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 6. Category × County combo pages — ONLY include if above threshold (≥3 listings)
   const catCountyPages: MetadataRoute.Sitemap = [];
   for (const row of categoryCountyCounts) {
-    if (row._count >= catCountyThreshold && row.categoryId && row.countyId) {
+    if (row._count >= catCountyThreshold && row.categoryId && row.county) {
       const catSlug = catIdMap.get(row.categoryId);
-      const countySlug = countyIdMap.get(row.countyId);
+      const countySlug = countyNameToSlug.get(row.county);
       if (catSlug && countySlug) {
         catCountyPages.push({
           url: `${SITE_URL}/jobs/category/${catSlug}/in-${countySlug}`,
@@ -151,8 +151,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 7. Opportunity × County combo pages — ONLY include if above threshold (≥3 listings)
   const oppCountyPages: MetadataRoute.Sitemap = [];
   for (const row of opportunityCountyCounts) {
-    if (row._count >= oppCountyThreshold && row.countyId) {
-      const countySlug = countyIdMap.get(row.countyId);
+    if (row._count >= oppCountyThreshold && row.county) {
+      const countySlug = countyNameToSlug.get(row.county);
       const oppType = row.opportunityType;
       if (countySlug && oppType) {
         const oppSlug = oppType.toLowerCase().replace(/_/g, "-");
