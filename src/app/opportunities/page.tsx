@@ -1,253 +1,216 @@
-'use client';
+import Link from "next/link";
+import type { Metadata } from "next";
+import { OPPORTUNITY_TYPES, KE_COUNTIES, slugifyCounty } from "@/lib/constants";
+import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
+import JobRowClickable from "@/components/jobready/JobRowClickable";
+import prisma from "@/lib/prisma";
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useJobModal } from '@/components/jobready/JobModalContext';
-import { GraduationCap, Briefcase, Award, DollarSign, Clock, AlertTriangle, Loader2, AlertCircle } from 'lucide-react';
+export const dynamic = "force-dynamic";
 
-/* ── Tab config ── */
-type TabKey = 'scholarships' | 'internships' | 'fellowships' | 'grants';
+/* ── Fetch counts for every opportunity type in one round-trip ── */
+async function getTypeCounts() {
+  // Single raw query: GROUP BY opportunityType
+  const rows = await prisma.$queryRaw<
+    Array<{ opportunityType: string; _count: bigint }>
+  >`
+    SELECT opportunityType, COUNT(*) as _count
+    FROM Listing
+    WHERE status = 'ACTIVE' AND opportunityType IS NOT NULL AND opportunityType != ''
+    GROUP BY opportunityType
+    ORDER BY _count DESC
+  `.catch(() => []);
 
-interface TabConfig {
-  key: TabKey;
-  label: string;
-  icon: typeof GraduationCap;
-  apiType: string;
-  listingTypeCode?: string;
+  const map = new Map<string, number>();
+  for (const r of rows) {
+    map.set(r.opportunityType, Number(r._count));
+  }
+  return map;
 }
 
-const TABS: TabConfig[] = [
-  { key: 'scholarships', label: 'Scholarships', icon: GraduationCap, apiType: 'scholarship' },
-  { key: 'internships', label: 'Internships', icon: Briefcase, apiType: 'internship' },
-  { key: 'fellowships', label: 'Fellowships', icon: Award, apiType: 'browse', listingTypeCode: 'FELLOWSHIP' },
-  { key: 'grants', label: 'Grants', icon: DollarSign, apiType: 'browse', listingTypeCode: 'GRANT' },
-];
-
-/* ── Opportunity item from API ── */
-interface OpportunityItem {
-  id: string;
-  title: string;
-  company: string;
-  type: string;
-  accent?: boolean;
-  deadline?: string;
-  urgent?: boolean;
+/* ── Fetch recent listings across all opportunity types ── */
+async function getRecentListings(limit = 20) {
+  return prisma.listing
+    .findMany({
+      where: {
+        status: "ACTIVE",
+        opportunityType: { not: null },
+      },
+      include: {
+        company: true,
+        category: true,
+        subcategory: true,
+        county: true,
+        tags: { include: { tag: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    })
+    .catch(() => []);
 }
 
-/* ── Skeleton row ── */
-function SkeletonRow() {
-  return (
-    <div className="py-3.5 animate-pulse flex items-center justify-between">
-      <div className="flex-1">
-        <div className="h-4 bg-subtle rounded w-3/4 mb-2" />
-        <div className="h-3 bg-subtle rounded w-1/2" />
-      </div>
-      <div className="h-3 bg-subtle rounded w-16 ml-3" />
-    </div>
-  );
-}
+export default async function OpportunitiesPage() {
+  const [typeCounts, recentListings] = await Promise.all([
+    getTypeCounts(),
+    getRecentListings(20),
+  ]);
 
-/* ── Main content ── */
-function OpportunitiesContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const { openJobById } = useJobModal();
+  const totalCount = Array.from(typeCounts.values()).reduce((a, b) => a + b, 0);
 
-  const tabParam = searchParams.get('tab') as TabKey | null;
-  const activeTab: TabKey = tabParam && TABS.some((t) => t.key === tabParam) ? tabParam : 'scholarships';
+  /* Build enriched type cards sorted by real count (types with listings first) */
+  const typesWithCounts = OPPORTUNITY_TYPES.map((t) => ({
+    ...t,
+    count: typeCounts.get(t.value) ?? 0,
+  })).sort((a, b) => b.count - a.count);
 
-  const [items, setItems] = useState<OpportunityItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [hasDeadline] = useState(true);
-
-  const currentTab = TABS.find((t) => t.key === activeTab)!;
-
-  const fetchItems = useCallback(async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const params = new URLSearchParams();
-      params.set('type', currentTab.apiType);
-      params.set('limit', '50');
-      if (currentTab.listingTypeCode) {
-        params.set('listingType', currentTab.listingTypeCode);
-      }
-
-      const res = await fetch(`/api/jobs?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = await res.json();
-
-      // Map API response to our opportunity items
-      const jobs = data.jobs || [];
-      const mapped: OpportunityItem[] = jobs.map((job: Record<string, unknown>) => ({
-        id: job.id as string || '',
-        title: job.title as string || '',
-        company: [job.company, job.location].filter(Boolean).join(' · ') as string,
-        type: (job.type || job.deadline || '') as string,
-        accent: activeTab === 'scholarships' ? !!(job.deadline) : false,
-        deadline: job.deadline as string | undefined,
-        urgent: job.urgent as boolean | undefined,
-      }));
-
-      setItems(mapped);
-    } catch (err) {
-      console.error('[OpportunitiesPage] Fetch error:', err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentTab]);
-
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
-
-  const switchTab = (key: TabKey) => {
-    router.push(`/opportunities?tab=${key}`, { scroll: false });
-  };
+  /* Split into "popular" (has listings) and "other" (no listings yet) */
+  const popular = typesWithCounts.filter((t) => t.count > 0);
+  const other = typesWithCounts.filter((t) => t.count === 0);
 
   return (
-    <div className="bg-white">
-      {/* Header */}
-      <div className="border-b border-divider">
-        <div className="max-w-6xl mx-auto px-5 pt-10 pb-8">
-          <h1 className="font-hero text-3xl sm:text-4xl font-black tracking-tight mb-2">
-            Opportunities
-          </h1>
-          <p className="text-[13px] text-muted">
-            Scholarships, internships, fellowships and more
-          </p>
+    <main className="bg-surface">
+      <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
+        <SeoPageHeader
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Opportunities", href: "/opportunities" },
+          ]}
+          title="Opportunities"
+          description="Scholarships, internships, fellowships, grants, bursaries and more from top organizations in Kenya."
+          count={totalCount || undefined}
+        />
+
+        {/* ── Browse by type ── */}
+        <div className="mb-10">
+          <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+            Browse by Type
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {typesWithCounts.map((t) => (
+              <Link
+                key={t.slug}
+                href={`/opportunities/${t.slug}`}
+                className="group flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all"
+              >
+                <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink transition-colors">
+                  {t.label}
+                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  {t.count > 0 && (
+                    <span className="text-[11px] font-mono text-accent">
+                      {t.count}
+                    </span>
+                  )}
+                  <svg
+                    className="w-4 h-4 text-muted group-hover:text-accent transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Tab navigation */}
-      <div className="border-b border-divider sticky top-0 bg-white z-10">
-        <div className="max-w-6xl mx-auto px-5">
-          <div className="flex overflow-x-auto scrollbar-hide">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.key;
+        {/* ── Recent listings across all types ── */}
+        {recentListings.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+              Latest Opportunities
+            </h2>
+            <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest mb-1">
+              <div className="col-span-5">Position</div>
+              <div className="col-span-3">Company</div>
+              <div className="col-span-2">Type</div>
+              <div className="col-span-2 text-right">Deadline</div>
+            </div>
+            <div className="divide-y divide-subtle">
+              {recentListings.map((job) => {
+                const dl = job.deadline
+                  ? Math.ceil(
+                      (job.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                    )
+                  : null;
+                const urgent = dl !== null && dl <= 3 && dl > 0;
+                return (
+                  <JobRowClickable
+                    key={job.id}
+                    slug={job.slug}
+                    className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors"
+                  >
+                    <div className="col-span-12 sm:col-span-5 min-w-0">
+                      <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
+                        {job.title}
+                      </p>
+                      <div className="sm:hidden flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] text-muted">{job.company?.name || ""}</span>
+                        <span className="text-[11px] text-subtle">&middot;</span>
+                        <span className="text-[11px] text-muted">{job.location || ""}</span>
+                      </div>
+                    </div>
+                    <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">
+                      {job.company?.name || ""}
+                    </div>
+                    <div className="col-span-6 sm:col-span-2 flex items-center">
+                      <span className="text-[11px] text-muted">
+                        {job.employmentType || job.listingType}
+                      </span>
+                    </div>
+                    <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
+                      {dl !== null ? (
+                        <span
+                          className={`font-mono text-[12px] font-medium tabular-nums ${
+                            dl <= 0
+                              ? "text-muted/40"
+                              : urgent
+                              ? "text-accent"
+                              : "text-muted"
+                          }`}
+                        >
+                          {dl <= 0 ? "Closed" : `${dl}d left`}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-muted/50">&mdash;</span>
+                      )}
+                    </div>
+                  </JobRowClickable>
+                );
+              })}
+            </div>
+            {totalCount > 20 && (
+              <Link
+                href="/jobs?opportunity=INTERNSHIP"
+                className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors mt-4"
+              >
+                View all {totalCount} opportunities &rarr;
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/* ── Browse by county ── */}
+        <div className="mb-10">
+          <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+            Opportunities by County
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {KE_COUNTIES.map((county) => {
+              const countySlug = slugifyCounty(county);
               return (
-                <button
-                  key={tab.key}
-                  onClick={() => switchTab(tab.key)}
-                  className={`py-3 px-1 text-sm font-medium border-b-2 mr-6 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                    isActive
-                      ? 'text-ink border-accent'
-                      : 'text-muted border-transparent hover:text-ink'
-                  }`}
+                <Link
+                  key={countySlug}
+                  href={`/opportunities/internship/in-${countySlug}`}
+                  className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors"
                 >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
+                  {county}
+                </Link>
               );
             })}
           </div>
         </div>
       </div>
-
-      {/* Tab content */}
-      <div className="max-w-6xl mx-auto px-5 py-8">
-        {loading ? (
-          <div className="divide-y divide-subtle">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonRow key={i} />
-            ))}
-          </div>
-        ) : error ? (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-7 h-7 text-muted/40" />
-            </div>
-            <h3 className="font-heading text-lg font-bold mb-2">Failed to load opportunities</h3>
-            <p className="text-[13px] text-muted max-w-sm mx-auto leading-relaxed">
-              Something went wrong. Please try refreshing the page.
-            </p>
-          </div>
-        ) : items.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-4">
-              {(() => { const Icon = currentTab.icon; return <Icon className="w-7 h-7 text-muted/40" />; })()}
-            </div>
-            <h3 className="font-heading text-lg font-bold mb-2">
-              No {currentTab.label.toLowerCase()} found
-            </h3>
-            <p className="text-[13px] text-muted max-w-sm mx-auto leading-relaxed">
-              There are no {currentTab.label.toLowerCase()} listed at the moment. Check back soon — new opportunities are posted regularly.
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="divide-y divide-subtle">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => openJobById(item.id)}
-                  className="flex items-center justify-between py-3.5 group cursor-pointer hover:bg-surface rounded-lg -mx-2 px-2 transition-colors active:scale-[0.98] transition-transform"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium group-hover:text-accent transition-colors truncate">
-                        {item.title}
-                      </p>
-                      {item.urgent && (
-                        <span className="flex items-center gap-0.5 text-[9px] font-mono text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md shrink-0 border border-red-100">
-                          <AlertTriangle className="w-2.5 h-2.5" />
-                          URGENT
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-muted mt-0.5 truncate">{item.company}</p>
-                  </div>
-                  <span
-                    className={`font-mono text-[11px] shrink-0 ml-3 flex items-center gap-1 ${
-                      item.accent || item.urgent
-                        ? 'text-accent font-medium'
-                        : 'text-muted'
-                    }`}
-                  >
-                    {hasDeadline && item.deadline ? (
-                      <Clock className="w-3 h-3" />
-                    ) : null}
-                    {item.type || item.deadline || '—'}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6">
-              <span className="font-mono text-[10px] text-muted/50">
-                {items.length} {currentTab.label.toLowerCase()} shown
-              </span>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ── Page with Suspense ── */
-export default function OpportunitiesPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-white">
-          <div className="max-w-6xl mx-auto px-5 pt-10 pb-8">
-            <div className="h-10 bg-subtle rounded w-48 animate-pulse mb-3" />
-            <div className="h-4 bg-subtle rounded w-72 animate-pulse" />
-          </div>
-          <div className="border-b border-divider">
-            <div className="max-w-6xl mx-auto px-5 flex gap-8 py-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-5 bg-subtle rounded w-24 animate-pulse" />
-              ))}
-            </div>
-          </div>
-        </div>
-      }
-    >
-      <OpportunitiesContent />
-    </Suspense>
+    </main>
   );
 }
