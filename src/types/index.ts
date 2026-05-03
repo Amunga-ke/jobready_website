@@ -21,8 +21,6 @@ export interface Job {
   salaryPeriod?: string;
   predictedSalary?: string;
   description: string;
-  requirements?: string;
-  instructions?: string;
   tags: string[];
   createdAt: string;
   deadline?: string | null;

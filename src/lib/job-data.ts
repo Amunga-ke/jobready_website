@@ -14,13 +14,6 @@ export const jobs: Job[] = [
     deadline: '2d left',
     description:
       'We are looking for an experienced Senior Accountant to join our Finance team at Safaricom PLC. The successful candidate will be responsible for financial reporting, budgeting, and ensuring compliance with IFRS standards. You will work closely with cross-functional teams and report directly to the Chief Accountant.',
-    requirements: [
-      'CPA(K) or ACCA qualification',
-      'Bachelor\'s degree in Accounting or Finance',
-      '5+ years of accounting experience in a large organization',
-      'Strong knowledge of IFRS and Kenyan tax regulations',
-      'Proficiency in ERP systems (SAP preferred)',
-    ],
     tags: ['Accounting', 'Finance', 'CPA', 'IFRS'],
     category: 'Finance & Accounting',
     isRemote: false,
@@ -38,13 +31,6 @@ export const jobs: Job[] = [
     deadline: '5d left',
     description:
       'KCB Bank is seeking a talented Backend Developer to build and maintain robust APIs and microservices that power our digital banking platform. You will collaborate with frontend developers, product managers, and DevOps engineers to deliver scalable solutions serving millions of customers across East Africa.',
-    requirements: [
-      'Bachelor\'s degree in Computer Science or related field',
-      '3+ years experience with Node.js, Python, or Java',
-      'Strong knowledge of RESTful APIs and microservices architecture',
-      'Experience with cloud platforms (AWS/Azure)',
-      'Knowledge of database systems (PostgreSQL, MongoDB)',
-    ],
     tags: ['Backend', 'API', 'Node.js', 'Python'],
     category: 'Technology & IT',
     isRemote: true,
@@ -63,13 +49,6 @@ export const jobs: Job[] = [
     urgent: true,
     description:
       'NCBA Group is offering an exciting 6-month internship opportunity in our Marketing department. You will gain hands-on experience in digital marketing, brand management, content creation, and market research. This is a perfect opportunity for recent graduates looking to kickstart their career in marketing.',
-    requirements: [
-      'Bachelor\'s degree in Marketing, Communications, or related field',
-      'Strong written and verbal communication skills',
-      'Familiarity with social media platforms and digital marketing tools',
-      'Creative mindset with attention to detail',
-      'Available immediately for 6 months',
-    ],
     tags: ['Marketing', 'Internship', 'Digital Marketing'],
     category: 'Marketing & Comms',
     isRemote: false,
@@ -86,13 +65,6 @@ export const jobs: Job[] = [
     posted: '12m',
     description:
       'The Kenya National Highways Authority is looking for a qualified Civil Engineer to oversee road construction and maintenance projects in the Nakuru region. You will manage project timelines, conduct site inspections, and ensure compliance with engineering standards and safety regulations.',
-    requirements: [
-      'Bachelor\'s degree in Civil Engineering',
-      'Registered with Engineers Board of Kenya (EBK)',
-      '5+ years experience in road construction projects',
-      'Strong project management skills',
-      'Knowledge of relevant Kenyan standards and regulations',
-    ],
     tags: ['Engineering', 'Infrastructure', 'Construction'],
     category: 'Engineering',
     isRemote: false,
@@ -110,13 +82,6 @@ export const jobs: Job[] = [
     posted: '1d',
     description:
       'Lead product strategy for 30M+ active users across East Africa. Work with a cross-functional team of 12+ engineers and designers. Define the product roadmap, conduct market analysis, and drive key metrics for M-Pesa\'s growth and user engagement across multiple markets.',
-    requirements: [
-      '8+ years of product management experience',
-      'Experience with fintech or mobile payments',
-      'Strong analytical and data-driven decision making',
-      'MBA or equivalent preferred',
-      'Experience leading cross-functional teams of 10+',
-    ],
     tags: ['Product', 'Fintech', 'Mobile', 'Leadership'],
     category: 'Technology & IT',
     isRemote: false,
@@ -133,13 +98,6 @@ export const jobs: Job[] = [
     posted: '3h',
     description:
       'Equity Bank is seeking a motivated Financial Analyst to join our Corporate Finance team. You will be responsible for financial modeling, preparing investment analysis reports, and supporting strategic decision-making processes across the group.',
-    requirements: [
-      'Bachelor\'s degree in Finance, Economics, or related field',
-      'CFA Level 1 or higher preferred',
-      '1-2 years of financial analysis experience',
-      'Advanced Excel and financial modeling skills',
-      'Strong analytical and presentation abilities',
-    ],
     tags: ['Finance', 'Analysis', 'Modeling'],
     category: 'Finance & Accounting',
     isRemote: false,
@@ -156,13 +114,6 @@ export const jobs: Job[] = [
     posted: '4h',
     description:
       'Join KCB Bank\'s technology team to build innovative banking solutions. You will develop full-stack applications using modern frameworks, participate in code reviews, and contribute to our continuous integration and delivery pipeline.',
-    requirements: [
-      'Bachelor\'s degree in Computer Science or equivalent',
-      '3+ years of software development experience',
-      'Proficiency in React/Next.js and Node.js',
-      'Experience with CI/CD pipelines and DevOps practices',
-      'Understanding of banking or fintech systems',
-    ],
     tags: ['Software', 'Full-stack', 'React', 'Node.js'],
     category: 'Technology & IT',
     isRemote: true,
@@ -179,13 +130,6 @@ export const jobs: Job[] = [
     posted: '6h',
     description:
       'NCBA Group\'s Graduate Trainee Program is a 12-month rotational program designed to develop future leaders. You will rotate across different departments including Retail Banking, Corporate Banking, Risk Management, and Operations, gaining a comprehensive understanding of the banking industry.',
-    requirements: [
-      'Bachelor\'s degree with Second Class Upper or equivalent',
-      'Graduated within the last 2 years',
-      'Strong leadership potential and interpersonal skills',
-      'Excellent written and verbal communication',
-      'Flexibility to rotate across departments and locations',
-    ],
     tags: ['Graduate', 'Training', 'Leadership'],
     category: 'Finance & Accounting',
     isRemote: false,
@@ -203,13 +147,6 @@ export const jobs: Job[] = [
     deadline: '3d left',
     description:
       'Equity Bank is seeking an experienced HR Manager to lead our Human Resources operations. You will oversee recruitment, employee relations, performance management, and training & development programs for a team of 500+ employees.',
-    requirements: [
-      'Bachelor\'s degree in Human Resources or related field',
-      '7+ years of HR management experience',
-      'Professional HR certification (CHRP or equivalent)',
-      'Strong knowledge of Kenyan labor laws',
-      'Experience with HRIS systems',
-    ],
     tags: ['HR', 'Management', 'People'],
     category: 'Human Resources',
     isRemote: false,
@@ -227,13 +164,6 @@ export const jobs: Job[] = [
     deadline: '5d left',
     description:
       'KCB Bank is looking for a Junior Developer to join our growing technology team. You will work on exciting projects including mobile banking apps, internal tools, and customer-facing platforms. Mentorship and training will be provided to help you grow your career.',
-    requirements: [
-      'Bachelor\'s degree in Computer Science or related field',
-      '0-1 year of development experience',
-      'Basic knowledge of any programming language',
-      'Eager to learn and grow in a fast-paced environment',
-      'Good problem-solving skills',
-    ],
     tags: ['Junior', 'Developer', 'Entry Level'],
     category: 'Technology & IT',
     isRemote: false,
@@ -251,13 +181,6 @@ export const jobs: Job[] = [
     deadline: '5d left',
     description:
       'The Kenya Revenue Authority is seeking a skilled Data Analyst to support data-driven decision making. You will analyze tax compliance data, identify trends and patterns, and provide actionable insights to support revenue collection strategies.',
-    requirements: [
-      'Bachelor\'s degree in Statistics, Mathematics, or Data Science',
-      '3+ years of data analysis experience',
-      'Proficiency in SQL, Python, and data visualization tools',
-      'Experience with statistical modeling and forecasting',
-      'Knowledge of tax systems is an added advantage',
-    ],
     tags: ['Data', 'Analytics', 'Statistics'],
     category: 'Finance & Accounting',
     isRemote: false,
@@ -278,13 +201,6 @@ export const jobs: Job[] = [
     isGazette: true,
     description:
       'The Kenya Revenue Authority Graduate Trainee Program is a prestigious 18-month program designed to develop the next generation of tax administration professionals. Trainees will undergo intensive training in tax policy, revenue collection, and public administration.',
-    requirements: [
-      'Bachelor\'s degree with Second Class Upper or equivalent',
-      'Graduated within the last 2 years',
-      'Age limit: 28 years and below',
-      'Strong analytical and communication skills',
-      'Must be a Kenyan citizen',
-    ],
     tags: ['Graduate', 'Government', 'Tax', 'Gazette'],
     category: 'Government & Public',
     isRemote: false,
@@ -303,13 +219,6 @@ export const jobs: Job[] = [
     isGovernment: true,
     description:
       'The Teachers Service Commission is recruiting 5,000 teachers for primary and secondary schools across all 47 counties. Successful candidates will be deployed to schools with the highest staffing needs, particularly in arid and semi-arid regions.',
-    requirements: [
-      'Diploma or Degree in Education',
-      'Registered with TSC',
-      'Must have valid TSC certificate',
-      'Willing to be posted to any county',
-      'Must be a Kenyan citizen',
-    ],
     tags: ['Teaching', 'Government', 'Education'],
     category: 'Education & Training',
     isRemote: false,
@@ -329,13 +238,6 @@ export const jobs: Job[] = [
     isGazette: true,
     description:
       'The Kenya Police Service is recruiting police constables to serve in various capacities across the country. Successful candidates will undergo a rigorous 9-month training program at the Kenya Police College before deployment.',
-    requirements: [
-      'Kenyan citizen aged 18-28 years',
-      'Minimum KCSE grade D+',
-      'Must be physically fit',
-      'No criminal record',
-      'Valid national identity card',
-    ],
     tags: ['Police', 'Government', 'Security', 'Gazette'],
     category: 'Government & Public',
     isRemote: false,
@@ -354,13 +256,6 @@ export const jobs: Job[] = [
     isGovernment: true,
     description:
       'Nakuru County Government has multiple openings across various departments including Health, Education, Public Works, and Administration. These positions offer competitive salaries and the opportunity to serve the local community.',
-    requirements: [
-      'Relevant diploma or degree based on position',
-      'Must be a resident of Nakuru County (where applicable)',
-      'Valid certificates and qualifications',
-      'Computer literacy',
-      'No criminal record',
-    ],
     tags: ['County', 'Government', 'Multiple Roles'],
     category: 'Government & Public',
     isRemote: false,
@@ -379,13 +274,6 @@ export const jobs: Job[] = [
     isGovernment: true,
     description:
       'Nairobi County Government is recruiting health workers including nurses, clinical officers, and public health officers to strengthen healthcare service delivery in county health facilities.',
-    requirements: [
-      'Valid professional license from relevant body',
-      'Diploma or degree in relevant health field',
-      'Experience in a clinical setting preferred',
-      'Good communication and interpersonal skills',
-      'Willingness to work in shifts',
-    ],
     tags: ['Health', 'County', 'Government'],
     category: 'Healthcare & Medical',
     isRemote: false,
@@ -404,13 +292,6 @@ export const jobs: Job[] = [
     isGovernment: true,
     description:
       'Mombasa County Government is seeking qualified Civil, Electrical, and Mechanical Engineers to oversee infrastructure projects including road construction, water supply systems, and public buildings.',
-    requirements: [
-      'Bachelor\'s degree in relevant engineering field',
-      'Registered with Engineers Board of Kenya',
-      '3+ years of relevant experience',
-      'Project management skills',
-      'Knowledge of county government operations',
-    ],
     tags: ['Engineering', 'County', 'Government'],
     category: 'Engineering',
     isRemote: false,
@@ -427,13 +308,6 @@ export const jobs: Job[] = [
     posted: '3d',
     description:
       'Co-operative Bank is looking for a Junior Accountant to support our Finance team. You will assist with bookkeeping, financial reporting, bank reconciliations, and preparing tax returns. Great opportunity for a recent graduate starting their accounting career.',
-    requirements: [
-      'Bachelor\'s degree in Accounting or Finance',
-      'CPA Section 2 and above',
-      '0-1 year accounting experience',
-      'Proficiency in Microsoft Excel',
-      'Attention to detail and high integrity',
-    ],
     tags: ['Accounting', 'Entry Level', 'Banking'],
     category: 'Finance & Accounting',
     isRemote: false,
@@ -450,13 +324,6 @@ export const jobs: Job[] = [
     posted: '4d',
     description:
       'Safaricom is hiring Customer Service Representatives to handle customer inquiries, resolve complaints, and provide information about our products and services. You will be the face of Safaricom to our millions of customers.',
-    requirements: [
-      'Diploma or degree in any field',
-      'Excellent communication skills in English and Kiswahili',
-      'Previous customer service experience preferred',
-      'Computer literacy',
-      'Ability to work in shifts',
-    ],
     tags: ['Customer Service', 'Entry Level', 'Telecom'],
     category: 'Sales & Business Dev',
     isRemote: false,
@@ -473,13 +340,6 @@ export const jobs: Job[] = [
     posted: '5d',
     description:
       'KRA needs a Data Entry Clerk on a 6-month contract to support digitization of tax records. You will accurately input, verify, and maintain data in our systems while ensuring data integrity and confidentiality.',
-    requirements: [
-      'Diploma in IT, Business Administration, or related field',
-      'Typing speed of 40+ WPM',
-      'Proficiency in Microsoft Office Suite',
-      'High attention to detail',
-      'Ability to maintain confidentiality',
-    ],
     tags: ['Data Entry', 'Contract', 'Government'],
     category: 'Operations & Admin',
     isRemote: false,
@@ -497,13 +357,6 @@ export const jobs: Job[] = [
     posted: '6d',
     description:
       'East African Breweries Limited is looking for a Marketing Assistant to support our brand management team. You will assist in executing marketing campaigns, managing social media accounts, coordinating events, and analyzing market trends.',
-    requirements: [
-      'Bachelor\'s degree in Marketing or related field',
-      '1 year of marketing experience preferred',
-      'Creative with strong organizational skills',
-      'Social media savvy',
-      'Valid driving license preferred',
-    ],
     tags: ['Marketing', 'FMCG', 'Entry Level'],
     category: 'Marketing & Comms',
     isRemote: false,
@@ -520,13 +373,6 @@ export const jobs: Job[] = [
     posted: '1w',
     description:
       'Equity Bank is offering a 3-month Finance Internship program. You will gain exposure to financial analysis, budgeting, forecasting, and reporting. Ideal for students in their final year or recent graduates.',
-    requirements: [
-      'Pursuing or completed a degree in Finance/Accounting',
-      'Strong analytical skills',
-      'Proficiency in Excel',
-      'Eager to learn in a fast-paced environment',
-      'Available for 3 months starting immediately',
-    ],
     tags: ['Finance', 'Internship', 'Banking'],
     category: 'Finance & Accounting',
     isRemote: false,
@@ -543,13 +389,6 @@ export const jobs: Job[] = [
     posted: '1w',
     description:
       'Safaricom\'s 6-month Software Engineering Internship offers hands-on experience in building mobile and web applications used by millions. You will work alongside senior engineers, participate in agile sprints, and contribute to production code.',
-    requirements: [
-      'Pursuing or completed a degree in Computer Science',
-      'Knowledge of at least one programming language',
-      'Understanding of web or mobile development',
-      'Strong problem-solving abilities',
-      'Available for 6 months',
-    ],
     tags: ['Software', 'Internship', 'Mobile'],
     category: 'Technology & IT',
     isRemote: false,
@@ -567,13 +406,6 @@ export const jobs: Job[] = [
     deadline: '28 Feb',
     description:
       'The Mastercard Foundation Scholars Program at the University of Nairobi provides full scholarships to academically talented yet economically disadvantaged young Africans. The scholarship covers tuition, accommodation, books, stipend, and mentorship support.',
-    requirements: [
-      'Strong academic performance',
-      'Demonstrated financial need',
-      'Leadership potential and community involvement',
-      'Under 30 years of age',
-      'Commitment to giving back to the community',
-    ],
     tags: ['Scholarship', 'University', 'Full Sponsorship'],
     category: 'Education & Training',
     isRemote: false,
@@ -591,13 +423,6 @@ export const jobs: Job[] = [
     deadline: '15 Mar',
     description:
       'The KCB Foundation Scholarship supports students from disadvantaged backgrounds pursuing tertiary education in Kenya. The scholarship covers tuition fees and provides a monthly stipend for living expenses.',
-    requirements: [
-      'Kenyan citizen from an economically disadvantaged background',
-      'Admitted to a recognized Kenyan university or college',
-      'Strong academic record',
-      'Demonstrated leadership and community service',
-      'Not older than 25 years',
-    ],
     tags: ['Scholarship', 'Foundation', 'Tuition'],
     category: 'Education & Training',
     isRemote: false,
@@ -617,13 +442,6 @@ export const jobs: Job[] = [
     isCasual: true,
     description:
       'Immediate opening for waitstaff at a busy restaurant in Westlands. No experience needed — training provided on the job. Flexible hours available.',
-    requirements: [
-      'No experience required',
-      'Must be 18+ years old',
-      'Good customer service attitude',
-      'Available for immediate start',
-      'Neat personal appearance',
-    ],
     tags: ['Casual', 'Hospitality', 'Waitstaff'],
     category: 'Hospitality & Tourism',
     isRemote: false,
@@ -643,13 +461,6 @@ export const jobs: Job[] = [
     isCasual: true,
     description:
       'Delivery riders needed for a growing logistics company based in Nairobi CBD. Earn competitive daily rates with the flexibility to choose your own schedule. Must own a motorcycle.',
-    requirements: [
-      'Must own a motorcycle (bodaboda)',
-      'Valid riding license',
-      'Smartphone for navigation',
-      'Knowledge of Nairobi routes',
-      '18+ years old',
-    ],
     tags: ['Casual', 'Delivery', 'Logistics'],
     category: 'Logistics & Supply Chain',
     isRemote: false,
@@ -669,13 +480,6 @@ export const jobs: Job[] = [
     isCasual: true,
     description:
       'Farm workers needed at a flower farm in Naivasha. Accommodation is provided on-site. Meals are also included. Great opportunity for those looking for steady work in a beautiful location.',
-    requirements: [
-      'No experience required',
-      'Physically fit',
-      'Willing to live on-site',
-      'Hardworking and reliable',
-      '18+ years old',
-    ],
     tags: ['Casual', 'Agriculture', 'Farm'],
     category: 'Hospitality & Tourism',
     isRemote: false,
@@ -695,13 +499,6 @@ export const jobs: Job[] = [
     isCasual: true,
     description:
       'Part-time shop assistant needed at a retail store along Thika Road. Flexible schedule — work 3-4 days per week. Ideal for students or those looking for supplementary income.',
-    requirements: [
-      'Basic computer literacy',
-      'Good customer service skills',
-      'Honest and reliable',
-      'Available on weekends',
-      '18+ years old',
-    ],
     tags: ['Part-time', 'Retail', 'Shop'],
     category: 'Sales & Business Dev',
     isRemote: false,
@@ -721,13 +518,6 @@ export const jobs: Job[] = [
     isCasual: true,
     description:
       'Weekend cleaning staff needed for office spaces in Kilimani. Work every Saturday and Sunday from 8am to 2pm. Perfect for those with weekday commitments looking for weekend work.',
-    requirements: [
-      'No experience required',
-      'Physically able',
-      'Punctual and reliable',
-      'Available on weekends',
-      '18+ years old',
-    ],
     tags: ['Casual', 'Cleaning', 'Weekend'],
     category: 'Operations & Admin',
     isRemote: false,
@@ -747,13 +537,6 @@ export const jobs: Job[] = [
     isCasual: true,
     description:
       'Loaders needed at a warehouse in Industrial Area for the morning shift. You will handle loading and offloading of goods, packaging, and inventory management.',
-    requirements: [
-      'Physically strong and fit',
-      'No experience required',
-      'Punctual for morning shifts',
-      'Reliable and hardworking',
-      '18+ years old',
-    ],
     tags: ['Casual', 'Warehouse', 'Loading'],
     category: 'Logistics & Supply Chain',
     isRemote: false,
@@ -770,13 +553,6 @@ export const jobs: Job[] = [
     posted: '1w',
     description:
       'EABL offers a structured internship program in the Marketing department. You will work on real brand campaigns, support event planning, conduct market research, and gain exposure to one of East Africa\'s largest FMCG companies.',
-    requirements: [
-      'Pursuing or completed a degree in Marketing/Communications',
-      'Creative mindset',
-      'Strong communication skills',
-      'Knowledge of social media platforms',
-      'Available for 3-6 months',
-    ],
     tags: ['Marketing', 'FMCG', 'Internship'],
     category: 'Marketing & Comms',
     isRemote: false,

@@ -87,8 +87,6 @@ model Listing {
   slug            String       @unique @db.VarChar(191)
   title           String       @db.VarChar(300)
   description     String       @default("") @db.Text
-  requirements    String?      @db.Text
-  instructions    String?      @db.Text
 
   // Type
   listingType     String       @default("JOB") @db.VarChar(20)
