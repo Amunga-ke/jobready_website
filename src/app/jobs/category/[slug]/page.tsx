@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { JOB_CATEGORIES, getCategoryBySlug, KE_COUNTIES, slugifyCounty } from "@/lib/constants";
+import { JOB_CATEGORIES, getCategoryBySlug, slugifyCounty } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCategoryIntro, getSalaryContext } from "@/lib/seo/fallback-content";
-import { SeoPageHeader, CountyGrid } from "@/components/jobready/SeoPageLayout";
+import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -74,7 +76,6 @@ export default async function CategoryPage({
 
   const count = dbCategory?._count.listings || 0;
   const salaryContext = getSalaryContext(category.value);
-  const relatedCategories = JOB_CATEGORIES.filter((c) => c.slug !== slug).slice(0, 6);
 
   // Fetch actual job listings for this category
   const listings = await prisma.listing.findMany({
@@ -82,6 +83,27 @@ export default async function CategoryPage({
     include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
     take: 20,
+  });
+
+  // Fetch county job counts for this category (only counties with jobs)
+  const countiesWithCounts = dbCategory?.id
+    ? await prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
+        SELECT l.countyName, COUNT(*) as _count
+        FROM Listing l
+        WHERE l.status = 'ACTIVE' AND l.categoryId = ${dbCategory.id}
+          AND l.countyName IS NOT NULL AND l.countyName != ''
+        GROUP BY l.countyName
+        ORDER BY _count DESC
+        LIMIT 15
+      `
+    : [];
+
+  // Fetch related categories with real job counts
+  const relatedCategoriesWithCounts = await prisma.category.findMany({
+    where: { active: true, id: { not: dbCategory?.id } },
+    orderBy: { sortOrder: "asc" },
+    take: 6,
+    include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
   });
 
   return (
@@ -219,54 +241,65 @@ export default async function CategoryPage({
           </div>
         )}
 
-        {/* Browse by county */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider">
-              {category.label} Jobs by County
-            </h2>
-            <Link href="/jobs" className="text-[12px] text-muted hover:text-ink transition-colors">
-              View all counties
-            </Link>
+        {/* Browse by county — only counties that have jobs in this category */}
+        {countiesWithCounts.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider">
+                {category.label} Jobs by County
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {countiesWithCounts.map((c) => {
+                const countySlug = slugifyCounty(c.countyName);
+                return (
+                  <Link
+                    key={countySlug}
+                    href={`/jobs/category/${slug}/in-${countySlug}`}
+                    className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors inline-flex items-center gap-1.5"
+                  >
+                    {c.countyName}
+                    <span className="text-[10px] font-mono text-accent">
+                      {Number(c._count)}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {KE_COUNTIES.map((county) => {
-              const countySlug = slugifyCounty(county);
-              return (
-                <Link
-                  key={countySlug}
-                  href={`/jobs/category/${slug}/in-${countySlug}`}
-                  className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors"
-                >
-                  {county}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+        )}
 
-        {/* Related categories */}
-        <div>
-          <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
-            Related Categories
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            {relatedCategories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/jobs/category/${cat.slug}`}
-                className="flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all group"
-              >
-                <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink">
-                  {cat.label}
-                </span>
-                <svg className="w-4 h-4 text-muted group-hover:text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            ))}
+        {/* Related categories with real job counts */}
+        {relatedCategoriesWithCounts.length > 0 && (
+          <div>
+            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+              Related Categories
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              {relatedCategoriesWithCounts.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/jobs/category/${cat.slug}`}
+                  className="flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all group"
+                >
+                  <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink">
+                    {cat.name}
+                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {cat._count.listings > 0 && (
+                      <span className="text-[11px] font-mono text-accent">
+                        {cat._count.listings}
+                      </span>
+                    )}
+                    <svg className="w-4 h-4 text-muted group-hover:text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </main>
   );
