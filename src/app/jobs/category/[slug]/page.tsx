@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { JOB_CATEGORIES, getCategoryBySlug, slugifyCounty } from "@/lib/constants";
+import { getCategoryBySlug, slugifyCounty } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCategoryIntro, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
@@ -16,39 +16,50 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
-  if (!category) return { title: "Not Found | JobReady" };
 
-  // Query real count
-  const catRecord = await prisma.category.findUnique({ where: { slug } });
-  const count = catRecord
-    ? await prisma.listing.count({ where: { categoryId: catRecord.id, status: "ACTIVE" } })
-    : 0;
+  // Look up category from DB first, fall back to hardcoded constants
+  const dbCategory = await prisma.category.findUnique({ where: { slug } });
+  if (!dbCategory) return { title: "Not Found | JobReady" };
 
+  const fallbackCategory = getCategoryBySlug(slug);
+  const label = dbCategory.name;
+
+  const count = await prisma.listing.count({
+    where: { categoryId: dbCategory.id, status: "ACTIVE" },
+  });
   const robots = getRobotsMeta(count, "CATEGORY" as SeoTier);
 
+  const description = fallbackCategory
+    ? getCategoryIntro(fallbackCategory)
+    : `Browse ${count} ${label.toLowerCase()} job openings across Kenya on JobReady.`;
+
   return {
-    title: `${category.label} Jobs in Kenya (${count || ""} Openings) | JobReady`,
-    description: getCategoryIntro(category),
+    title: `${label} Jobs in Kenya${count > 0 ? ` (${count} Openings)` : ""} | JobReady`,
+    description,
     robots,
     alternates: { canonical: `https://jobreadyke.co.ke/jobs/category/${slug}` },
     openGraph: {
-      title: `${category.label} Jobs in Kenya | JobReady`,
-      description: getCategoryIntro(category),
+      title: `${label} Jobs in Kenya | JobReady`,
+      description,
       url: `https://jobreadyke.co.ke/jobs/category/${slug}`,
       type: "website",
       siteName: "JobReady",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${category.label} Jobs in Kenya | JobReady`,
-      description: getCategoryIntro(category),
+      title: `${label} Jobs in Kenya | JobReady`,
+      description,
     },
   };
 }
 
 export async function generateStaticParams() {
-  return JOB_CATEGORIES.map((cat) => ({ slug: cat.slug }));
+  // Generate static params from DB categories
+  const categories = await prisma.category.findMany({
+    where: { active: true },
+    select: { slug: true },
+  });
+  return categories.map((cat) => ({ slug: cat.slug }));
 }
 
 export default async function CategoryPage({
@@ -57,11 +68,8 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const category = getCategoryBySlug(slug);
 
-  if (!category) notFound();
-
-  // Fetch from DB: category, subcategories with counts, listings
+  // Look up category from DB — this is the source of truth
   const dbCategory = await prisma.category.findUnique({
     where: { slug },
     include: {
@@ -74,33 +82,42 @@ export default async function CategoryPage({
     },
   });
 
-  const count = dbCategory?._count.listings || 0;
-  const salaryContext = getSalaryContext(category.value);
+  if (!dbCategory) notFound();
+
+  // Check if we have a matching hardcoded category for salary info
+  const fallbackCategory = getCategoryBySlug(slug);
+  const label = dbCategory.name;
+  const description = fallbackCategory
+    ? getCategoryIntro(fallbackCategory)
+    : `Browse ${dbCategory._count.listings} ${label.toLowerCase()} job openings across Kenya.`;
+  const salaryContext = fallbackCategory
+    ? getSalaryContext(fallbackCategory.value)
+    : null;
+
+  const count = dbCategory._count.listings;
 
   // Fetch actual job listings for this category
   const listings = await prisma.listing.findMany({
-    where: { categoryId: dbCategory?.id, status: "ACTIVE" },
+    where: { categoryId: dbCategory.id, status: "ACTIVE" },
     include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
     take: 20,
   });
 
   // Fetch county job counts for this category (only counties with jobs)
-  const countiesWithCounts = dbCategory?.id
-    ? await prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
-        SELECT l.countyName, COUNT(*) as _count
-        FROM Listing l
-        WHERE l.status = 'ACTIVE' AND l.categoryId = ${dbCategory.id}
-          AND l.countyName IS NOT NULL AND l.countyName != ''
-        GROUP BY l.countyName
-        ORDER BY _count DESC
-        LIMIT 15
-      `
-    : [];
+  const countiesWithCounts = await prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
+    SELECT l.countyName, COUNT(*) as _count
+    FROM Listing l
+    WHERE l.status = 'ACTIVE' AND l.categoryId = ${dbCategory.id}
+      AND l.countyName IS NOT NULL AND l.countyName != ''
+    GROUP BY l.countyName
+    ORDER BY _count DESC
+    LIMIT 15
+  `;
 
   // Fetch related categories with real job counts
   const relatedCategoriesWithCounts = await prisma.category.findMany({
-    where: { active: true, id: { not: dbCategory?.id } },
+    where: { active: true, id: { not: dbCategory.id } },
     orderBy: { sortOrder: "asc" },
     take: 6,
     include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
@@ -113,14 +130,14 @@ export default async function CategoryPage({
           breadcrumbs={[
             { label: "Home", href: "/" },
             { label: "Jobs", href: "/jobs" },
-            { label: category.label, href: `/jobs/category/${slug}` },
+            { label, href: `/jobs/category/${slug}` },
           ]}
-          title={`${category.label} Jobs in Kenya`}
-          description={getCategoryIntro(category)}
+          title={`${label} Jobs in Kenya`}
+          description={description}
           count={count || undefined}
         />
 
-        {/* Salary overview */}
+        {/* Salary overview (only if we have hardcoded data for this category) */}
         {salaryContext && (
           <div className="mb-8 rounded-lg bg-emerald-50/60 border border-emerald-100/80 px-5 py-4 max-w-xl">
             <p className="text-[11px] font-medium text-emerald-600 uppercase tracking-wider mb-1">
@@ -160,7 +177,7 @@ export default async function CategoryPage({
                       </p>
                       <div className="sm:hidden flex items-center gap-2 mt-0.5">
                         <span className="text-[11px] text-muted">{job.company.name}</span>
-                        <span className="text-[11px] text-subtle">·</span>
+                        <span className="text-[11px] text-subtle">&middot;</span>
                         <span className="text-[11px] text-muted">{job.location}</span>
                       </div>
                     </div>
@@ -182,7 +199,7 @@ export default async function CategoryPage({
                           {dl <= 0 ? "Closed" : `${dl}d left`}
                         </span>
                       ) : (
-                        <span className="text-[11px] text-muted/50">—</span>
+                        <span className="text-[11px] text-muted/50">&mdash;</span>
                       )}
                     </div>
                   </JobRowClickable>
@@ -191,26 +208,26 @@ export default async function CategoryPage({
             </div>
             {count > 20 && (
               <Link
-                href={`/jobs?category=${dbCategory?.id}`}
+                href={`/jobs?category=${dbCategory.id}`}
                 className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors mt-4"
               >
-                View all {count} {category.label.toLowerCase()} jobs →
+                View all {count} {label.toLowerCase()} jobs &rarr;
               </Link>
             )}
           </div>
         ) : (
           <div className="mb-10 text-center py-12">
             <p className="text-[14px] text-muted">
-              No {category.label.toLowerCase()} jobs listed at the moment. Check back soon.
+              No {label.toLowerCase()} jobs listed at the moment. Check back soon.
             </p>
           </div>
         )}
 
         {/* Subcategory grid with real counts */}
-        {dbCategory?.subcategories && dbCategory.subcategories.length > 0 && (
+        {dbCategory.subcategories && dbCategory.subcategories.length > 0 && (
           <div className="mb-10">
             <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
-              {category.label} Subcategories
+              {label} Subcategories
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               {dbCategory.subcategories.map((sub) => (
@@ -246,7 +263,7 @@ export default async function CategoryPage({
           <div className="mb-10">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider">
-                {category.label} Jobs by County
+                {label} Jobs by County
               </h2>
             </div>
             <div className="flex flex-wrap gap-2">
