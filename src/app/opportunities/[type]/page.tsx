@@ -10,10 +10,18 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-async function getOpportunities(typeSlug: string, limit = 20) {
+// Shared data fetcher — called by both generateMetadata and the page.
+// Next.js deduplicates fetches within the same render, but Prisma queries
+// are not deduplicated, so we cache in a global map keyed by typeSlug.
+const oppDataCache = new Map<string, Promise<{ listings: any[]; count: number }>>();
+
+function getOpportunities(typeSlug: string, limit = 20) {
+  const cached = oppDataCache.get(typeSlug);
+  if (cached) return cached;
+
   const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
 
-  const [listings, count] = await Promise.all([
+  const promise = Promise.all([
     prisma.listing
       .findMany({
         where: { status: "ACTIVE", opportunityType: dbType },
@@ -26,15 +34,16 @@ async function getOpportunities(typeSlug: string, limit = 20) {
         orderBy: { createdAt: "desc" },
         take: limit,
       })
-      .catch(() => []),
+      .catch((e) => { console.error("[getOpportunities] findMany error:", e); return []; }),
     prisma.listing
       .count({
         where: { status: "ACTIVE", opportunityType: dbType },
       })
       .catch(() => 0),
-  ]);
+  ]).then(([listings, count]) => ({ listings, count }));
 
-  return { listings, count };
+  oppDataCache.set(typeSlug, promise);
+  return promise;
 }
 
 export async function generateMetadata({
@@ -47,10 +56,7 @@ export async function generateMetadata({
     const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
     if (!opp) return { title: "Not Found | JobReady" };
 
-    const dbType = (opp.value || "").replace(/-/g, "_");
-    const count = await prisma.listing.count({
-      where: { status: "ACTIVE", opportunityType: dbType },
-    }).catch(() => 0);
+    const { count } = await getOpportunities(typeSlug, 20);
     const robots = getRobotsMeta(count, "OPPORTUNITY" as SeoTier);
 
     return {

@@ -17,6 +17,49 @@ function parseLocation(raw: string) {
   return { countySlug, county };
 }
 
+// Shared data fetcher — deduplicates between generateMetadata and page render
+const oppCountyCache = new Map<string, Promise<{ listings: any[]; count: number }>>();
+
+function getOppByCounty(typeSlug: string, county: string, limit = 20) {
+  const cacheKey = `${typeSlug}:${county}`;
+  const cached = oppCountyCache.get(cacheKey);
+  if (cached) return cached;
+
+  const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
+
+  const promise = Promise.all([
+    prisma.listing
+      .findMany({
+        where: {
+          status: "ACTIVE",
+          opportunityType: dbType,
+          county: county,
+        },
+        include: {
+          company: true,
+          category: true,
+          subcategory: true,
+          tags: { include: { tag: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      })
+      .catch((e) => { console.error("[getOppByCounty] findMany error:", e); return []; }),
+    prisma.listing
+      .count({
+        where: {
+          status: "ACTIVE",
+          opportunityType: dbType,
+          county: county,
+        },
+      })
+      .catch(() => 0),
+  ]).then(([listings, count]) => ({ listings, count }));
+
+  oppCountyCache.set(cacheKey, promise);
+  return promise;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -31,16 +74,7 @@ export async function generateMetadata({
     const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
     if (!opp) return { title: "Not Found | JobReady" };
 
-    const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
-    const count = await prisma.listing
-      .count({
-        where: {
-          status: "ACTIVE",
-          opportunityType: dbType,
-          county: county,
-        },
-      })
-      .catch(() => 0);
+    const { count } = await getOppByCounty(typeSlug, county, 20);
     const robots = getRobotsMeta(count, "OPP_COUNTY" as SeoTier);
 
     return {
@@ -82,36 +116,7 @@ export default async function OpportunityCountyPage({
     const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
     if (!opp) notFound();
 
-    const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
-
-    const [listings, count] = await Promise.all([
-      prisma.listing
-        .findMany({
-          where: {
-            status: "ACTIVE",
-            opportunityType: dbType,
-            county: county,
-          },
-          include: {
-            company: true,
-            category: true,
-            subcategory: true,
-            tags: { include: { tag: true } },
-          },
-          orderBy: { createdAt: "desc" },
-          take: 20,
-        })
-        .catch(() => []),
-      prisma.listing
-        .count({
-          where: {
-            status: "ACTIVE",
-            opportunityType: dbType,
-            county: county,
-          },
-        })
-        .catch(() => 0),
-    ]);
+    const { listings, count } = await getOppByCounty(typeSlug, county, 20);
 
     const nearby = KE_COUNTIES.slice(0, 8) as unknown as string[];
     const otherTypes = OPPORTUNITY_TYPES.filter((t) => t.slug !== typeSlug).slice(0, 8);
