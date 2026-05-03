@@ -8,6 +8,7 @@ import { Search, SlidersHorizontal, Briefcase, ChevronLeft, ChevronRight } from 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  try {
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : undefined;
   const listingType = typeof params.type === "string" ? params.type : undefined;
@@ -57,6 +58,9 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       description,
     },
   };
+  } catch {
+    return { title: "Browse All Jobs | JobReady", description: "Search and browse thousands of jobs from verified employers across Kenya." };
+  }
 }
 
 // ─── Filter pills config ───

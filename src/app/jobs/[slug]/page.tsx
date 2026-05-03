@@ -12,26 +12,30 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const job = await getJobBySlug(slug);
-  if (!job) return { title: "Job Not Found | JobReady" };
+  try {
+    const { slug } = await params;
+    const job = await getJobBySlug(slug);
+    if (!job) return { title: "Job Not Found | JobReady" };
 
-  return {
-    title: `${job.title} at ${job.companyName} | JobReady`,
-    description: `Apply for ${job.title} at ${job.companyName} in ${job.location}. ${job.listingType === "JOB" ? "Job" : "Opportunity"} posted on JobReady — Kenya's most trusted job board.`,
-    openGraph: {
-      title: `${job.title} at ${job.companyName}`,
-      description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`,
-      url: `https://jobreadyke.co.ke/jobs/${slug}`,
-      type: "article",
-      siteName: "JobReady",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${job.title} at ${job.companyName}`,
-      description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`,
-    },
-  };
+    return {
+      title: `${job.title} at ${job.companyName} | JobReady`,
+      description: `Apply for ${job.title} at ${job.companyName} in ${job.location}. ${job.listingType === "JOB" ? "Job" : "Opportunity"} posted on JobReady — Kenya's most trusted job board.`,
+      openGraph: {
+        title: `${job.title} at ${job.companyName}`,
+        description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`,
+        url: `https://jobreadyke.co.ke/jobs/${slug}`,
+        type: "article",
+        siteName: "JobReady",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${job.title} at ${job.companyName}`,
+        description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`,
+      },
+    };
+  } catch {
+    return { title: "Job Not Found | JobReady" };
+  }
 }
 
 // ─── Page component ───
@@ -40,6 +44,7 @@ export default async function JobDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  try {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
 
@@ -239,4 +244,7 @@ export default async function JobDetailPage({
       </article>
     </main>
   );
+  } catch {
+    notFound();
+  }
 }

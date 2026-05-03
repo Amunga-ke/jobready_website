@@ -14,56 +14,59 @@ export async function generateMetadata({
 }: {
   params: Promise<{ type: string }>;
 }): Promise<Metadata> {
-  const { type: typeSlug } = await params;
-  const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
-  if (!opp) return { title: "Not Found | JobReady" };
+  try {
+    const { type: typeSlug } = await params;
+    const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
+    if (!opp) return { title: "Not Found | JobReady" };
 
-  const dbType = opp.value.replace(/-/g, "_");
-  const count = await prisma.listing.count({
-    where: { status: "ACTIVE", opportunityType: dbType },
-  });
-  const robots = getRobotsMeta(count, "OPPORTUNITY" as SeoTier);
+    const dbType = (opp.value || "").replace(/-/g, "_");
+    const count = await prisma.listing.count({
+      where: { status: "ACTIVE", opportunityType: dbType },
+    }).catch(() => 0);
+    const robots = getRobotsMeta(count, "OPPORTUNITY" as SeoTier);
 
-  return {
-    title: `${opp.label} Opportunities in Kenya | JobReady`,
-    description: getOpportunityIntro(opp.label),
-    robots,
-    alternates: {
-      canonical: `https://jobreadyke.co.ke/opportunities/${typeSlug}`,
-    },
-    openGraph: {
-      title: `${opp.label} in Kenya | JobReady`,
+    return {
+      title: `${opp.label} Opportunities in Kenya | JobReady`,
       description: getOpportunityIntro(opp.label),
-      url: `https://jobreadyke.co.ke/opportunities/${typeSlug}`,
-      type: "website",
-      siteName: "JobReady",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${opp.label} in Kenya | JobReady`,
-      description: getOpportunityIntro(opp.label),
-    },
-  };
+      robots,
+      alternates: {
+        canonical: `https://jobreadyke.co.ke/opportunities/${typeSlug}`,
+      },
+      openGraph: {
+        title: `${opp.label} in Kenya | JobReady`,
+        description: getOpportunityIntro(opp.label),
+        url: `https://jobreadyke.co.ke/opportunities/${typeSlug}`,
+        type: "website",
+        siteName: "JobReady",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${opp.label} in Kenya | JobReady`,
+        description: getOpportunityIntro(opp.label),
+      },
+    };
+  } catch {
+    return { title: "Not Found | JobReady" };
+  }
 }
 
-export async function generateStaticParams() {
-  return OPPORTUNITY_TYPES.map((opp) => ({ type: opp.slug }));
-}
+// No generateStaticParams — page is force-dynamic, all types handled at runtime
 
 export default async function OpportunityTypePage({
   params,
 }: {
   params: Promise<{ type: string }>;
 }) {
+  try {
   const { type: typeSlug } = await params;
   const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
 
   if (!opp) notFound();
 
-  const dbType = opp.value.replace(/-/g, "_");
+  const dbType = (opp.value || "").replace(/-/g, "_");
   const count = await prisma.listing.count({
     where: { status: "ACTIVE", opportunityType: dbType },
-  });
+  }).catch(() => 0);
   const nearbyCounties = KE_COUNTIES.slice(0, 8) as unknown as string[];
 
   return (
@@ -147,4 +150,7 @@ export default async function OpportunityTypePage({
       </div>
     </main>
   );
+  } catch {
+    notFound();
+  }
 }

@@ -37,6 +37,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ level: string }>;
 }): Promise<Metadata> {
+  try {
   const { level } = await params;
   const gov = GOV_LEVELS.find((g) => g.slug === level);
   if (!gov) return { title: "Not Found | JobReady" };
@@ -60,6 +61,9 @@ export async function generateMetadata({
       description: gov.description,
     },
   };
+  } catch {
+    return { title: "Not Found | JobReady" };
+  }
 }
 
 export const dynamic = 'force-dynamic';
@@ -69,12 +73,13 @@ export default async function GovernmentLevelPage({
 }: {
   params: Promise<{ level: string }>;
 }) {
+  try {
   const { level } = await params;
   const gov = GOV_LEVELS.find((g) => g.slug === level);
 
   if (!gov) notFound();
 
-  const jobs = await getGovernmentJobsByLevel(gov.dbLevel);
+  const jobs = await getGovernmentJobsByLevel(gov.dbLevel).catch(() => [] as Job[]);
   const count = jobs.length;
   const otherLevels = GOV_LEVELS.filter((g) => g.slug !== level);
 
@@ -196,6 +201,9 @@ export default async function GovernmentLevelPage({
       </div>
     </main>
   );
+  } catch {
+    notFound();
+  }
 }
 
 /* ── Government job row (opens sidesheet) ── */

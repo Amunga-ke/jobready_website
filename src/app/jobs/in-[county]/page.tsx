@@ -15,12 +15,13 @@ export async function generateMetadata({
 }: {
   params: Promise<{ county: string }>;
 }): Promise<Metadata> {
+  try {
   const { county: countySlug } = await params;
   const countyName = getCountyBySlug(countySlug);
 
   if (!countyName) return { title: "Not Found | JobReady" };
 
-  const count = await getJobCountByCounty(countySlug);
+  const count = await getJobCountByCounty(countySlug).catch(() => 0);
   const robots = getRobotsMeta(count, "COUNTY" as SeoTier);
 
   return {
@@ -43,6 +44,9 @@ export async function generateMetadata({
       description: getCountyIntro(countyName),
     },
   };
+  } catch {
+    return { title: "Not Found | JobReady" };
+  }
 }
 
 // No generateStaticParams — page is force-dynamic
@@ -52,13 +56,14 @@ export default async function CountyPage({
 }: {
   params: Promise<{ county: string }>;
 }) {
+  try {
   const { county: countySlug } = await params;
   const countyName = getCountyBySlug(countySlug);
 
   if (!countyName) notFound();
 
   const [countResult, nearby, relatedCategories] = await Promise.all([
-    getJobsByCounty(countySlug, 20),
+    getJobsByCounty(countySlug, 20).catch(() => ({ jobs: [] as Job[], count: 0 })),
     Promise.resolve(getNearbyCounties(countyName)),
     Promise.resolve(JOB_CATEGORIES.slice(0, 8)),
   ]);
@@ -224,4 +229,7 @@ export default async function CountyPage({
       </div>
     </main>
   );
+  } catch {
+    notFound();
+  }
 }
