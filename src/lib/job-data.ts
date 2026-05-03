@@ -10,7 +10,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Senior',
     salary: '180,000 - 250,000',
-    salaryCurrency: 'Ksh',
     posted: '2m',
     deadline: '2d left',
     description:
@@ -35,7 +34,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Mid Level',
     salary: '150,000 - 220,000',
-    salaryCurrency: 'Ksh',
     posted: '5m',
     deadline: '5d left',
     description:
@@ -60,7 +58,6 @@ export const jobs: Job[] = [
     type: 'Internship',
     level: 'Intern',
     salary: '25,000 - 35,000',
-    salaryCurrency: 'Ksh',
     posted: '8m',
     deadline: '1d left',
     urgent: true,
@@ -86,7 +83,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Mid Level',
     salary: '120,000 - 180,000',
-    salaryCurrency: 'Ksh',
     posted: '12m',
     description:
       'The Kenya National Highways Authority is looking for a qualified Civil Engineer to oversee road construction and maintenance projects in the Nakuru region. You will manage project timelines, conduct site inspections, and ensure compliance with engineering standards and safety regulations.',
@@ -111,7 +107,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Senior',
     salary: '350,000 - 500,000',
-    salaryCurrency: 'Ksh',
     posted: '1d',
     description:
       'Lead product strategy for 30M+ active users across East Africa. Work with a cross-functional team of 12+ engineers and designers. Define the product roadmap, conduct market analysis, and drive key metrics for M-Pesa\'s growth and user engagement across multiple markets.',
@@ -135,7 +130,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '80,000 - 120,000',
-    salaryCurrency: 'Ksh',
     posted: '3h',
     description:
       'Equity Bank is seeking a motivated Financial Analyst to join our Corporate Finance team. You will be responsible for financial modeling, preparing investment analysis reports, and supporting strategic decision-making processes across the group.',
@@ -159,7 +153,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Mid Level',
     salary: '140,000 - 200,000',
-    salaryCurrency: 'Ksh',
     posted: '4h',
     description:
       'Join KCB Bank\'s technology team to build innovative banking solutions. You will develop full-stack applications using modern frameworks, participate in code reviews, and contribute to our continuous integration and delivery pipeline.',
@@ -183,7 +176,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '60,000 - 80,000',
-    salaryCurrency: 'Ksh',
     posted: '6h',
     description:
       'NCBA Group\'s Graduate Trainee Program is a 12-month rotational program designed to develop future leaders. You will rotate across different departments including Retail Banking, Corporate Banking, Risk Management, and Operations, gaining a comprehensive understanding of the banking industry.',
@@ -207,7 +199,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Senior',
     salary: '200,000 - 300,000',
-    salaryCurrency: 'Ksh',
     posted: '2d',
     deadline: '3d left',
     description:
@@ -232,7 +223,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '70,000 - 100,000',
-    salaryCurrency: 'Ksh',
     posted: '1d',
     deadline: '5d left',
     description:
@@ -257,7 +247,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Mid Level',
     salary: '100,000 - 160,000',
-    salaryCurrency: 'Ksh',
     posted: '2d',
     deadline: '5d left',
     description:
@@ -283,7 +272,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '70,000 - 90,000',
-    salaryCurrency: 'Ksh',
     posted: '5d',
     deadline: 'Closes 15 Feb',
     isGovernment: true,
@@ -310,7 +298,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '30,000 - 50,000',
-    salaryCurrency: 'Ksh',
     posted: '1w',
     deadline: 'Closes 28 Feb',
     isGovernment: true,
@@ -336,7 +323,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '35,000 - 45,000',
-    salaryCurrency: 'Ksh',
     posted: '3d',
     deadline: 'Closes 10 Mar',
     isGovernment: true,
@@ -363,7 +349,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '30,000 - 60,000',
-    salaryCurrency: 'Ksh',
     posted: '4d',
     deadline: 'Closes 20 Feb',
     isGovernment: true,
@@ -389,7 +374,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '40,000 - 80,000',
-    salaryCurrency: 'Ksh',
     posted: '5d',
     deadline: 'Closes 25 Feb',
     isGovernment: true,
@@ -415,7 +399,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Mid Level',
     salary: '80,000 - 150,000',
-    salaryCurrency: 'Ksh',
     posted: '6d',
     deadline: 'Closes 5 Mar',
     isGovernment: true,
@@ -441,7 +424,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '60,000 - 90,000',
-    salaryCurrency: 'Ksh',
     posted: '3d',
     description:
       'Co-operative Bank is looking for a Junior Accountant to support our Finance team. You will assist with bookkeeping, financial reporting, bank reconciliations, and preparing tax returns. Great opportunity for a recent graduate starting their accounting career.',
@@ -465,7 +447,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '35,000 - 50,000',
-    salaryCurrency: 'Ksh',
     posted: '4d',
     description:
       'Safaricom is hiring Customer Service Representatives to handle customer inquiries, resolve complaints, and provide information about our products and services. You will be the face of Safaricom to our millions of customers.',
@@ -489,7 +470,6 @@ export const jobs: Job[] = [
     type: 'Contract',
     level: 'Entry Level',
     salary: '25,000 - 35,000',
-    salaryCurrency: 'Ksh',
     posted: '5d',
     description:
       'KRA needs a Data Entry Clerk on a 6-month contract to support digitization of tax records. You will accurately input, verify, and maintain data in our systems while ensuring data integrity and confidentiality.',
@@ -514,7 +494,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Entry Level',
     salary: '45,000 - 65,000',
-    salaryCurrency: 'Ksh',
     posted: '6d',
     description:
       'East African Breweries Limited is looking for a Marketing Assistant to support our brand management team. You will assist in executing marketing campaigns, managing social media accounts, coordinating events, and analyzing market trends.',
@@ -538,7 +517,6 @@ export const jobs: Job[] = [
     type: 'Internship',
     level: 'Intern',
     salary: '20,000 - 30,000',
-    salaryCurrency: 'Ksh',
     posted: '1w',
     description:
       'Equity Bank is offering a 3-month Finance Internship program. You will gain exposure to financial analysis, budgeting, forecasting, and reporting. Ideal for students in their final year or recent graduates.',
@@ -562,7 +540,6 @@ export const jobs: Job[] = [
     type: 'Internship',
     level: 'Intern',
     salary: '25,000 - 40,000',
-    salaryCurrency: 'Ksh',
     posted: '1w',
     description:
       'Safaricom\'s 6-month Software Engineering Internship offers hands-on experience in building mobile and web applications used by millions. You will work alongside senior engineers, participate in agile sprints, and contribute to production code.',
@@ -586,7 +563,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Any',
     salary: 'Full Scholarship',
-    salaryCurrency: '',
     posted: '2w',
     deadline: '28 Feb',
     description:
@@ -611,7 +587,6 @@ export const jobs: Job[] = [
     type: 'Full-time',
     level: 'Any',
     salary: 'Tuition + Stipend',
-    salaryCurrency: '',
     posted: '3w',
     deadline: '15 Mar',
     description:
@@ -636,7 +611,6 @@ export const jobs: Job[] = [
     type: 'Casual',
     level: 'Any',
     salary: 'Ksh 500/day',
-    salaryCurrency: 'Ksh',
     posted: '2h',
     casualRate: 'Ksh 500/day',
     casualNote: 'Immediate start',
@@ -663,7 +637,6 @@ export const jobs: Job[] = [
     type: 'Casual',
     level: 'Any',
     salary: 'Ksh 1,200/day',
-    salaryCurrency: 'Ksh',
     posted: '4h',
     casualRate: 'Ksh 1,200/day',
     casualNote: 'Own bike required',
@@ -690,7 +663,6 @@ export const jobs: Job[] = [
     type: 'Casual',
     level: 'Any',
     salary: 'Ksh 700/day',
-    salaryCurrency: 'Ksh',
     posted: '1d',
     casualRate: 'Ksh 700/day',
     casualNote: 'Accommodation provided',
@@ -717,7 +689,6 @@ export const jobs: Job[] = [
     type: 'Part-time',
     level: 'Entry Level',
     salary: 'Ksh 15k/mo',
-    salaryCurrency: 'Ksh',
     posted: '1d',
     casualRate: 'Ksh 15k/mo',
     casualNote: 'Part-time',
@@ -744,7 +715,6 @@ export const jobs: Job[] = [
     type: 'Casual',
     level: 'Any',
     salary: 'Ksh 600/day',
-    salaryCurrency: 'Ksh',
     posted: '2d',
     casualRate: 'Ksh 600/day',
     casualNote: 'Weekends only',
@@ -771,7 +741,6 @@ export const jobs: Job[] = [
     type: 'Casual',
     level: 'Any',
     salary: 'Ksh 800/day',
-    salaryCurrency: 'Ksh',
     posted: '3d',
     casualRate: 'Ksh 800/day',
     casualNote: 'Morning shift (6am-2pm)',
@@ -798,7 +767,6 @@ export const jobs: Job[] = [
     type: 'Internship',
     level: 'Intern',
     salary: '25,000 - 35,000',
-    salaryCurrency: 'Ksh',
     posted: '1w',
     description:
       'EABL offers a structured internship program in the Marketing department. You will work on real brand campaigns, support event planning, conduct market research, and gain exposure to one of East Africa\'s largest FMCG companies.',

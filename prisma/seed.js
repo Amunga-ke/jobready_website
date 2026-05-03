@@ -115,12 +115,12 @@ async function main() {
       data: {
         title:j.t, slug:j.s, type:j.type, level:j.lv,
         description:j.d, requirements:JSON.stringify(j.r),
-        salaryMin:j.sMin, salaryMax:j.sMax, salaryCurrency:j.sMin?'Ksh':'',
+        salaryMin:j.sMin, salaryMax:j.sMax,
         salaryNote:j.sn||null,
         casualRate:j.cr||null, casualNote:j.cn||null,
         isCasual:j.cas||false,
         isGovernment:j.g, isGazette:j.gz||false,
-        isUrgent:j.u, isFeatured:j.f||false, isRemote:j.rem,
+        isFeatured:j.f||false, isRemote:j.rem,
         postedAt:new Date(j.p), deadlineAt:j.dl?new Date(j.dl):null,
         companyId:cid, categoryId:catid, locationId:lid,
         tags:{create:j.tg.map(t=>({tagId:tagMap[t]}))}

@@ -300,7 +300,6 @@ export function mapJobToView(listing: PrismaListingRow): Job {
 
     // Compensation
     salary: formatSalary(jd?.salaryMin, jd?.salaryMax),
-    salaryCurrency: jd?.currency?.symbol ?? '',
     salaryDisplay: jd?.salaryDisplay,
     salaryPeriod: formatSalaryPeriod(jd?.salaryPeriod),
 

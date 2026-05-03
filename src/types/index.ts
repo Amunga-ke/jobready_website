@@ -8,7 +8,6 @@ export interface Job {
   companyVerified: boolean;
   location: string;
   county: string;
-  country: string;
   category: string;
   subcategory?: string;
   listingType: "JOB" | "GOVERNMENT" | "CASUAL" | "OPPORTUNITY";
@@ -19,10 +18,8 @@ export interface Job {
   workMode: "ONSITE" | "REMOTE" | "HYBRID";
   salaryMin?: number | null;
   salaryMax?: number | null;
-  salaryCurrency?: string;
   salaryPeriod?: string;
   predictedSalary?: string;
-  isPredictedSalary?: boolean;
   description: string;
   requirements?: string;
   instructions?: string;
@@ -51,7 +48,6 @@ export interface JobCard {
   workMode: Job["workMode"];
   salaryMin?: number | null;
   salaryMax?: number | null;
-  salaryCurrency?: string;
   salaryPeriod?: string;
   createdAt: string;
   deadline?: string | null;

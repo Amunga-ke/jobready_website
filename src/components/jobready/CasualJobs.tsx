@@ -22,7 +22,7 @@ export default function CasualJobs({ jobs }: { jobs: Job[] }) {
                 <span className="text-ink group-hover:text-accent transition-colors">{job.title}</span>
                 <span className="text-muted/40"> — {job.location.split(",")[0]} — </span>
                 <span className="text-muted">
-                  {job.salaryCurrency}{" "}{job.salaryMin?.toLocaleString()}/{job.salaryPeriod}
+                  KES{" "}{job.salaryMin?.toLocaleString()}/{job.salaryPeriod}
                 </span>
                 {job.tags.length > 0 && (
                   <span className="text-muted/40"> — {job.tags[job.tags.length > 2 ? 2 : job.tags.length - 1]}</span>

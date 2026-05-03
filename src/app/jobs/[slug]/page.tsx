@@ -174,7 +174,7 @@ export default async function JobDetailPage({
           </p>
           {job.salaryMin != null && job.salaryMax != null ? (
             <p className="text-base font-semibold text-ink">
-              {job.salaryCurrency || "KES"} {job.salaryMin?.toLocaleString()} –{" "}
+              KES {job.salaryMin?.toLocaleString()} –{" "}
               {job.salaryMax?.toLocaleString()}
               {job.salaryPeriod && (
                 <span className="font-normal text-muted">
@@ -188,7 +188,7 @@ export default async function JobDetailPage({
               <p className="text-base font-medium text-ink/60">
                 {job.predictedSalary || "Not disclosed"}
               </p>
-              {job.isPredictedSalary && (
+              {job.predictedSalary && (
                 <p className="text-[12px] text-muted mt-1">
                   Estimated based on similar roles in{" "}
                   {job.county || job.location}

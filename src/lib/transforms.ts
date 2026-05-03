@@ -22,7 +22,6 @@ export function listingToJob(
     companyVerified: listing.company?.verified ?? false,
     location: listing.location,
     county: listing.countyName,
-    country: listing.country,
     category: listing.category?.name
       ?? (listing.listingType === "JOB"
         ? "Job"
@@ -40,10 +39,8 @@ export function listingToJob(
     workMode: listing.workMode as Job["workMode"],
     salaryMin: listing.salaryMin,
     salaryMax: listing.salaryMax,
-    salaryCurrency: listing.salaryCurrency,
     salaryPeriod: listing.salaryPeriod ?? undefined,
     predictedSalary: listing.predictedSalary ?? undefined,
-    isPredictedSalary: listing.isPredictedSalary ?? undefined,
     description: listing.description,
     requirements: listing.requirements ?? undefined,
     instructions: listing.instructions ?? undefined,

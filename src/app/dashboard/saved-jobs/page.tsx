@@ -29,7 +29,6 @@ interface SavedJob {
     employmentType: string;
     salaryMin: number | null;
     salaryMax: number | null;
-    salaryCurrency: string;
     salaryPeriod?: string;
     deadline: string | null;
     applicationUrl?: string | null;
@@ -106,7 +105,7 @@ export default function SavedJobsPage() {
 
   function formatSalary(job: SavedJob["job"]) {
     if (job.salaryMin == null || job.salaryMax == null) return "Not disclosed";
-    return `${job.salaryCurrency} ${job.salaryMin.toLocaleString()} – ${job.salaryMax.toLocaleString()}${job.salaryPeriod ? `/${job.salaryPeriod}` : ""}`;
+    return `KES ${job.salaryMin.toLocaleString()} – ${job.salaryMax.toLocaleString()}${job.salaryPeriod ? `/${job.salaryPeriod}` : ""}`;
   }
 
   function daysUntil(dateStr: string | null): string | null {
