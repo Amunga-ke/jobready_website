@@ -46,6 +46,36 @@ function getOpportunities(typeSlug: string, limit = 20) {
   return promise;
 }
 
+// Fetch county-level counts for a specific opportunity type
+const oppCountyCountCache = new Map<string, Promise<Map<string, number>>>();
+
+function getCountyCountsForType(typeSlug: string) {
+  const cached = oppCountyCountCache.get(typeSlug);
+  if (cached) return cached;
+
+  const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
+
+  const promise = prisma.$queryRaw<Array<{ county: string; _count: bigint }>>`
+    SELECT county, COUNT(*) as _count
+    FROM Listing
+    WHERE status = 'ACTIVE' AND opportunityType = ${dbType}
+      AND county IS NOT NULL AND county != ''
+    GROUP BY county
+    ORDER BY _count DESC
+  `
+    .then((rows) => {
+      const map = new Map<string, number>();
+      for (const r of rows) {
+        map.set(r.county, Number(r._count));
+      }
+      return map;
+    })
+    .catch(() => new Map<string, number>());
+
+  oppCountyCountCache.set(typeSlug, promise);
+  return promise;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -97,7 +127,10 @@ export default async function OpportunityTypePage({
 
     if (!opp) notFound();
 
-    const oppResult = await getOpportunities(typeSlug, 20);
+    const [oppResult, countyCounts] = await Promise.all([
+      getOpportunities(typeSlug, 20),
+      getCountyCountsForType(typeSlug),
+    ]);
     const count = oppResult.count;
     const listings = oppResult.listings;
     const nearbyCounties = KE_COUNTIES.slice(0, 8) as unknown as string[];
@@ -201,13 +234,21 @@ export default async function OpportunityTypePage({
             <div className="flex flex-wrap gap-2">
               {KE_COUNTIES.map((county) => {
                 const countySlug = slugifyCounty(county);
+                const countyCount = countyCounts.get(county) || 0;
                 return (
                   <Link
                     key={countySlug}
                     href={`/opportunities/${typeSlug}/in-${countySlug}`}
-                    className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors"
+                    className={`text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors ${
+                      countyCount > 0
+                        ? "bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink"
+                        : "bg-ink/[0.02] text-muted/40"
+                    }`}
                   >
                     {county}
+                    {countyCount > 0 && (
+                      <span className="ml-1.5 font-mono text-[11px] text-accent">{countyCount}</span>
+                    )}
                   </Link>
                 );
               })}
