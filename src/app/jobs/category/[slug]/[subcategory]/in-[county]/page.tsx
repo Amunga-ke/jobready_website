@@ -14,12 +14,16 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, subcategory: subSlug, county: countySlug } = await params;
 
-  const category = await prisma.category.findUnique({ where: { slug } });
+  const category = await prisma.category
+    .findUnique({ where: { slug } })
+    .catch(() => null);
   if (!category) return { title: "Not Found | JobReady" };
 
-  const sub = await prisma.subcategory.findFirst({
-    where: { slug: subSlug, categoryId: category.id },
-  });
+  const sub = await prisma.subcategory
+    .findFirst({
+      where: { slug: subSlug, categoryId: category.id },
+    })
+    .catch(() => null);
   if (!sub) return { title: "Not Found | JobReady" };
 
   // Derive county name from slug (replace hyphens, title-case)
@@ -27,13 +31,15 @@ export async function generateMetadata({
     .replace(/-/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  const count = await prisma.listing.count({
-    where: {
-      subcategoryId: sub.id,
-      status: "ACTIVE",
-      countyName,
-    },
-  });
+  const count = await prisma.listing
+    .count({
+      where: {
+        subcategoryId: sub.id,
+        status: "ACTIVE",
+        countyName,
+      },
+    })
+    .catch(() => 0);
 
   const title = `${sub.name} Jobs in ${countyName}${count > 0 ? ` (${count})` : ""} | JobReady`;
   const description = `Find ${count} ${sub.name.toLowerCase()} jobs in ${countyName}, Kenya.`;
@@ -55,12 +61,16 @@ export default async function SubcategoryCountyPage({
   const { slug, subcategory: subSlug, county: countySlug } = await params;
 
   // Look up from DB
-  const category = await prisma.category.findUnique({ where: { slug } });
+  const category = await prisma.category
+    .findUnique({ where: { slug } })
+    .catch(() => null);
   if (!category) notFound();
 
-  const sub = await prisma.subcategory.findFirst({
-    where: { slug: subSlug, categoryId: category.id },
-  });
+  const sub = await prisma.subcategory
+    .findFirst({
+      where: { slug: subSlug, categoryId: category.id },
+    })
+    .catch(() => null);
   if (!sub) notFound();
 
   // Derive county name from slug
@@ -69,16 +79,18 @@ export default async function SubcategoryCountyPage({
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
   // Fetch listings
-  const listings = await prisma.listing.findMany({
-    where: {
-      subcategoryId: sub.id,
-      status: "ACTIVE",
-      countyName,
-    },
-    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
+  const listings = await prisma.listing
+    .findMany({
+      where: {
+        subcategoryId: sub.id,
+        status: "ACTIVE",
+        countyName,
+      },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    })
+    .catch(() => []);
 
   const count = listings.length;
 
