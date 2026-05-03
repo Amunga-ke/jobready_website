@@ -39,7 +39,6 @@ async function getRecentListings(limit = 20) {
         company: true,
         category: true,
         subcategory: true,
-        county: true,
         tags: { include: { tag: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -147,7 +146,7 @@ export default async function OpportunitiesPage() {
                       <div className="sm:hidden flex items-center gap-2 mt-0.5">
                         <span className="text-[11px] text-muted">{job.company?.name || ""}</span>
                         <span className="text-[11px] text-subtle">&middot;</span>
-                        <span className="text-[11px] text-muted">{job.location || ""}</span>
+                        <span className="text-[11px] text-muted">{job.town || ""}</span>
                       </div>
                     </div>
                     <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">

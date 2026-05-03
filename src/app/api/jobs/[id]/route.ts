@@ -15,7 +15,6 @@ export async function GET(
         company: true,
         category: true,
         subcategory: true,
-        county: true,
         tags: { include: { tag: true } },
       },
     });
