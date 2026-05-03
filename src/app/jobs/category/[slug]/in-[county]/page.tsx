@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { KE_COUNTIES, slugifyCounty, getCategoryBySlug, getCountyBySlug } from "@/lib/constants";
+import { KE_COUNTIES, slugifyCounty, getCategoryBySlug } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getComboIntro, getSalaryContext, getNearbyCounties } from "@/lib/seo/fallback-content";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
@@ -17,7 +17,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string; county: string }>;
 }): Promise<Metadata> {
   const { slug, county: countySlug } = await params;
-  const county = getCountyBySlug(countySlug);
+
+  // Look up county name from KE_COUNTIES or DB
+  let county = KE_COUNTIES.find((c) => slugifyCounty(c) === countySlug);
+  if (!county) {
+    const countyRecord = await prisma.county.findUnique({ where: { slug: countySlug } });
+    if (countyRecord) county = countyRecord.name;
+  }
   if (!county) return { title: "Not Found | JobReady" };
 
   const catRecord = await prisma.category.findUnique({ where: { slug } });
@@ -57,7 +63,14 @@ export default async function CategoryCountyPage({
   params: Promise<{ slug: string; county: string }>;
 }) {
   const { slug, county: countySlug } = await params;
-  const county = getCountyBySlug(countySlug);
+
+  // Look up county name from DB or fall back to hardcoded KE_COUNTIES
+  let county = KE_COUNTIES.find((c) => slugifyCounty(c) === countySlug);
+  if (!county) {
+    // Try DB County table
+    const countyRecord = await prisma.county.findUnique({ where: { slug: countySlug } });
+    if (countyRecord) county = countyRecord.name;
+  }
   if (!county) notFound();
 
   // Look up category from DB (source of truth)
