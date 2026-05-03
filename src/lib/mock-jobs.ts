@@ -27,10 +27,6 @@ export const featuredHeroJob: Job = {
   salaryPeriod: "month",
   description:
     "<p>Lead product strategy for M-Pesa, serving 30M+ active users across East Africa. You will own the product roadmap, work closely with a cross-functional team of 12+ engineers and designers, and drive key initiatives in financial inclusion, lending, and merchant payments.</p><ul><li>Define and execute the M-Pesa product vision and roadmap</li><li>Analyze market trends, user behavior, and competitive landscape</li><li>Collaborate with engineering, design, and business teams</li><li>Drive A/B testing and data-informed product decisions</li><li>Present product strategy to C-suite stakeholders</li></ul>",
-  requirements:
-    "<ul><li>7+ years in product management, ideally in fintech or mobile payments</li><li>Experience leading products with 1M+ active users</li><li>Strong analytical skills and data-driven decision making</li><li>Excellent communication and stakeholder management</li><li>Degree in Business, Computer Science, or related field</li></ul>",
-  instructions:
-    "<p>Submit your CV and a brief product case study (max 3 pages) to <strong>careers@safaricom.co.ke</strong> with subject line <strong>SPM-MPesa-2025</strong>.</p>",
   tags: ["Product Management", "Fintech", "M-Pesa", "Mobile Payments", "Senior"],
   createdAt: "2025-01-15T09:00:00Z",
   deadline: "2025-03-15T23:59:00Z",
@@ -56,8 +52,6 @@ export const featuredJobs: Job[] = [
     salaryPeriod: "month",
     description:
       "<p>Join Equity Bank's Strategic Planning division as a Financial Analyst. You will support investment decisions, financial modeling, and reporting across the bank's East Africa operations.</p><ul><li>Build and maintain financial models for business planning</li><li>Prepare management reports and board presentations</li><li>Conduct market research and competitive analysis</li><li>Support budget forecasting and variance analysis</li></ul>",
-    requirements:
-      "<ul><li>Bachelor's degree in Finance, Accounting, or related field</li><li>CPA or CFA qualification preferred</li><li>3+ years in financial analysis or corporate finance</li><li>Advanced Excel and financial modeling skills</li><li>Experience with ERP systems (SAP/Oracle)</li></ul>",
     tags: ["Finance", "Banking", "Financial Analysis", "CPA"],
     createdAt: "2025-02-01T10:00:00Z",
     deadline: "2025-03-01T23:59:00Z",
@@ -82,8 +76,6 @@ export const featuredJobs: Job[] = [
     salaryPeriod: "month",
     description:
       "<p>Build the next generation of KCB's digital banking platform. Work with modern microservices architecture, cloud infrastructure, and agile delivery teams.</p><ul><li>Design and develop RESTful APIs and microservices</li><li>Implement secure payment processing solutions</li><li>Write unit and integration tests</li><li>Participate in code reviews and technical design discussions</li></ul>",
-    requirements:
-      "<ul><li>4+ years of software development experience</li><li>Proficiency in Java, Python, or Node.js</li><li>Experience with cloud platforms (AWS/Azure)</li><li>Knowledge of microservices and containerization (Docker/K8s)</li><li>Understanding of banking or fintech domain is a plus</li></ul>",
     tags: ["Software Engineering", "Backend", "Java", "Remote", "Fintech"],
     createdAt: "2025-01-28T08:00:00Z",
     deadline: "2025-03-10T23:59:00Z",
@@ -104,8 +96,6 @@ export const featuredJobs: Job[] = [
     workMode: "ONSITE",
     description:
       "<p>NCBA Group's 12-month Graduate Trainee Program offers recent graduates hands-on experience in banking operations, digital innovation, and leadership development. Successful candidates rotate across multiple departments.</p><ul><li>Rotate through Retail Banking, Corporate Banking, and Operations</li><li>Participate in leadership and professional development workshops</li><li>Contribute to digital transformation projects</li><li>Receive mentorship from senior executives</li></ul>",
-    requirements:
-      "<ul><li>Bachelor's degree (minimum Second Class Upper)</li><li>Graduated in 2023 or 2024</li><li>Strong analytical and communication skills</li><li>Passionate about the financial services industry</li><li>No prior work experience required</li></ul>",
     tags: ["Graduate", "Trainee", "Banking", "Entry Level"],
     createdAt: "2025-02-05T11:00:00Z",
     deadline: "2025-03-20T23:59:00Z",
@@ -135,8 +125,6 @@ export const closingSoonJobs: Job[] = [
     salaryPeriod: "month",
     description:
       "<p>Join NCBA's Marketing department for a 3-month internship. Gain exposure to brand management, digital marketing campaigns, and corporate communications.</p><ul><li>Assist in planning and executing marketing campaigns</li><li>Create content for social media platforms</li><li>Support market research and competitor analysis</li><li>Help organize corporate events and sponsorships</li></ul>",
-    requirements:
-      "<ul><li>Pursuing a degree in Marketing, Communications, or related field</li><li>Strong writing and creative skills</li><li>Familiarity with social media platforms</li><li>Available for 3 months starting immediately</li></ul>",
     tags: ["Marketing", "Internship", "Social Media"],
     createdAt: "2025-01-20T14:00:00Z",
     deadline: "2025-02-20T23:59:00Z",
@@ -160,8 +148,6 @@ export const closingSoonJobs: Job[] = [
     salaryPeriod: "month",
     description:
       "<p>Join Safaricom's Finance division as a Senior Accountant. Oversee financial reporting, tax compliance, and internal audit processes for one of East Africa's largest companies.</p>",
-    requirements:
-      "<ul><li>CPA(K) qualification mandatory</li><li>7+ years in accounting or auditing</li><li>IFRS knowledge and experience</li><li>Strong SAP or ERP experience</li></ul>",
     tags: ["Accounting", "CPA", "Senior", "Finance"],
     createdAt: "2025-01-25T09:00:00Z",
     deadline: "2025-02-25T23:59:00Z",
@@ -185,8 +171,6 @@ export const closingSoonJobs: Job[] = [
     salaryPeriod: "month",
     description:
       "<p>Lead the HR function for Equity Bank's Nairobi region, managing talent acquisition, employee relations, performance management, and organizational development for 500+ staff.</p>",
-    requirements:
-      "<ul><li>8+ years in HR management</li><li>CHRP certification preferred</li><li>Experience in banking or financial services HR</li><li>Strong labor law knowledge</li></ul>",
     tags: ["HR", "Management", "Banking", "Senior"],
     createdAt: "2025-01-22T10:00:00Z",
     deadline: "2025-02-28T23:59:00Z",
@@ -210,8 +194,6 @@ export const closingSoonJobs: Job[] = [
     salaryPeriod: "month",
     description:
       "<p>KCB Bank is looking for enthusiastic Junior Developers to join our technology team. You will work on internal tools, customer-facing applications, and gain exposure to enterprise software development.</p>",
-    requirements:
-      "<ul><li>Degree in Computer Science, IT, or related field</li><li>Proficiency in at least one programming language</li><li>Understanding of databases (SQL)</li><li>Problem-solving mindset</li></ul>",
     tags: ["Software Engineering", "Junior", "Entry Level"],
     createdAt: "2025-01-18T12:00:00Z",
     deadline: "2025-03-05T23:59:00Z",
@@ -236,8 +218,6 @@ export const closingSoonJobs: Job[] = [
     salaryPeriod: "month",
     description:
       "<p>KRA is seeking a Data Analyst to support revenue intelligence and compliance analytics. You will work with large datasets to identify tax compliance patterns and support policy decisions.</p>",
-    requirements:
-      "<ul><li>Degree in Statistics, Mathematics, Data Science, or related field</li><li>3+ years in data analysis</li><li>Proficiency in Python/R and SQL</li><li>Experience with BI tools (Power BI/Tableau)</li></ul>",
     tags: ["Data", "Analytics", "Government", "Tax"],
     createdAt: "2025-01-19T08:00:00Z",
     deadline: "2025-03-05T23:59:00Z",
@@ -264,10 +244,6 @@ export const nationalGovJobs: Job[] = [
     workMode: "ONSITE",
     description:
       "<p>The Kenya Revenue Authority invites applications from qualified graduates for its 2025 Graduate Trainee Program. The program runs for 18 months and offers rotations across Customs, Domestic Taxes, and IT departments.</p><ul><li>Rotate through multiple KRA departments</li><li>Receive comprehensive training on tax administration</li><li>Work on real revenue collection projects</li><li>Get mentorship from senior officers</li></ul>",
-    requirements:
-      "<ul><li>Bachelor's degree (minimum Second Class Upper)</li><li>Graduated between 2022 and 2024</li><li>Must be a Kenyan citizen aged 35 and below</li><li>No criminal record</li></ul>",
-    instructions:
-      "<p>Apply online through the <strong>KRA recruitment portal</strong>. Attach certified copies of academic certificates, national ID, and a detailed CV.</p>",
     tags: ["Government", "KRA", "Graduate", "National"],
     createdAt: "2025-01-10T07:00:00Z",
     deadline: "2025-02-15T23:59:00Z",
@@ -289,8 +265,6 @@ export const nationalGovJobs: Job[] = [
     workMode: "ONSITE",
     description:
       "<p>The Teachers Service Commission has advertised 5,000 teaching positions for secondary schools across all 47 counties. Positions are available for various subject combinations.</p>",
-    requirements:
-      "<ul><li>Bachelor of Education degree</li><li>TSC registration certificate</li><li>Diploma or degree in relevant subject combination</li><li>Must be a Kenyan citizen</li></ul>",
     tags: ["Government", "TSC", "Teaching", "Education"],
     createdAt: "2025-01-12T08:00:00Z",
     deadline: "2025-02-28T23:59:00Z",
@@ -312,34 +286,6 @@ export const nationalGovJobs: Job[] = [
     workMode: "ONSITE",
     description:
       "<p>The National Police Service is recruiting 10,000 police constables across all 47 counties. Successful candidates will undergo 9 months of training at Kiganjo Police Training College.</p>",
-    requirements:
-      "<ul><li>Kenyan citizen aged 18-28 years</li><li>Minimum KCSE mean grade D+ (plain)</li><li>Must be physically fit</li><li>No criminal record</li><li>Height: Male 5'8\" / Female 5'3\" minimum</li></ul>",
-    tags: ["Government", "Police", "Security", "Recruitment"],
-    createdAt: "2025-01-08T06:00:00Z",
-    deadline: "2025-03-10T23:59:00Z",
-    featured: false,
-  },
-];
-
-export const countyGovJobs: Job[] = [
-  {
-    id: "gov-4",
-    slug: "nakuru-county-various-positions-2025",
-    title: "Nakuru County — Various Positions",
-    companyName: "County Government of Nakuru",
-    companyVerified: true,
-    location: "Nakuru",
-    county: "Nakuru",
-    category: "Government & Public Service",
-    listingType: "GOVERNMENT",
-    governmentLevel: "COUNTY",
-    employmentType: "Full-time",
-    experienceLevel: "Mid-level",
-    workMode: "ONSITE",
-    description:
-      "<p>The County Government of Nakuru is recruiting for multiple positions across Health, Public Works, and Administration departments.</p>",
-    requirements:
-      "<ul><li>Relevant diploma or degree</li><li>Must be a resident of Nakuru County (where applicable)</li><li>Valid professional certifications</li></ul>",
     tags: ["Government", "County", "Nakuru"],
     createdAt: "2025-01-15T09:00:00Z",
     deadline: "2025-02-20T23:59:00Z",
@@ -361,8 +307,6 @@ export const countyGovJobs: Job[] = [
     workMode: "ONSITE",
     description:
       "<p>Nairobi County is recruiting clinical officers, nurses, and public health officers for county health facilities.</p>",
-    requirements:
-      "<ul><li>Diploma or degree in relevant health discipline</li><li>Valid license from relevant professional body</li><li>2+ years experience in a clinical setting</li></ul>",
     tags: ["Government", "County", "Health", "Nairobi"],
     createdAt: "2025-01-18T10:00:00Z",
     deadline: "2025-02-25T23:59:00Z",
@@ -384,8 +328,6 @@ export const countyGovJobs: Job[] = [
     workMode: "ONSITE",
     description:
       "<p>Mombasa County is seeking Civil and Structural Engineers for infrastructure development projects including roads, drainage, and public buildings.</p>",
-    requirements:
-      "<ul><li>BSc in Civil/Structural Engineering</li><li>Registered with Engineers Board of Kenya</li><li>5+ years experience in construction projects</li></ul>",
     tags: ["Government", "County", "Engineering", "Mombasa"],
     createdAt: "2025-01-20T08:00:00Z",
     deadline: "2025-03-05T23:59:00Z",
@@ -754,8 +696,6 @@ export const scholarshipJobs: Job[] = [
     salaryMax: 0,
     description:
       "<p>Full scholarship for undergraduate studies at the University of Nairobi. Covers tuition, accommodation, books, and a living stipend. Open to academically talented yet economically disadvantaged students from Kenya.</p>",
-    requirements:
-      "<ul><li>Strong academic record (mean grade A- or above in KCSE)</li><li>Demonstrated financial need</li><li>Leadership potential and community involvement</li><li>Applying for an undergraduate degree at UoN</li></ul>",
     tags: ["Scholarship", "University", "Full Scholarship"],
     createdAt: "2025-01-15T09:00:00Z",
     deadline: "2025-02-28T23:59:00Z",

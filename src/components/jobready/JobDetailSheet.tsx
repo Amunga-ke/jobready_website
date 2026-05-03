@@ -375,36 +375,6 @@ export default function JobDetailSheet() {
             </div>
           )}
 
-          {/* Requirements */}
-          {job.requirements && (
-            <div>
-              <h3 className="text-[12px] font-medium text-muted uppercase tracking-wider mb-2">
-                Requirements
-              </h3>
-              <div
-                className="text-[13px] text-ink/80 leading-relaxed prose prose-sm max-w-none
-                  [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
-                  [&_li]:mb-1 [&_p]:mb-2"
-                dangerouslySetInnerHTML={{ __html: job.requirements }}
-              />
-            </div>
-          )}
-
-          {/* Application instructions */}
-          {job.instructions && (
-            <div>
-              <h3 className="text-[12px] font-medium text-muted uppercase tracking-wider mb-2">
-                How to Apply
-              </h3>
-              <div
-                className="text-[13px] text-ink/80 leading-relaxed prose prose-sm max-w-none
-                  [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
-                  [&_li]:mb-1 [&_p]:mb-2"
-                dangerouslySetInnerHTML={{ __html: job.instructions }}
-              />
-            </div>
-          )}
-
           {/* Tags */}
           {job.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">

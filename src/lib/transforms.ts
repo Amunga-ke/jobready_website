@@ -42,8 +42,6 @@ export function listingToJob(
     salaryPeriod: listing.salaryPeriod ?? undefined,
     predictedSalary: listing.predictedSalary ?? undefined,
     description: listing.description,
-    requirements: listing.requirements ?? undefined,
-    instructions: listing.instructions ?? undefined,
     tags: listing.tags?.map((t) => t.tag.name) ?? [],
     createdAt: listing.createdAt.toISOString(),
     deadline: listing.deadline?.toISOString() ?? null,

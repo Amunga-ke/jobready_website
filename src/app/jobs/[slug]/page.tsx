@@ -412,36 +412,6 @@ export default async function SlugPage({
             </div>
           )}
 
-          {/* Requirements */}
-          {job.requirements && (
-            <div>
-              <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-3">
-                Requirements
-              </h2>
-              <div
-                className="text-[14px] text-ink/80 leading-relaxed
-                  [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
-                  [&_li]:mb-1.5 [&_p]:mb-3"
-                dangerouslySetInnerHTML={{ __html: job.requirements }}
-              />
-            </div>
-          )}
-
-          {/* Instructions */}
-          {job.instructions && (
-            <div>
-              <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-3">
-                How to Apply
-              </h2>
-              <div
-                className="text-[14px] text-ink/80 leading-relaxed
-                  [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
-                  [&_li]:mb-1.5 [&_p]:mb-3 [&_strong]:font-semibold [&_strong]:text-ink"
-                dangerouslySetInnerHTML={{ __html: job.instructions }}
-              />
-            </div>
-          )}
-
           {/* Apply CTA */}
           <div className="pt-4 border-t border-divider flex items-center justify-between gap-4">
             <ShareButton slug={job.slug} title={job.title} />
