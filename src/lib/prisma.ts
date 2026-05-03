@@ -7,7 +7,8 @@ function buildDatabaseUrl(): string {
   // Shared hosting has low max_user_connections — keep pool small
   if (base.includes("connection_limit")) return base;
   const sep = base.includes("?") ? "&" : "?";
-  return `${base}${sep}connection_limit=5&pool_timeout=10`;
+  // Vercel serverless: keep pool small to avoid exhausting shared MySQL max_user_connections
+  return `${base}${sep}connection_limit=3&pool_timeout=15`;
 }
 
 export const prisma =
