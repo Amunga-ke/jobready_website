@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 
@@ -21,8 +22,12 @@ const MOBILE_BOTTOM = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
+
+  // Hide navbar inside dashboard (dashboard has its own shell)
+  if (pathname.startsWith("/dashboard")) return null;
 
   // Lock body scroll when overlay is open
   useEffect(() => {

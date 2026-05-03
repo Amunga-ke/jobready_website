@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { JOB_CATEGORIES, KE_COUNTIES, slugifyCounty, getCategoryBySlug, getCountyBySlug } from "@/lib/constants";
-import { getRobotsMeta, getFallbackStrategy, type SeoTier } from "@/lib/seo/page-thresholds";
+import { KE_COUNTIES, slugifyCounty, getCategoryBySlug, getCountyBySlug } from "@/lib/constants";
+import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getComboIntro, getSalaryContext, getNearbyCounties } from "@/lib/seo/fallback-content";
-import { SeoPageHeader, SubcategoryGrid, RichFallback } from "@/components/jobready/SeoPageLayout";
+import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { getJobCountByCategoryAndCounty, getJobsByCategoryAndCounty } from "@/lib/data";
+import prisma from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -14,50 +17,38 @@ export async function generateMetadata({
   params: Promise<{ slug: string; county: string }>;
 }): Promise<Metadata> {
   const { slug, county: countySlug } = await params;
-  const category = getCategoryBySlug(slug);
   const county = getCountyBySlug(countySlug);
+  if (!county) return { title: "Not Found | JobReady" };
 
-  if (!category || !county) return { title: "Not Found | JobReady" };
+  const catRecord = await prisma.category.findUnique({ where: { slug } });
+  if (!catRecord) return { title: "Not Found | JobReady" };
 
+  const label = catRecord.name;
+  const category = getCategoryBySlug(slug);
   const count = await getJobCountByCategoryAndCounty(slug, countySlug);
   const robots = getRobotsMeta(count, "CAT_COUNTY" as SeoTier);
+  const description = category ? getComboIntro(category, county) : `Browse ${count} ${label.toLowerCase()} job openings in ${county}, Kenya on JobReady.`;
 
   return {
-    title: `${category.label} Jobs in ${county} (${count || ""} Openings) | JobReady`,
-    description: getComboIntro(category, county),
+    title: `${label} Jobs in ${county} (${count || ""} Openings) | JobReady`,
+    description,
     robots,
     alternates: {
       canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/in-${countySlug}`,
     },
     openGraph: {
-      title: `${category.label} Jobs in ${county} | JobReady`,
-      description: getComboIntro(category, county),
+      title: `${label} Jobs in ${county} | JobReady`,
+      description,
       url: `https://jobreadyke.co.ke/jobs/category/${slug}/in-${countySlug}`,
       type: "website",
       siteName: "JobReady",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${category.label} Jobs in ${county} | JobReady`,
-      description: getComboIntro(category, county),
+      title: `${label} Jobs in ${county} | JobReady`,
+      description,
     },
   };
-}
-
-/**
- * CRITICAL: Only pre-generate combo pages that meet the threshold.
- * This is where the thin-page prevention happens.
- */
-export async function generateStaticParams() {
-  // In production, this would query:
-  // SELECT category, county, COUNT(*) as count
-  // FROM listings WHERE status = 'PUBLISHED'
-  // GROUP BY category, county
-  // HAVING count >= 3
-  //
-  // For now, return empty — combos are generated dynamically on first visit
-  // but only indexed if they meet the threshold (controlled via robots meta)
-  return [];
 }
 
 export default async function CategoryCountyPage({
@@ -66,17 +57,36 @@ export default async function CategoryCountyPage({
   params: Promise<{ slug: string; county: string }>;
 }) {
   const { slug, county: countySlug } = await params;
-  const category = getCategoryBySlug(slug);
   const county = getCountyBySlug(countySlug);
+  if (!county) notFound();
 
-  if (!category || !county) notFound();
+  // Look up category from DB (source of truth)
+  const catRecord = await prisma.category.findUnique({ where: { slug } });
+  if (!catRecord) notFound();
 
-  const [comboResult, salaryContext, nearby, relatedCategories] = await Promise.all([
+  const label = catRecord.name;
+  const category = getCategoryBySlug(slug); // may be null for DB-only categories
+  const salaryContext = category ? getSalaryContext(category.value) : null;
+  const description = category ? getComboIntro(category, county) : `Browse ${label.toLowerCase()} job openings in ${county}, Kenya.`;
+
+  // Fetch subcategories from DB
+  const subcategories = await prisma.subcategory.findMany({
+    where: { categoryId: catRecord.id, active: true },
+    orderBy: { sortOrder: "asc" },
+    include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
+  });
+
+  const [comboResult, nearby, otherCategories] = await Promise.all([
     getJobsByCategoryAndCounty(slug, countySlug, 20),
-    Promise.resolve(getSalaryContext(category.value)),
     Promise.resolve(getNearbyCounties(county)),
-    Promise.resolve(JOB_CATEGORIES.filter((c) => c.slug !== slug).slice(0, 6)),
+    prisma.category.findMany({
+      where: { active: true, id: { not: catRecord.id } },
+      orderBy: { name: "asc" },
+      select: { slug: true, name: true, _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
+      take: 6,
+    }),
   ]);
+
   const count = comboResult.count;
   const comboJobs = comboResult.jobs;
 
@@ -87,26 +97,14 @@ export default async function CategoryCountyPage({
           breadcrumbs={[
             { label: "Home", href: "/" },
             { label: "Jobs", href: "/jobs" },
-            { label: category.label, href: `/jobs/category/${slug}` },
+            { label, href: `/jobs/category/${slug}` },
             { label: county, href: `/jobs/in-${countySlug}` },
-            { label: `${category.label} in ${county}`, href: `/jobs/category/${slug}/in-${countySlug}` },
+            { label: `${label} in ${county}`, href: `/jobs/category/${slug}/in-${countySlug}` },
           ]}
-          title={`${category.label} Jobs in ${county}`}
-          description={getComboIntro(category, county)}
+          title={`${label} Jobs in ${county}`}
+          description={description}
           count={count || undefined}
         />
-
-        {/* SEO threshold indicator (dev only — remove in production) */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="mb-4 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-[12px] text-yellow-700">
-            SEO Tier: CAT_COUNTY | Threshold: 3 | Count: {count} |{" "}
-            {count >= 3 ? (
-              <span className="text-green-700 font-medium">INDEXED</span>
-            ) : (
-              <span className="text-red-700 font-medium">NOINDEX</span>
-            )}
-          </div>
-        )}
 
         {/* Salary overview */}
         {salaryContext && (
@@ -116,12 +114,12 @@ export default async function CategoryCountyPage({
             </p>
             <p className="text-base font-semibold text-ink">{salaryContext}</p>
             <p className="text-[12px] text-muted mt-1">
-              Average {category.label.toLowerCase()} salary in {county}
+              Average {label.toLowerCase()} salary in {county}
             </p>
           </div>
         )}
 
-        {/* Listings or rich fallback */}
+        {/* Listings */}
         {comboJobs.length > 0 ? (
           <div className="mb-10">
             <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest mb-1">
@@ -157,8 +155,8 @@ export default async function CategoryCountyPage({
                     </div>
                     <div className="col-span-6 sm:col-span-2 flex items-center">
                       <span className="text-[11px] text-muted">
-                          {job.subcategory || job.listingType === "GOVERNMENT" ? "Gov" : job.employmentType || "Job"}
-                        </span>
+                        {job.subcategory || job.listingType === "GOVERNMENT" ? "Gov" : job.employmentType || "Job"}
+                      </span>
                     </div>
                     <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
                       {dl !== null ? (
@@ -178,31 +176,66 @@ export default async function CategoryCountyPage({
                 href={`/jobs?category=${slug}&county=${countySlug}`}
                 className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors mt-4"
               >
-                View all {count} {category.label.toLowerCase()} jobs in {county} →
+                View all {count} {label.toLowerCase()} jobs in {county} →
               </Link>
             )}
           </div>
         ) : (
-          <div className="mb-10">
-            <RichFallback
-              category={category}
-              county={county}
-              listingCount={count}
-              nearbyCounties={nearby}
-              relatedCategories={relatedCategories}
-            />
+          <div className="mb-10 rounded-xl bg-accent-bg border border-accent/10 px-5 py-6 text-center">
+            <p className="text-[14px] text-ink/80">
+              No {label.toLowerCase()} jobs listed in {county} at the moment.
+            </p>
+            <div className="flex items-center justify-center gap-3 mt-4">
+              <Link
+                href={`/jobs/category/${slug}`}
+                className="text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
+              >
+                View all {label.toLowerCase()} jobs →
+              </Link>
+              <Link
+                href={`/jobs/in-${countySlug}`}
+                className="text-[13px] font-medium text-muted hover:text-ink transition-colors"
+              >
+                All jobs in {county} →
+              </Link>
+            </div>
           </div>
         )}
 
-        {/* Subcategory drill-down */}
-        <div className="mb-10">
-          <SubcategoryGrid category={category} countySlug={countySlug} />
-        </div>
+        {/* Subcategories with real DB counts */}
+        {subcategories.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+              {label} Subcategories in {county}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              {subcategories.map((sub) => (
+                <Link
+                  key={sub.slug}
+                  href={`/jobs/category/${slug}/${sub.slug}`}
+                  className="group flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all"
+                >
+                  <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink transition-colors truncate mr-2">
+                    {sub.name}
+                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {sub._count.listings > 0 && (
+                      <span className="text-[11px] font-mono text-accent">{sub._count.listings}</span>
+                    )}
+                    <svg className="w-4 h-4 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* Nearby counties with same category */}
+        {/* Nearby counties */}
         <div className="mb-10">
           <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
-            {category.label} Jobs Nearby
+            {label} Jobs Nearby
           </h2>
           <div className="flex flex-wrap gap-2">
             {nearby.map((c) => (
@@ -223,23 +256,23 @@ export default async function CategoryCountyPage({
             Other Jobs in {county}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            {relatedCategories.map((cat) => (
+            {otherCategories.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/jobs/category/${cat.slug}/in-${countySlug}`}
-                className="flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all group"
+                className="group flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all"
               >
                 <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink">
-                  {cat.label}
+                  {cat.name}
                 </span>
-                <svg
-                  className="w-4 h-4 text-muted group-hover:text-accent"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <div className="flex items-center gap-2 shrink-0">
+                  {cat._count.listings > 0 && (
+                    <span className="text-[11px] font-mono text-accent">{cat._count.listings}</span>
+                  )}
+                  <svg className="w-4 h-4 text-muted group-hover:text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </Link>
             ))}
           </div>
