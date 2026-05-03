@@ -7,6 +7,8 @@ import { getOpportunityIntro } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import prisma from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
