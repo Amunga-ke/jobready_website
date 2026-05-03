@@ -9,7 +9,7 @@ export async function getFeaturedJobs(): Promise<Job[]> {
     include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
     take: 6,
-  });
+  }).catch(() => []);
   return listings.map(listingToJob);
 }
 
@@ -20,7 +20,7 @@ export async function getJustPosted(): Promise<Job[]> {
     include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
     take: 4,
-  });
+  }).catch(() => []);
   return listings.map(listingToJob);
 }
 
@@ -29,7 +29,8 @@ export async function getClosingSoon(): Promise<Job[]> {
   const now = new Date();
   const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
-  const listings = await prisma.listing.findMany({
+  // Try 3-day window first, fall back to 14-day window if nothing found
+  let listings = await prisma.listing.findMany({
     where: {
       status: "ACTIVE",
       deadline: { gt: now, lte: threeDaysFromNow },
@@ -37,7 +38,21 @@ export async function getClosingSoon(): Promise<Job[]> {
     include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
     orderBy: { deadline: "asc" },
     take: 10,
-  });
+  }).catch(() => []);
+
+  if (listings.length === 0) {
+    const fourteenDays = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    listings = await prisma.listing.findMany({
+      where: {
+        status: "ACTIVE",
+        deadline: { gt: now, lte: fourteenDays },
+      },
+      include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
+      orderBy: { deadline: "asc" },
+      take: 10,
+    }).catch(() => []);
+  }
+
   return listings.map(listingToJob);
 }
 
@@ -60,13 +75,13 @@ export async function getGovernmentJobs() {
       include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
-    }),
+    }).catch(() => []),
     prisma.listing.findMany({
       where: { status: "ACTIVE", listingType: "GOVERNMENT", governmentLevel: "COUNTY" },
       include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
-    }),
+    }).catch(() => []),
   ]);
 
   return {
@@ -82,46 +97,54 @@ export async function getCasualJobs(): Promise<Job[]> {
     include: { company: true, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
     take: 8,
-  });
+  }).catch(() => []);
   return listings.map(listingToJob);
 }
 
 // ─── Opportunities Hub ───
 export async function getOpportunities() {
+  // Each query has its own .catch() so a single connection failure
+  // doesn't kill the entire function
   const [internships, scholarships, entryLevel] = await Promise.all([
     prisma.listing.findMany({
       where: { status: "ACTIVE", opportunityType: "INTERNSHIP" },
       include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
-    }),
+    }).catch(() => []),
     prisma.listing.findMany({
       where: { status: "ACTIVE", opportunityType: "SCHOLARSHIP" },
       include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
-    }),
+    }).catch(() => []),
     prisma.listing.findMany({
       where: { status: "ACTIVE", experienceLevel: "Entry-level", listingType: { in: ["JOB", "OPPORTUNITY"] } },
       include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
-    }),
+    }).catch(() => []),
+  ]);
+
+  const [internshipCount, scholarshipCount, entryLevelCount] = await Promise.all([
+    prisma.listing.count({
+      where: { status: "ACTIVE", opportunityType: "INTERNSHIP" },
+    }).catch(() => 0),
+    prisma.listing.count({
+      where: { status: "ACTIVE", opportunityType: "SCHOLARSHIP" },
+    }).catch(() => 0),
+    prisma.listing.count({
+      where: { status: "ACTIVE", experienceLevel: "Entry-level", listingType: { in: ["JOB", "OPPORTUNITY"] } },
+    }).catch(() => 0),
   ]);
 
   return {
     internships: internships.map(listingToJob),
     scholarships: scholarships.map(listingToJob),
     entryLevel: entryLevel.map(listingToJob),
-    internshipCount: await prisma.listing.count({
-      where: { status: "ACTIVE", opportunityType: "INTERNSHIP" },
-    }),
-    scholarshipCount: await prisma.listing.count({
-      where: { status: "ACTIVE", opportunityType: "SCHOLARSHIP" },
-    }),
-    entryLevelCount: await prisma.listing.count({
-      where: { status: "ACTIVE", experienceLevel: "Entry-level" },
-    }),
+    internshipCount,
+    scholarshipCount,
+    entryLevelCount,
   };
 }
 
@@ -135,7 +158,7 @@ export async function getCategories() {
         select: { listings: { where: { status: "ACTIVE" } } },
       },
     },
-  });
+  }).catch(() => []);
 }
 
 // ─── Counties with listing counts ───
@@ -148,7 +171,7 @@ export async function getCounties() {
         select: { listings: { where: { status: "ACTIVE" } } },
       },
     },
-  });
+  }).catch(() => []);
 }
 
 // ─── Job by slug (for detail pages) ───
