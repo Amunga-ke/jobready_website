@@ -9,16 +9,27 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+function parseLocation(raw: string) {
+  if (!raw.startsWith("in-")) return null;
+  const countySlug = raw.replace(/^in-/, "");
+  const county = getCountyBySlug(countySlug);
+  if (!county) return null;
+  return { countySlug, county };
+}
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ type: string; county: string }>;
+  params: Promise<{ type: string; location: string }>;
 }): Promise<Metadata> {
   try {
-    const { type: typeSlug, county: countySlug } = await params;
+    const { type: typeSlug, location: rawLocation } = await params;
+    const loc = parseLocation(rawLocation);
+    if (!loc) return { title: "Not Found | JobReady" };
+
+    const { countySlug, county } = loc;
     const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
-    const county = getCountyBySlug(countySlug);
-    if (!opp || !county) return { title: "Not Found | JobReady" };
+    if (!opp) return { title: "Not Found | JobReady" };
 
     const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
     const count = await prisma.listing
@@ -57,24 +68,22 @@ export async function generateMetadata({
   }
 }
 
-// No generateStaticParams — page is force-dynamic
-
 export default async function OpportunityCountyPage({
   params,
 }: {
-  params: Promise<{ type: string; county: string }>;
+  params: Promise<{ type: string; location: string }>;
 }) {
   try {
-    const { type: typeSlug, county: countySlug } = await params;
-    const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
-    const county = getCountyBySlug(countySlug);
+    const { type: typeSlug, location: rawLocation } = await params;
+    const loc = parseLocation(rawLocation);
+    if (!loc) notFound();
 
-    if (!opp || !county) notFound();
+    const { countySlug, county } = loc;
+    const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
+    if (!opp) notFound();
 
     const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
 
-    // Fetch listings and count using countyName (text match) instead of countyId
-    // This avoids depending on the DB County table having a matching slug
     const [listings, count] = await Promise.all([
       prisma.listing
         .findMany({
