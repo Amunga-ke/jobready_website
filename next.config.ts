@@ -7,14 +7,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
-  async rewrites() {
-    return [
-      {
-        source: "/jobs/in-:county",
-        destination: "/jobs/county-route/:county",
-      },
-    ];
-  },
 };
 
 export default nextConfig;
