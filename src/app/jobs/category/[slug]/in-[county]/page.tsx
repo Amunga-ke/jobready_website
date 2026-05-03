@@ -8,6 +8,8 @@ import { SeoPageHeader, SubcategoryGrid, RichFallback } from "@/components/jobre
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { getJobCountByCategoryAndCounty, getJobsByCategoryAndCounty } from "@/lib/data";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {
@@ -44,21 +46,7 @@ export async function generateMetadata({
   };
 }
 
-/**
- * CRITICAL: Only pre-generate combo pages that meet the threshold.
- * This is where the thin-page prevention happens.
- */
-export async function generateStaticParams() {
-  // In production, this would query:
-  // SELECT category, county, COUNT(*) as count
-  // FROM listings WHERE status = 'PUBLISHED'
-  // GROUP BY category, county
-  // HAVING count >= 3
-  //
-  // For now, return empty — combos are generated dynamically on first visit
-  // but only indexed if they meet the threshold (controlled via robots meta)
-  return [];
-}
+// No generateStaticParams — page is force-dynamic
 
 export default async function CategoryCountyPage({
   params,
