@@ -27,6 +27,27 @@ async function getTypeCounts() {
   return map;
 }
 
+/* ── Fetch county counts across ALL opportunity types ── */
+async function getCountyCounts() {
+  const rows = await prisma.$queryRaw<
+    Array<{ county: string; _count: bigint }>
+  >`
+    SELECT county, COUNT(*) as _count
+    FROM Listing
+    WHERE status = 'ACTIVE'
+      AND opportunityType IS NOT NULL AND opportunityType != ''
+      AND county IS NOT NULL AND county != ''
+    GROUP BY county
+    ORDER BY _count DESC
+  `.catch(() => []);
+
+  const map = new Map<string, number>();
+  for (const r of rows) {
+    map.set(r.county, Number(r._count));
+  }
+  return map;
+}
+
 /* ── Fetch recent listings across all opportunity types ── */
 async function getRecentListings(limit = 20) {
   return prisma.listing
@@ -48,9 +69,10 @@ async function getRecentListings(limit = 20) {
 }
 
 export default async function OpportunitiesPage() {
-  const [typeCounts, recentListings] = await Promise.all([
+  const [typeCounts, recentListings, countyCounts] = await Promise.all([
     getTypeCounts(),
     getRecentListings(20),
+    getCountyCounts(),
   ]);
 
   const totalCount = Array.from(typeCounts.values()).reduce((a, b) => a + b, 0);
@@ -197,13 +219,21 @@ export default async function OpportunitiesPage() {
           <div className="flex flex-wrap gap-2">
             {KE_COUNTIES.map((county) => {
               const countySlug = slugifyCounty(county);
+              const cCount = countyCounts.get(county) || 0;
               return (
                 <Link
                   key={countySlug}
                   href={`/opportunities/internship/in-${countySlug}`}
-                  className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors"
+                  className={`text-[12px] font-medium px-3 py-1.5 rounded-lg transition-colors ${
+                    cCount > 0
+                      ? "bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink"
+                      : "bg-ink/[0.02] text-muted/40"
+                  }`}
                 >
                   {county}
+                  {cCount > 0 && (
+                    <span className="ml-1.5 font-mono text-[11px] text-accent">{cCount}</span>
+                  )}
                 </Link>
               );
             })}

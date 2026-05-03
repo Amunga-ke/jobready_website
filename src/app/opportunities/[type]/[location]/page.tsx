@@ -60,6 +60,35 @@ function getOppByCounty(typeSlug: string, county: string, limit = 20) {
   return promise;
 }
 
+// Fetch counts for ALL opportunity types within a specific county
+const oppTypeCountyCache = new Map<string, Promise<Map<string, number>>>();
+
+function getTypeCountsForCounty(county: string) {
+  const cached = oppTypeCountyCache.get(county);
+  if (cached) return cached;
+
+  const promise = prisma.$queryRaw<Array<{ opportunityType: string; _count: bigint }>>`
+    SELECT opportunityType, COUNT(*) as _count
+    FROM Listing
+    WHERE status = 'ACTIVE'
+      AND opportunityType IS NOT NULL AND opportunityType != ''
+      AND county = ${county}
+    GROUP BY opportunityType
+    ORDER BY _count DESC
+  `
+    .then((rows) => {
+      const map = new Map<string, number>();
+      for (const r of rows) {
+        map.set(r.opportunityType, Number(r._count));
+      }
+      return map;
+    })
+    .catch(() => new Map<string, number>());
+
+  oppTypeCountyCache.set(county, promise);
+  return promise;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -117,6 +146,7 @@ export default async function OpportunityCountyPage({
     if (!opp) notFound();
 
     const { listings, count } = await getOppByCounty(typeSlug, county, 20);
+    const typeCountsMap = await getTypeCountsForCounty(county);
 
     const nearby = KE_COUNTIES.slice(0, 8) as unknown as string[];
     const otherTypes = OPPORTUNITY_TYPES.filter((t) => t.slug !== typeSlug).slice(0, 8);
@@ -219,15 +249,25 @@ export default async function OpportunityCountyPage({
               Other Opportunities in {county}
             </h2>
             <div className="flex flex-wrap gap-2">
-              {otherTypes.map((t) => (
-                <Link
-                  key={t.slug}
-                  href={`/opportunities/${t.slug}/in-${countySlug}`}
-                  className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-100 transition-colors"
-                >
-                  {t.label}
-                </Link>
-              ))}
+              {otherTypes.map((t) => {
+                const tCount = typeCountsMap.get(t.value) || 0;
+                return (
+                  <Link
+                    key={t.slug}
+                    href={`/opportunities/${t.slug}/in-${countySlug}`}
+                    className={`text-[12px] font-medium px-3 py-1.5 rounded-lg border transition-colors ${
+                      tCount > 0
+                        ? "bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100"
+                        : "bg-ink/[0.02] text-muted/40 border-ink/[0.04]"
+                    }`}
+                  >
+                    {t.label}
+                    {tCount > 0 && (
+                      <span className="ml-1.5 font-mono text-[11px] text-amber-500">{tCount}</span>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
