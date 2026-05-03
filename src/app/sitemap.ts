@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import prisma from "@/lib/prisma";
-import { OPPORTUNITY_TYPES, KE_COUNTIES, slugifyCounty, JOB_CATEGORIES } from "@/lib/constants";
+import { OPPORTUNITY_TYPES } from "@/lib/constants";
 import { SEO_THRESHOLDS } from "@/lib/seo/page-thresholds";
 
 const SITE_URL = "https://jobreadyke.co.ke";
@@ -8,6 +8,7 @@ const SITE_URL = "https://jobreadyke.co.ke";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  try {
   const [
     categoriesWithSubs,
     counties,
@@ -26,58 +27,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           select: { slug: true },
         },
       },
-    }),
+    }).catch(() => []),
     prisma.county.findMany({
       where: { active: true },
       select: { slug: true, name: true },
-    }),
+    }).catch(() => []),
     prisma.listing.findMany({
       where: { status: "ACTIVE" },
       select: { slug: true, updatedAt: true },
       orderBy: { createdAt: "desc" },
       take: 1000,
-    }),
+    }).catch(() => []),
     prisma.jobUpdate.findMany({
       where: { status: "PUBLISHED" },
       select: { slug: true, updatedAt: true },
       orderBy: { createdAt: "desc" },
       take: 200,
-    }),
+    }).catch(() => []),
     // Get counts for all category × county combos to filter thin pages
     prisma.listing.groupBy({
       by: ["categoryId", "countyId"],
       where: { status: "ACTIVE" },
       _count: true,
-    }),
+    }).catch(() => []),
     // Get counts for all opportunity × county combos to filter thin pages
     prisma.listing.groupBy({
       by: ["opportunityType", "countyId"],
       where: { status: "ACTIVE", opportunityType: { not: null } },
       _count: true,
-    }),
+    }).catch(() => []),
   ]);
 
-  // Build lookup maps for combo counts
-  const catCountyCountMap = new Map<string, number>();
-  for (const row of categoryCountyCounts) {
-    catCountyCountMap.set(`${row.categoryId}-${row.countyId}`, row._count);
-  }
-
-  const oppCountyCountMap = new Map<string, number>();
-  for (const row of opportunityCountyCounts) {
-    oppCountyCountMap.set(`${row.opportunityType}-${row.countyId}`, row._count);
-  }
-
   // Fetch county IDs for slug lookup
-  const allCounties = await prisma.county.findMany({
-    select: { id: true, slug: true },
-  });
+  const allCounties = await prisma.county
+    .findMany({ select: { id: true, slug: true } })
+    .catch(() => []);
   const countyIdMap = new Map(allCounties.map((c) => [c.id, c.slug]));
 
   // Fetch category IDs for slug lookup
-  const allCategories = await prisma.category.findMany({
-    select: { id: true, slug: true },
-  });
+  const allCategories = await prisma.category
+    .findMany({ select: { id: true, slug: true } })
+    .catch(() => []);
   const catIdMap = new Map(allCategories.map((c) => [c.id, c.slug]));
 
   const now = new Date();
@@ -142,7 +132,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // 6. Category × County combo pages — ONLY include if above threshold (≥3 listings)
-  // Use groupBy results directly (they already have categoryId + countyId)
   const catCountyPages: MetadataRoute.Sitemap = [];
   for (const row of categoryCountyCounts) {
     if (row._count >= catCountyThreshold && row.categoryId && row.countyId) {
@@ -204,4 +193,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...jobPages,
     ...updatePages,
   ];
+  } catch {
+    // Fallback: return static pages only if DB queries fail
+    const now = new Date();
+    return [
+      { url: SITE_URL, lastModified: now, changeFrequency: "daily", priority: 1.0 },
+      { url: `${SITE_URL}/jobs`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    ];
+  }
 }
