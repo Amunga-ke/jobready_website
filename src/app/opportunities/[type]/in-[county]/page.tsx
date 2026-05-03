@@ -1,63 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
 import { OPPORTUNITY_TYPES, KE_COUNTIES, slugifyCounty, getCountyBySlug } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
-import { formatDateShortUTC } from "@/lib/format-date";
-import { listingToJob } from "@/lib/transforms";
-import type { Job } from "@/types";
-
-async function getOpportunityCountByCounty(typeSlug: string, countySlug: string): Promise<number> {
-  const countyRecord = await prisma.county
-    .findUnique({
-      where: { slug: countySlug },
-      select: { id: true },
-    })
-    .catch(() => null);
-  if (!countyRecord) return 0;
-
-  return prisma.listing
-    .count({
-      where: {
-        status: "ACTIVE",
-        opportunityType: typeSlug.toUpperCase().replace(/-/g, "_"),
-        countyId: countyRecord.id,
-      },
-    })
-    .catch(() => 0);
-}
-
-async function getOpportunitiesByCounty(typeSlug: string, countySlug: string, limit = 20) {
-  const countyRecord = await prisma.county
-    .findUnique({
-      where: { slug: countySlug },
-      select: { id: true },
-    })
-    .catch(() => null);
-  if (!countyRecord) return { jobs: [] as Job[], count: 0 };
-
-  const oppType = typeSlug.toUpperCase().replace(/-/g, "_");
-  const [listings, count] = await Promise.all([
-    prisma.listing
-      .findMany({
-        where: { status: "ACTIVE", opportunityType: oppType, countyId: countyRecord.id },
-        include: { company: true, category: true, subcategory: true, county: true, tags: { include: { tag: true } } },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-      })
-      .catch(() => []),
-    prisma.listing
-      .count({
-        where: { status: "ACTIVE", opportunityType: oppType, countyId: countyRecord.id },
-      })
-      .catch(() => 0),
-  ]);
-
-  return { jobs: listings.map(listingToJob), count };
-}
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -66,34 +14,47 @@ export async function generateMetadata({
 }: {
   params: Promise<{ type: string; county: string }>;
 }): Promise<Metadata> {
-  const { type: typeSlug, county: countySlug } = await params;
-  const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
-  const county = getCountyBySlug(countySlug);
-  if (!opp || !county) return { title: "Not Found | JobReady" };
+  try {
+    const { type: typeSlug, county: countySlug } = await params;
+    const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
+    const county = getCountyBySlug(countySlug);
+    if (!opp || !county) return { title: "Not Found | JobReady" };
 
-  const count = await getOpportunityCountByCounty(typeSlug, countySlug);
-  const robots = getRobotsMeta(count, "OPP_COUNTY" as SeoTier);
+    const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
+    const count = await prisma.listing
+      .count({
+        where: {
+          status: "ACTIVE",
+          opportunityType: dbType,
+          countyName: county,
+        },
+      })
+      .catch(() => 0);
+    const robots = getRobotsMeta(count, "OPP_COUNTY" as SeoTier);
 
-  return {
-    title: `${opp.label} in ${county}, Kenya${count > 0 ? ` (${count} Openings)` : ""} | JobReady`,
-    description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya. Application details and deadlines on JobReady.`,
-    robots,
-    alternates: {
-      canonical: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`,
-    },
-    openGraph: {
-      title: `${opp.label} in ${county} | JobReady`,
-      description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`,
-      url: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`,
-      type: "website",
-      siteName: "JobReady",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${opp.label} in ${county} | JobReady`,
-      description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`,
-    },
-  };
+    return {
+      title: `${opp.label} in ${county}, Kenya${count > 0 ? ` (${count} Openings)` : ""} | JobReady`,
+      description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya. Application details and deadlines on JobReady.`,
+      robots,
+      alternates: {
+        canonical: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`,
+      },
+      openGraph: {
+        title: `${opp.label} in ${county} | JobReady`,
+        description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`,
+        url: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`,
+        type: "website",
+        siteName: "JobReady",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${opp.label} in ${county} | JobReady`,
+        description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`,
+      },
+    };
+  } catch {
+    return { title: "Not Found | JobReady" };
+  }
 }
 
 // No generateStaticParams — page is force-dynamic
@@ -103,106 +64,163 @@ export default async function OpportunityCountyPage({
 }: {
   params: Promise<{ type: string; county: string }>;
 }) {
-  const { type: typeSlug, county: countySlug } = await params;
-  const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
-  const county = getCountyBySlug(countySlug);
+  try {
+    const { type: typeSlug, county: countySlug } = await params;
+    const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
+    const county = getCountyBySlug(countySlug);
 
-  if (!opp || !county) notFound();
+    if (!opp || !county) notFound();
 
-  const oppResult = await getOpportunitiesByCounty(typeSlug, countySlug, 20);
-  const count = oppResult.count;
-  const oppJobs = oppResult.jobs;
-  const nearby = KE_COUNTIES.slice(0, 8) as unknown as string[];
-  const otherTypes = OPPORTUNITY_TYPES.filter((t) => t.slug !== typeSlug).slice(0, 8);
+    const dbType = typeSlug.toUpperCase().replace(/-/g, "_");
 
-  return (
-    <main className="bg-surface">
-      <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
-        <SeoPageHeader
-          breadcrumbs={[
-            { label: "Home", href: "/" },
-            { label: "Opportunities", href: "/opportunities" },
-            { label: opp.label, href: `/opportunities/${typeSlug}` },
-            { label: county, href: `/jobs/in-${countySlug}` },
-          ]}
-          title={`${opp.label} in ${county}`}
-          description={`Browse ${opp.label.toLowerCase()} opportunities available in ${county}, Kenya.`}
-          count={count || undefined}
-        />
+    // Fetch listings and count using countyName (text match) instead of countyId
+    // This avoids depending on the DB County table having a matching slug
+    const [listings, count] = await Promise.all([
+      prisma.listing
+        .findMany({
+          where: {
+            status: "ACTIVE",
+            opportunityType: dbType,
+            countyName: county,
+          },
+          include: {
+            company: true,
+            category: true,
+            subcategory: true,
+            county: true,
+            tags: { include: { tag: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        })
+        .catch(() => []),
+      prisma.listing
+        .count({
+          where: {
+            status: "ACTIVE",
+            opportunityType: dbType,
+            countyName: county,
+          },
+        })
+        .catch(() => 0),
+    ]);
 
-        {oppJobs.length > 0 ? (
-          <div className="mb-10">
-            <p className="text-[14px] text-muted mb-4">
-              Showing {count} {opp.label.toLowerCase()} opportunities in {county}.
-            </p>
-            <div className="space-y-0 divide-y divide-subtle">
-              {oppJobs.map((job) => (
-                <JobRowClickable
-                  key={job.id}
-                  slug={job.slug}
-                  className="flex items-center justify-between py-3 group cursor-pointer rounded-lg hover:bg-white/60 -mx-2 px-2 transition-colors"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium group-hover:text-accent transition-colors leading-snug truncate">
-                      {job.title}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[12px] text-muted">{job.companyName}</span>
-                      {job.location && (
-                        <>
-                          <span className="text-divider">·</span>
-                          <span className="text-[12px] text-muted">{job.location}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 ml-4 shrink-0">
-                    {job.deadline && (
-                      <span className="font-mono text-[11px] text-muted tabular-nums">
-                        {formatDateShortUTC(job.deadline)}
-                      </span>
-                    )}
-                    <svg
-                      className="w-4 h-4 text-muted/40 group-hover:text-accent transition-colors"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+    const nearby = KE_COUNTIES.slice(0, 8) as unknown as string[];
+    const otherTypes = OPPORTUNITY_TYPES.filter((t) => t.slug !== typeSlug).slice(0, 8);
+
+    return (
+      <main className="bg-surface">
+        <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
+          <SeoPageHeader
+            breadcrumbs={[
+              { label: "Home", href: "/" },
+              { label: "Opportunities", href: "/opportunities" },
+              { label: opp.label, href: `/opportunities/${typeSlug}` },
+              { label: county, href: `/opportunities/${typeSlug}/in-${countySlug}` },
+            ]}
+            title={`${opp.label} in ${county}`}
+            description={`Browse ${opp.label.toLowerCase()} opportunities available in ${county}, Kenya.`}
+            count={count || undefined}
+          />
+
+          {listings.length > 0 ? (
+            <div className="mb-10">
+              <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest mb-1">
+                <div className="col-span-5">Position</div>
+                <div className="col-span-3">Company</div>
+                <div className="col-span-2">Type</div>
+                <div className="col-span-2 text-right">Deadline</div>
+              </div>
+              <div className="divide-y divide-subtle">
+                {listings.map((job) => {
+                  const dl = job.deadline
+                    ? Math.ceil(
+                        (job.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                      )
+                    : null;
+                  const urgent = dl !== null && dl <= 3 && dl > 0;
+                  return (
+                    <JobRowClickable
+                      key={job.id}
+                      slug={job.slug}
+                      className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </JobRowClickable>
+                      <div className="col-span-12 sm:col-span-5 min-w-0">
+                        <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
+                          {job.title}
+                        </p>
+                        <div className="sm:hidden flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] text-muted">{job.company?.name || ""}</span>
+                          <span className="text-[11px] text-subtle">&middot;</span>
+                          <span className="text-[11px] text-muted">{job.location || ""}</span>
+                        </div>
+                      </div>
+                      <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">
+                        {job.company?.name || ""}
+                      </div>
+                      <div className="col-span-6 sm:col-span-2 flex items-center">
+                        <span className="text-[11px] text-muted">
+                          {job.employmentType || job.listingType}
+                        </span>
+                      </div>
+                      <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
+                        {dl !== null ? (
+                          <span
+                            className={`font-mono text-[12px] font-medium tabular-nums ${
+                              dl <= 0
+                                ? "text-muted/40"
+                                : urgent
+                                ? "text-accent"
+                                : "text-muted"
+                            }`}
+                          >
+                            {dl <= 0 ? "Closed" : `${dl}d left`}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-muted/50">&mdash;</span>
+                        )}
+                      </div>
+                    </JobRowClickable>
+                  );
+                })}
+              </div>
+              {count > 20 && (
+                <p className="text-[13px] text-muted mt-4">
+                  Showing 20 of {count} {opp.label.toLowerCase()} opportunities in {county}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="mb-10">
+              <RichFallback
+                county={county}
+                listingCount={count}
+                nearbyCounties={nearby}
+              />
+            </div>
+          )}
+
+          {/* Other opportunity types in this county */}
+          <div>
+            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+              Other Opportunities in {county}
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {otherTypes.map((t) => (
+                <Link
+                  key={t.slug}
+                  href={`/opportunities/${t.slug}/in-${countySlug}`}
+                  className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-100 transition-colors"
+                >
+                  {t.label}
+                </Link>
               ))}
             </div>
           </div>
-        ) : (
-          <div className="mb-10">
-            <RichFallback
-              county={county}
-              listingCount={count}
-              nearbyCounties={nearby}
-            />
-          </div>
-        )}
-
-        {/* Other opportunity types in this county */}
-        <div>
-          <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
-            Other Opportunities in {county}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {otherTypes.map((t) => (
-              <Link
-                key={t.slug}
-                href={`/opportunities/${t.slug}/in-${countySlug}`}
-                className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-100 transition-colors"
-              >
-                {t.label}
-              </Link>
-            ))}
-          </div>
         </div>
-      </div>
-    </main>
-  );
+      </main>
+    );
+  } catch {
+    notFound();
+  }
 }
