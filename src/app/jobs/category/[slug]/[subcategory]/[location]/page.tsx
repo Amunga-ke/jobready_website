@@ -39,7 +39,7 @@ export async function generateMetadata({
 
     const count = await prisma.listing
       .count({
-        where: { subcategoryId: sub.id, status: "ACTIVE", countyName: county },
+        where: { subcategoryId: sub.id, status: "ACTIVE", county: county },
       })
       .catch(() => 0);
 
@@ -83,18 +83,18 @@ export default async function SubcategoryCountyPage({
     const [listings, countiesWithCounts] = await Promise.all([
       prisma.listing
         .findMany({
-          where: { subcategoryId: sub.id, status: "ACTIVE", countyName: county },
+          where: { subcategoryId: sub.id, status: "ACTIVE", county: county },
           include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
           orderBy: { createdAt: "desc" },
           take: 20,
         })
         .catch(() => []),
-      prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
-        SELECT l.countyName, COUNT(*) as _count
+      prisma.$queryRaw<Array<{ county: string; _count: bigint }>>`
+        SELECT l.county, COUNT(*) as _count
         FROM Listing l
         WHERE l.status = 'ACTIVE' AND l.subcategoryId = ${sub.id}
-          AND l.countyName IS NOT NULL AND l.countyName != ''
-        GROUP BY l.countyName
+          AND l.county IS NOT NULL AND l.county != ''
+        GROUP BY l.county
         ORDER BY _count DESC
         LIMIT 15
       `.catch(() => []),
@@ -190,13 +190,13 @@ export default async function SubcategoryCountyPage({
               </h2>
               <div className="flex flex-wrap gap-2">
                 {countiesWithCounts.map((c) => {
-                  const cSlug = c.countyName
+                  const cSlug = c.county
                     .toLowerCase()
                     .replace(/[^a-z0-9]+/g, "-")
                     .replace(/^-|-$/g, "");
                   return (
                     <Link
-                      key={c.countyName}
+                      key={c.county}
                       href={`/jobs/category/${slug}/${subSlug}/in-${cSlug}`}
                       className={`text-[12px] font-medium px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition-colors ${
                         cSlug === countySlug
@@ -204,7 +204,7 @@ export default async function SubcategoryCountyPage({
                           : "bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink"
                       }`}
                     >
-                      {c.countyName}
+                      {c.county}
                       <span className={`text-[10px] font-mono ${cSlug === countySlug ? "text-white/80" : "text-accent"}`}>
                         {Number(c._count)}
                       </span>

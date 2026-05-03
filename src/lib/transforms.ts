@@ -20,8 +20,8 @@ export function listingToJob(
     companyName: listing.company?.name ?? "Unknown",
     companyLogo: listing.company?.logo ?? null,
     companyVerified: listing.company?.verified ?? false,
-    location: listing.location,
-    county: listing.countyName,
+    location: listing.town,
+    county: listing.county,
     category: listing.category?.name
       ?? (listing.listingType === "JOB"
         ? "Job"

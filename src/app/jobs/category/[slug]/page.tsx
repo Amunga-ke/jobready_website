@@ -109,12 +109,12 @@ export default async function CategoryPage({
       orderBy: { createdAt: "desc" },
       take: 20,
     }).catch(() => []),
-    prisma.$queryRaw<Array<{ countyName: string; _count: bigint }>>`
-      SELECT l.countyName, COUNT(*) as _count
+    prisma.$queryRaw<Array<{ county: string; _count: bigint }>>`
+      SELECT l.county, COUNT(*) as _count
       FROM Listing l
       WHERE l.status = 'ACTIVE' AND l.categoryId = ${dbCategory.id}
-        AND l.countyName IS NOT NULL AND l.countyName != ''
-      GROUP BY l.countyName
+        AND l.county IS NOT NULL AND l.county != ''
+      GROUP BY l.county
       ORDER BY _count DESC
       LIMIT 15
     `.catch(() => []),
@@ -265,7 +265,7 @@ export default async function CategoryPage({
         {(() => {
           const countyCounts = new Map<string, number>();
           for (const c of countiesWithCounts) {
-            countyCounts.set(c.countyName, Number(c._count));
+            countyCounts.set(c.county, Number(c._count));
           }
           const sorted = [...KE_COUNTIES].sort((a, b) => {
             const ca = countyCounts.get(a) || 0;
