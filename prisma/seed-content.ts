@@ -872,7 +872,6 @@ async function seedListings(companyMap: Map<string, string>) {
         workMode: listing.workMode,
         salaryMin: listing.salaryMin ?? null,
         salaryMax: listing.salaryMax ?? null,
-        salaryCurrency: "KES",
         salaryPeriod: listing.salaryPeriod || null,
         status: "ACTIVE",
         featured: listing.featured,

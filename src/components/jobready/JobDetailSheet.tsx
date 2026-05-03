@@ -80,7 +80,7 @@ function SalaryBlock({ job }: { job: Job }) {
       </p>
       {hasSalary ? (
         <p className="text-sm font-semibold text-ink">
-          {job.salaryCurrency || "KES"}{" "}
+          KES{" "}
           {job.salaryMin?.toLocaleString()} – {job.salaryMax?.toLocaleString()}
           {job.salaryPeriod && (
             <span className="font-normal text-muted"> / {job.salaryPeriod}</span>
@@ -91,7 +91,7 @@ function SalaryBlock({ job }: { job: Job }) {
           <p className="text-sm font-medium text-ink/60">
             {job.predictedSalary || "Not disclosed"}
           </p>
-          {job.isPredictedSalary && (
+          {job.predictedSalary && (
             <p className="text-[11px] text-muted mt-0.5">
               Estimated based on similar roles in {job.county || job.location}
             </p>

@@ -36,7 +36,6 @@ interface RecentSavedJob {
     employmentType: string;
     salaryMin: number | null;
     salaryMax: number | null;
-    salaryCurrency: string;
   };
   savedAt: string;
 }

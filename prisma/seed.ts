@@ -993,7 +993,6 @@ async function main() {
       industry: c.industry,
       verified: c.verified,
       county: c.county,
-      country: "Kenya",
     })),
   });
   const dbCompanies = await prisma.company.findMany();
@@ -1035,8 +1034,6 @@ async function main() {
       deadline = new Date(t.deadline);
     }
 
-    const isUrgent = deadline ? (deadline.getTime() - Date.now()) < 48 * 60 * 60 * 1000 : false;
-
     listingRows.push({
       slug,
       title: t.title,
@@ -1052,17 +1049,14 @@ async function main() {
       location: t.location,
       countyId,
       countyName: t.countyName,
-      country: "Kenya",
       employmentType: t.employmentType,
       experienceLevel: t.experienceLevel,
       workMode: t.workMode,
       salaryMin: t.salaryMin,
       salaryMax: t.salaryMax,
-      salaryCurrency: "KES",
       salaryPeriod: t.salaryPeriod || null,
       status: "ACTIVE",
       featured: t.featured,
-      isUrgent,
       applicationUrl: t.applicationUrl || null,
       applyEmail: t.applyEmail || null,
       deadline,

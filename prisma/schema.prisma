@@ -110,7 +110,6 @@ model Listing {
   countyId        String?      @db.VarChar(64)
   county          County?      @relation(fields: [countyId], references: [id])
   countyName      String       @default("") @db.VarChar(100)
-  country         String       @default("Kenya") @db.VarChar(100)
 
   // Employment details
   employmentType  String       @default("Full-time") @db.VarChar(20)
@@ -120,17 +119,14 @@ model Listing {
   // Salary
   salaryMin       Int?
   salaryMax       Int?
-  salaryCurrency  String       @default("KES") @db.VarChar(10)
   salaryPeriod    String?      @db.VarChar(10)
 
   // AI-predicted salary (shown when salary not disclosed)
   predictedSalary  String?     @db.VarChar(100)
-  isPredictedSalary Boolean @default(false)
 
   // Status & visibility
   status          String       @default("ACTIVE") @db.VarChar(20)
   featured        Boolean      @default(false)
-  isUrgent        Boolean      @default(false)
 
   // Application
   applicationUrl  String?      @db.VarChar(500)
