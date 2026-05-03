@@ -6,8 +6,6 @@ import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getOpportunityIntro } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
-import { formatDateShortUTC } from "@/lib/format-date";
-import { listingToJob } from "@/lib/transforms";
 import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +35,7 @@ async function getOpportunities(typeSlug: string, limit = 20) {
       .catch(() => 0),
   ]);
 
-  return { jobs: listings.map(listingToJob), count };
+  return { listings, count };
 }
 
 export async function generateMetadata({
@@ -96,7 +94,7 @@ export default async function OpportunityTypePage({
 
     const oppResult = await getOpportunities(typeSlug, 20);
     const count = oppResult.count;
-    const oppJobs = oppResult.jobs;
+    const listings = oppResult.listings;
     const nearbyCounties = KE_COUNTIES.slice(0, 8) as unknown as string[];
 
     return (
@@ -114,50 +112,72 @@ export default async function OpportunityTypePage({
           />
 
           {/* Listings or fallback */}
-          {oppJobs.length > 0 ? (
+          {listings.length > 0 ? (
             <div className="mb-10">
-              <p className="text-[14px] text-muted mb-4">
-                Showing {count} {opp.label.toLowerCase()} opportunities.
-              </p>
-              <div className="space-y-0 divide-y divide-subtle">
-                {oppJobs.map((job) => (
-                  <JobRowClickable
-                    key={job.id}
-                    slug={job.slug}
-                    className="flex items-center justify-between py-3 group cursor-pointer rounded-lg hover:bg-white/60 -mx-2 px-2 transition-colors"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium group-hover:text-accent transition-colors leading-snug truncate">
-                        {job.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[12px] text-muted">{job.companyName}</span>
-                        {job.location && (
-                          <>
-                            <span className="text-divider">·</span>
-                            <span className="text-[12px] text-muted">{job.location}</span>
-                          </>
+              <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest mb-1">
+                <div className="col-span-5">Position</div>
+                <div className="col-span-3">Company</div>
+                <div className="col-span-2">Type</div>
+                <div className="col-span-2 text-right">Deadline</div>
+              </div>
+              <div className="divide-y divide-subtle">
+                {listings.map((job) => {
+                  const dl = job.deadline
+                    ? Math.ceil(
+                        (job.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                      )
+                    : null;
+                  const urgent = dl !== null && dl <= 3 && dl > 0;
+                  return (
+                    <JobRowClickable
+                      key={job.id}
+                      slug={job.slug}
+                      className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors"
+                    >
+                      <div className="col-span-12 sm:col-span-5 min-w-0">
+                        <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
+                          {job.title}
+                        </p>
+                        <div className="sm:hidden flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] text-muted">{job.company?.name || ""}</span>
+                          <span className="text-[11px] text-subtle">&middot;</span>
+                          <span className="text-[11px] text-muted">{job.location || ""}</span>
+                        </div>
+                      </div>
+                      <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">
+                        {job.company?.name || ""}
+                      </div>
+                      <div className="col-span-6 sm:col-span-2 flex items-center">
+                        <span className="text-[11px] text-muted">
+                          {job.employmentType || job.listingType}
+                        </span>
+                      </div>
+                      <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
+                        {dl !== null ? (
+                          <span
+                            className={`font-mono text-[12px] font-medium tabular-nums ${
+                              dl <= 0
+                                ? "text-muted/40"
+                                : urgent
+                                ? "text-accent"
+                                : "text-muted"
+                            }`}
+                          >
+                            {dl <= 0 ? "Closed" : `${dl}d left`}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-muted/50">&mdash;</span>
                         )}
                       </div>
-                    </div>
-                    <div className="flex items-center gap-3 ml-4 shrink-0">
-                      {job.deadline && (
-                        <span className="font-mono text-[11px] text-muted tabular-nums">
-                          {formatDateShortUTC(job.deadline)}
-                        </span>
-                      )}
-                      <svg
-                        className="w-4 h-4 text-muted/40 group-hover:text-accent transition-colors"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </JobRowClickable>
-                ))}
+                    </JobRowClickable>
+                  );
+                })}
               </div>
+              {count > 20 && (
+                <p className="text-[13px] text-muted mt-4">
+                  Showing 20 of {count} {opp.label.toLowerCase()} opportunities
+                </p>
+              )}
             </div>
           ) : (
             <div className="mb-10">
