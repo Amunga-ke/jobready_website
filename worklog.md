@@ -487,3 +487,31 @@ Stage Summary:
 - API Routes: DONE (15 endpoints)
 - SaveJobButton: DONE (DB-backed for auth users, localStorage for guests)
 - Test Users: seeker@test.com / employer@test.com (password: password123)
+---
+Task ID: 15
+Agent: Main Agent
+Task: Fix 6 UI/UX bugs — DB categories, broken APIs, Prisma search, dashboard layout
+
+Work Log:
+- Analyzed all 6 reported issues from user feedback
+- Dashboard layout: ALREADY FIXED — PublicLayout correctly hides Navbar/Footer on /dashboard/* and /auth/*
+- /jobs page categories: ALREADY using DB via prisma.category.findMany()
+- Job counts on county/related categories: ALREADY showing counts
+- Fix companyName Prisma bug: data.ts getJobs() used companyName (non-existent field), changed to company: { name: { contains: q } }
+- Fix /api/categories: completely rewritten — was using old schema (parentId, isActive, type), now uses current Category model
+- Fix /api/locations: completely rewritten — was using non-existent Location model, now uses County model
+- Fix /jobs/in-[county] page: removed generateStaticParams (was stale static), added force-dynamic, replaced hardcoded JOB_CATEGORIES with DB query including per-county job counts
+- Fix dashboard alerts page: replaced hardcoded JOB_CATEGORIES with fetch from /api/categories endpoint
+- Re-seeded database: 9 categories, 155 subcategories, 47 counties, 82 tags, 33 companies, 91 listings
+- Build: PASSES (0 errors, 0 warnings)
+- Pushed to GitHub: commit 4eaed7f
+
+Stage Summary:
+- Prisma search bug: FIXED (company relation query)
+- Categories API: FIXED (matches current schema)
+- Locations API: FIXED (uses County model)
+- County pages: FIXED (DB categories with job counts, force-dynamic)
+- Dashboard alerts: FIXED (fetches from /api/categories)
+- Database: RE-SEEDED (91 listings, all lookup tables populated)
+- Build: PASSES
+- Commit: 4eaed7f -> https://github.com/Amunga-ke/jobready_website.git
