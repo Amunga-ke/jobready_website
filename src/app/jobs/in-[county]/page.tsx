@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { KE_COUNTIES, slugifyCounty, getCountyBySlug } from "@/lib/constants";
+import { KE_COUNTIES, slugifyCounty, JOB_CATEGORIES, getCountyBySlug } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
-import { getCountyIntro, getNearbyCounties } from "@/lib/seo/fallback-content";
+import { getCountyIntro, getNearbyCounties, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { getJobCountByCounty, getJobsByCounty } from "@/lib/data";
-import prisma from "@/lib/prisma";
-
-export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -46,6 +43,12 @@ export async function generateMetadata({
   };
 }
 
+export async function generateStaticParams() {
+  return KE_COUNTIES.map((county) => ({
+    county: slugifyCounty(county),
+  }));
+}
+
 export default async function CountyPage({
   params,
 }: {
@@ -56,37 +59,13 @@ export default async function CountyPage({
 
   if (!countyName) notFound();
 
-  // Look up county record for ID-based queries
-  const countyRecord = await prisma.county.findUnique({
-    where: { slug: countySlug },
-    select: { id: true },
-  });
-
-  // Fetch jobs, nearby counties, and DB categories with per-county job counts
-  const [countResult, nearby, dbCategories] = await Promise.all([
+  const [countResult, nearby, relatedCategories] = await Promise.all([
     getJobsByCounty(countySlug, 20),
     Promise.resolve(getNearbyCounties(countyName)),
-    countyRecord
-      ? prisma.category.findMany({
-          where: { active: true },
-          orderBy: { sortOrder: "asc" },
-          include: {
-            _count: {
-              select: {
-                listings: {
-                  where: { status: "ACTIVE", countyId: countyRecord.id },
-                },
-              },
-            },
-          },
-        })
-      : Promise.resolve([]),
+    Promise.resolve(JOB_CATEGORIES.slice(0, 8)),
   ]);
   const count = countResult.count;
   const countyJobs = countResult.jobs;
-  const relatedCategories = dbCategories
-    .filter((c) => c._count.listings > 0)
-    .slice(0, 8);
 
   return (
     <main className="bg-surface">
@@ -114,10 +93,7 @@ export default async function CountyPage({
             <div className="divide-y divide-subtle">
               {countyJobs.map((job) => {
                 const dl = job.deadline
-                  ? Math.ceil(
-                      (new Date(job.deadline).getTime() - Date.now()) /
-                        (1000 * 60 * 60 * 24)
-                    )
+                  ? Math.ceil((new Date(job.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
                   : null;
                 const urgent = dl !== null && dl <= 3 && dl > 0;
                 return (
@@ -131,13 +107,9 @@ export default async function CountyPage({
                         {job.title}
                       </p>
                       <div className="sm:hidden flex items-center gap-2 mt-0.5">
-                        <span className="text-[11px] text-muted">
-                          {job.companyName}
-                        </span>
+                        <span className="text-[11px] text-muted">{job.companyName}</span>
                         <span className="text-[11px] text-subtle">·</span>
-                        <span className="text-[11px] text-muted">
-                          {job.location}
-                        </span>
+                        <span className="text-[11px] text-muted">{job.location}</span>
                       </div>
                     </div>
                     <div className="hidden sm:block sm:col-span-3 text-[12px] text-muted truncate">
@@ -145,24 +117,12 @@ export default async function CountyPage({
                     </div>
                     <div className="col-span-6 sm:col-span-2 flex items-center">
                       <span className="text-[11px] text-muted">
-                        {job.listingType === "GOVERNMENT"
-                          ? "Gov"
-                          : job.listingType === "CASUAL"
-                          ? "Casual"
-                          : job.employmentType || "Job"}
+                        {job.listingType === "GOVERNMENT" ? "Gov" : job.listingType === "CASUAL" ? "Casual" : job.employmentType || "Job"}
                       </span>
                     </div>
                     <div className="col-span-6 sm:col-span-2 flex sm:justify-end items-center">
                       {dl !== null ? (
-                        <span
-                          className={`font-mono text-[12px] font-medium tabular-nums ${
-                            dl <= 0
-                              ? "text-muted/40"
-                              : urgent
-                              ? "text-accent"
-                              : "text-muted"
-                          }`}
-                        >
+                        <span className={`font-mono text-[12px] font-medium tabular-nums ${dl <= 0 ? "text-muted/40" : urgent ? "text-accent" : "text-muted"}`}>
                           {dl <= 0 ? "Closed" : `${dl}d left`}
                         </span>
                       ) : (
@@ -175,7 +135,7 @@ export default async function CountyPage({
             </div>
             {count > 20 && (
               <Link
-                href={`/jobs?county=${countyRecord?.id || countySlug}`}
+                href={`/jobs?county=${countySlug}`}
                 className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors mt-4"
               >
                 View all {count} jobs in {countyName} →
@@ -188,50 +148,34 @@ export default async function CountyPage({
               county={countyName}
               listingCount={count}
               nearbyCounties={nearby}
-              relatedCategories={relatedCategories.map((c) => ({
-                label: c.name,
-                slug: c.slug,
-                value: c.name,
-              }))}
+              relatedCategories={relatedCategories}
             />
           </div>
         )}
 
-        {/* Jobs by category (from DB with counts) */}
+        {/* Jobs by category */}
         <div className="mb-10">
           <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
             Jobs in {countyName} by Category
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {dbCategories.map((cat) => (
+            {JOB_CATEGORIES.slice(0, 12).map((cat) => (
               <Link
-                key={cat.id}
+                key={cat.slug}
                 href={`/jobs/category/${cat.slug}/in-${countySlug}`}
                 className="flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all group"
               >
                 <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink">
-                  {cat.name}
+                  {cat.label}
                 </span>
-                <div className="flex items-center gap-2 shrink-0">
-                  {cat._count.listings > 0 && (
-                    <span className="text-[11px] font-mono text-accent">
-                      {cat._count.listings}
-                    </span>
-                  )}
-                  <svg
-                    className="w-4 h-4 text-muted group-hover:text-accent"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
+                <svg
+                  className="w-4 h-4 text-muted group-hover:text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             ))}
           </div>

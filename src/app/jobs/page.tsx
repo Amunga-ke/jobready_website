@@ -4,7 +4,6 @@ import { getJobs } from "@/lib/data";
 import { formatDateShortUTC } from "@/lib/format-date";
 import JobClickable from "@/components/jobready/JobClickable";
 import { Search, SlidersHorizontal, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
-import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +61,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 
 // ─── Filter pills config ───
 const FILTER_PILLS: { label: string; param: string; value: string }[] = [
+  { label: "All Jobs", param: "", value: "" },
   { label: "Remote", param: "mode", value: "REMOTE" },
   { label: "Full-Time", param: "employment", value: "FULL_TIME" },
   { label: "Part-Time", param: "employment", value: "PART_TIME" },
@@ -71,9 +71,6 @@ const FILTER_PILLS: { label: string; param: string; value: string }[] = [
   { label: "Closing Soon", param: "sort", value: "closing" },
   { label: "Casual", param: "type", value: "CASUAL" },
 ];
-
-// Params that represent filter criteria (not sort, not page, not search)
-const FILTER_PARAM_KEYS = ["mode", "type", "employment", "opportunity", "experience", "govt"];
 
 function deadlineText(job: { deadline?: string | null }): { text: string; urgent: boolean } {
   if (!job.deadline) return { text: "", urgent: false };
@@ -93,15 +90,7 @@ function buildFilterUrl(currentParams: URLSearchParams, remove?: string, add?: {
     url.set(add.key, add.value);
   }
   if (resetPage) url.delete("page");
-  const qs = url.toString();
-  return qs ? `/jobs?${qs}` : "/jobs";
-}
-
-function hasActiveFilters(params: URLSearchParams): boolean {
-  for (const key of FILTER_PARAM_KEYS) {
-    if (params.has(key)) return true;
-  }
-  return params.get("sort") === "closing";
+  return `/jobs?${url.toString()}`;
 }
 
 export default async function JobsPage({
@@ -124,34 +113,24 @@ export default async function JobsPage({
   const sort = typeof params.sort === "string" ? params.sort : "latest";
   const page = Number(params.page) || 1;
 
-  // Fetch jobs and categories in parallel
-  const [{ jobs, total, totalPages }, categoriesWithCounts] = await Promise.all([
-    getJobs({
-      q,
-      category,
-      county,
-      listingType,
-      employmentType,
-      experienceLevel,
-      workMode,
-      governmentLevel,
-      opportunityType,
-      sort,
-      page,
-      limit: 20,
-    }),
-    prisma.category.findMany({
-      where: { active: true },
-      include: { _count: { select: { listings: { where: { status: "ACTIVE" } } } } },
-      orderBy: { name: "asc" },
-    }),
-  ]);
+  const { jobs, total, totalPages } = await getJobs({
+    q,
+    category,
+    county,
+    listingType,
+    employmentType,
+    experienceLevel,
+    workMode,
+    governmentLevel,
+    opportunityType,
+    sort,
+    page,
+    limit: 20,
+  });
 
   const currentUrlParams = new URLSearchParams(
     Object.entries(params).filter(([, v]) => typeof v === "string") as [string, string][]
   );
-
-  const anyFiltersActive = hasActiveFilters(currentUrlParams);
 
   // Build heading text
   let headingText = "All Jobs";
@@ -217,24 +196,26 @@ export default async function JobsPage({
         {/* Filter pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
           <SlidersHorizontal className="w-4 h-4 text-muted shrink-0 mr-1" />
-          {/* "All Jobs" pill — clears all filters */}
-          <Link
-            href={anyFiltersActive ? "/jobs" : undefined}
-            className={`text-[12px] font-medium px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors ${
-              !anyFiltersActive
-                ? "bg-ink text-white border-ink"
-                : "bg-white text-muted border-divider hover:border-ink/30 hover:text-ink"
-            }`}
-          >
-            All Jobs
-          </Link>
           {FILTER_PILLS.map((pill) => {
-            const isActive = currentUrlParams.get(pill.param) === pill.value;
+            const isActive =
+              pill.value === ""
+                ? !workMode && !listingType && !employmentType && !opportunityType && !experienceLevel && sort !== "closing"
+                : currentUrlParams.get(pill.param) === pill.value;
 
-            // If active, clicking untoggles (removes the param)
-            const href = isActive
-              ? buildFilterUrl(currentUrlParams, pill.param)
-              : buildFilterUrl(currentUrlParams, undefined, { key: pill.param, value: pill.value });
+            // All Jobs pill clears everything; active pill toggles off
+            let href: string;
+            if (pill.value === "") {
+              href = "/jobs";
+            } else if (isActive) {
+              // Clicking an active filter pill removes that specific param
+              const url = new URLSearchParams(currentUrlParams);
+              url.delete(pill.param);
+              url.delete("page");
+              const qs = url.toString();
+              href = qs ? `/jobs?${qs}` : "/jobs";
+            } else {
+              href = buildFilterUrl(currentUrlParams, undefined, { key: pill.param, value: pill.value });
+            }
 
             return (
               <Link
@@ -398,39 +379,6 @@ export default async function JobsPage({
           <p className="text-center text-[11px] font-mono text-muted/40 mt-6">
             Showing {((page - 1) * 20) + 1}–{Math.min(page * 20, total)} of {total} jobs
           </p>
-        )}
-
-        {/* ─── Browse by Category ─── */}
-        {categoriesWithCounts.length > 0 && (
-          <section className="mt-14 pt-10 border-t border-divider">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-[15px] font-heading font-semibold text-ink">Browse by Category</h2>
-                <p className="text-[12px] text-muted mt-1">
-                  {categoriesWithCounts.length} categories with active listings
-                </p>
-              </div>
-              <Link href="/jobs" className="text-[12px] text-accent hover:text-accent-dark font-medium transition-colors">
-                View all
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-              {categoriesWithCounts.map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/jobs/category/${cat.slug}`}
-                  className="group flex items-center justify-between px-4 py-3 rounded-lg border border-divider hover:border-accent/30 hover:bg-accent-bg/50 transition-all"
-                >
-                  <span className="text-[13px] font-medium text-ink/80 group-hover:text-ink transition-colors truncate mr-2">
-                    {cat.name}
-                  </span>
-                  <span className="text-[11px] font-mono text-accent shrink-0">
-                    {cat._count.listings}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
         )}
       </div>
     </main>

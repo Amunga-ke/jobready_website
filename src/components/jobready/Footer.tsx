@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Linkedin, Facebook, Instagram } from "lucide-react";
 
 const FOOTER_LINKS = {
@@ -33,9 +30,6 @@ const FOOTER_LINKS = {
 };
 
 export default function Footer() {
-  const pathname = usePathname();
-  if (pathname.startsWith("/dashboard")) return null;
-
   return (
     <footer className="border-t border-divider py-16 bg-surface">
       <div className="max-w-6xl mx-auto px-5">

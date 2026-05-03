@@ -277,7 +277,7 @@ export async function getJobs(params: {
     where.OR = [
       { title: { contains: q } },
       { description: { contains: q } },
-      { company: { name: { contains: q } } },
+      { companyName: { contains: q } },
     ];
   }
   if (category) where.categoryId = category;
