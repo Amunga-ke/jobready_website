@@ -12,7 +12,10 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string; subcategory: string; county: string }>;
 }): Promise<Metadata> {
-  const { slug, subcategory: subSlug, county: countySlug } = await params;
+  try {
+    const { slug, subcategory: subSlug, county: countySlug } = await params;
+
+    if (!countySlug) return { title: "Not Found | JobReady" };
 
   const category = await prisma.category
     .findUnique({ where: { slug } })
@@ -45,12 +48,15 @@ export async function generateMetadata({
   const description = `Find ${count} ${sub.name.toLowerCase()} jobs in ${countyName}, Kenya.`;
 
   return {
-    title,
-    description,
-    alternates: { canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
-    openGraph: { title, description, siteName: "JobReady", type: "website" },
-    twitter: { card: "summary_large_image", title, description },
-  };
+      title,
+      description,
+      alternates: { canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
+      openGraph: { title, description, siteName: "JobReady", type: "website" },
+      twitter: { card: "summary_large_image", title, description },
+    };
+  } catch {
+    return { title: "Not Found | JobReady" };
+  }
 }
 
 export default async function SubcategoryCountyPage({
@@ -58,7 +64,10 @@ export default async function SubcategoryCountyPage({
 }: {
   params: Promise<{ slug: string; subcategory: string; county: string }>;
 }) {
-  const { slug, subcategory: subSlug, county: countySlug } = await params;
+  try {
+    const { slug, subcategory: subSlug, county: countySlug } = await params;
+
+    if (!countySlug) notFound();
 
   // Look up from DB
   const category = await prisma.category
@@ -193,5 +202,8 @@ export default async function SubcategoryCountyPage({
         </div>
       </div>
     </main>
-  );
+    );
+  } catch {
+    notFound();
+  }
 }
