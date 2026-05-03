@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { getCategoryBySlug, slugifyCounty } from "@/lib/constants";
+import { getCategoryBySlug, slugifyCounty, KE_COUNTIES } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCategoryIntro, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
@@ -261,33 +261,53 @@ export default async function CategoryPage({
           </div>
         )}
 
-        {/* Browse by county — only counties that have jobs in this category */}
-        {countiesWithCounts.length > 0 && (
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider">
-                {label} Jobs by County
-              </h2>
+        {/* Browse by county — show all 47 counties, highlight those with listings */}
+        {(() => {
+          const countyCounts = new Map<string, number>();
+          for (const c of countiesWithCounts) {
+            countyCounts.set(c.countyName, Number(c._count));
+          }
+          const sorted = [...KE_COUNTIES].sort((a, b) => {
+            const ca = countyCounts.get(a) || 0;
+            const cb = countyCounts.get(b) || 0;
+            if (ca > 0 && cb > 0) return cb - ca;
+            if (ca > 0) return -1;
+            if (cb > 0) return 1;
+            return a.localeCompare(b);
+          });
+          return (
+            <div className="mb-10">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider">
+                  {label} Jobs by County
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {sorted.map((countyName) => {
+                  const cSlug = slugifyCounty(countyName);
+                  const cCount = countyCounts.get(countyName) || 0;
+                  const hasJobs = cCount > 0;
+                  return (
+                    <Link
+                      key={cSlug}
+                      href={`/jobs/category/${slug}/in-${cSlug}`}
+                      className={`text-[12px] font-medium px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition-colors ${
+                        hasJobs
+                          ? "bg-ink/[0.06] text-ink/80 hover:bg-ink/[0.1] hover:text-ink font-semibold"
+                          : "bg-ink/[0.03] text-ink/50 hover:bg-ink/[0.06] hover:text-ink/70"
+                      }`}
+                    >
+                      {countyName}
+                      {hasJobs && (
+                        <span className="text-[10px] font-mono text-accent">{cCount}</span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {countiesWithCounts.map((c) => {
-                const countySlug = slugifyCounty(c.countyName);
-                return (
-                  <Link
-                    key={countySlug}
-                    href={`/jobs/category/${slug}/in-${countySlug}`}
-                    className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors inline-flex items-center gap-1.5"
-                  >
-                    {c.countyName}
-                    <span className="text-[10px] font-mono text-accent">
-                      {Number(c._count)}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Related categories with real job counts */}
         {relatedCategoriesWithCounts.length > 0 && (

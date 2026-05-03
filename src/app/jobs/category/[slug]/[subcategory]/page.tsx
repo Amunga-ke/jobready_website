@@ -221,35 +221,56 @@ async function CategoryCountyView({
           </div>
         )}
 
-        {/* Other counties with jobs in this category */}
-        {countiesWithCounts.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
-              {category.name} Jobs by County
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {countiesWithCounts.map((c) => {
-                const cSlug = slugifyCounty(c.countyName);
-                return (
-                  <Link
-                    key={c.countyName}
-                    href={`/jobs/category/${slug}/in-${cSlug}`}
-                    className={`text-[12px] font-medium px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition-colors ${
-                      cSlug === countySlug
-                        ? "bg-accent text-white"
-                        : "bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink"
-                    }`}
-                  >
-                    {c.countyName}
-                    <span className={`text-[10px] font-mono ${cSlug === countySlug ? "text-white/80" : "text-accent"}`}>
-                      {Number(c._count)}
-                    </span>
-                  </Link>
-                );
-              })}
+        {/* All counties — highlight those with jobs and mark current */}
+        {(() => {
+          const countyCounts = new Map<string, number>();
+          for (const c of countiesWithCounts) {
+            countyCounts.set(c.countyName, Number(c._count));
+          }
+          const sorted = [...KE_COUNTIES].sort((a, b) => {
+            const ca = countyCounts.get(a) || 0;
+            const cb = countyCounts.get(b) || 0;
+            if (ca > 0 && cb > 0) return cb - ca;
+            if (ca > 0) return -1;
+            if (cb > 0) return 1;
+            return a.localeCompare(b);
+          });
+          return (
+            <div className="mb-10">
+              <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+                {category.name} Jobs by County
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {sorted.map((countyName) => {
+                  const cSlug = slugifyCounty(countyName);
+                  const cCount = countyCounts.get(countyName) || 0;
+                  const isCurrent = cSlug === countySlug;
+                  const hasJobs = cCount > 0;
+                  return (
+                    <Link
+                      key={cSlug}
+                      href={`/jobs/category/${slug}/in-${cSlug}`}
+                      className={`text-[12px] font-medium px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition-colors ${
+                        isCurrent
+                          ? "bg-accent text-white"
+                          : hasJobs
+                          ? "bg-ink/[0.06] text-ink/80 hover:bg-ink/[0.1] hover:text-ink font-semibold"
+                          : "bg-ink/[0.03] text-ink/50 hover:bg-ink/[0.06] hover:text-ink/70"
+                      }`}
+                    >
+                      {countyName}
+                      {hasJobs && (
+                        <span className={`text-[10px] font-mono ${isCurrent ? "text-white/80" : "text-accent"}`}>
+                          {cCount}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Navigation links */}
         <div className="flex flex-wrap gap-3">
@@ -356,32 +377,53 @@ async function SubcategoryView({ slug, subSlug }: { slug: string; subSlug: strin
           </div>
         )}
 
-        {/* Browse by county */}
-        {countiesWithCounts.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
-              {sub.name} Jobs by County
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {countiesWithCounts.map((c) => {
-                const cSlug = c.countyName
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, "-")
-                  .replace(/^-|-$/g, "");
-                return (
-                  <Link
-                    key={c.countyName}
-                    href={`/jobs/category/${slug}/${subSlug}/in-${cSlug}`}
-                    className="text-[12px] font-medium px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 hover:bg-ink/[0.08] hover:text-ink transition-colors inline-flex items-center gap-1.5"
-                  >
-                    {c.countyName}
-                    <span className="text-[10px] font-mono text-accent">{Number(c._count)}</span>
-                  </Link>
-                );
-              })}
+        {/* Browse by county — show all 47 counties, highlight those with listings */}
+        {(() => {
+          // Build a lookup map from DB results
+          const countyCounts = new Map<string, number>();
+          for (const c of countiesWithCounts) {
+            countyCounts.set(c.countyName, Number(c._count));
+          }
+          // Sort: counties with listings first (by count desc), then the rest alphabetically
+          const sorted = [...KE_COUNTIES].sort((a, b) => {
+            const ca = countyCounts.get(a) || 0;
+            const cb = countyCounts.get(b) || 0;
+            if (ca > 0 && cb > 0) return cb - ca;
+            if (ca > 0) return -1;
+            if (cb > 0) return 1;
+            return a.localeCompare(b);
+          });
+          return (
+            <div className="mb-10">
+              <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
+                {sub.name} Jobs by County
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {sorted.map((countyName) => {
+                  const cSlug = slugifyCounty(countyName);
+                  const cCount = countyCounts.get(countyName) || 0;
+                  const hasJobs = cCount > 0;
+                  return (
+                    <Link
+                      key={cSlug}
+                      href={`/jobs/category/${slug}/${subSlug}/in-${cSlug}`}
+                      className={`text-[12px] font-medium px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition-colors ${
+                        hasJobs
+                          ? "bg-ink/[0.06] text-ink/80 hover:bg-ink/[0.1] hover:text-ink font-semibold"
+                          : "bg-ink/[0.03] text-ink/50 hover:bg-ink/[0.06] hover:text-ink/70"
+                      }`}
+                    >
+                      {countyName}
+                      {hasJobs && (
+                        <span className="text-[10px] font-mono text-accent">{cCount}</span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Other subcategories */}
         {siblings.length > 0 && (
