@@ -13,7 +13,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string; subcategory: string }>;
 }): Promise<Metadata> {
-  const { slug, subcategory: subSlug } = await params;
+  try {
+    const { slug, subcategory: subSlug } = await params;
 
   const category = await prisma.category
     .findUnique({ where: { slug } })
@@ -36,13 +37,16 @@ export async function generateMetadata({
   const title = `${sub.name} Jobs in Kenya${count > 0 ? ` (${count})` : ""} | JobReady`;
   const description = `Browse ${count} ${sub.name.toLowerCase()} job openings across Kenya on JobReady.`;
 
-  return {
-    title,
-    description,
-    alternates: { canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}` },
-    openGraph: { title, description, siteName: "JobReady", type: "website" },
-    twitter: { card: "summary_large_image", title, description },
-  };
+    return {
+      title,
+      description,
+      alternates: { canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}` },
+      openGraph: { title, description, siteName: "JobReady", type: "website" },
+      twitter: { card: "summary_large_image", title, description },
+    };
+  } catch {
+    return { title: "Not Found | JobReady" };
+  }
 }
 
 export default async function SubcategoryPage({
@@ -50,7 +54,8 @@ export default async function SubcategoryPage({
 }: {
   params: Promise<{ slug: string; subcategory: string }>;
 }) {
-  const { slug, subcategory: subSlug } = await params;
+  try {
+    const { slug, subcategory: subSlug } = await params;
 
   // Look up category from DB
   const category = await prisma.category
@@ -261,5 +266,8 @@ export default async function SubcategoryPage({
         )}
       </div>
     </main>
-  );
+    );
+  } catch {
+    notFound();
+  }
 }

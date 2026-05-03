@@ -15,7 +15,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  try {
+    const { slug } = await params;
 
   // Look up category from DB first, fall back to hardcoded constants
   const dbCategory = await prisma.category
@@ -55,6 +56,9 @@ export async function generateMetadata({
       description,
     },
   };
+  } catch {
+    return { title: "Not Found | JobReady" };
+  }
 }
 
 // No generateStaticParams — page is force-dynamic, all slugs handled at runtime
@@ -64,7 +68,8 @@ export default async function CategoryPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  try {
+    const { slug } = await params;
 
   // Look up category from DB — this is the source of truth
   const dbCategory = await prisma.category
@@ -317,5 +322,8 @@ export default async function CategoryPage({
         )}
       </div>
     </main>
-  );
+    );
+  } catch {
+    notFound();
+  }
 }

@@ -12,17 +12,20 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string; county: string }>;
 }): Promise<Metadata> {
-  const { slug, county: countySlug } = await params;
+  try {
+    const { slug, county: countySlug } = await params;
 
-  const category = await prisma.category
-    .findUnique({ where: { slug } })
-    .catch(() => null);
-  if (!category) return { title: "Not Found | JobReady" };
+    if (!countySlug) return { title: "Not Found | JobReady" };
 
-  // Derive county name from slug (replace hyphens, title-case)
-  const countyName = countySlug
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    const category = await prisma.category
+      .findUnique({ where: { slug } })
+      .catch(() => null);
+    if (!category) return { title: "Not Found | JobReady" };
+
+    // Derive county name from slug (replace hyphens, title-case)
+    const countyName = countySlug
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
 
   const count = await prisma.listing
     .count({
@@ -38,14 +41,17 @@ export async function generateMetadata({
   const description = `Find ${count} ${category.name.toLowerCase()} jobs in ${countyName}, Kenya.`;
 
   return {
-    title,
-    description,
-    alternates: {
-      canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/in-${countySlug}`,
-    },
-    openGraph: { title, description, siteName: "JobReady", type: "website" },
-    twitter: { card: "summary_large_image", title, description },
-  };
+      title,
+      description,
+      alternates: {
+        canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/in-${countySlug}`,
+      },
+      openGraph: { title, description, siteName: "JobReady", type: "website" },
+      twitter: { card: "summary_large_image", title, description },
+    };
+  } catch {
+    return { title: "Not Found | JobReady" };
+  }
 }
 
 export default async function CategoryCountyPage({
@@ -53,18 +59,21 @@ export default async function CategoryCountyPage({
 }: {
   params: Promise<{ slug: string; county: string }>;
 }) {
-  const { slug, county: countySlug } = await params;
+  try {
+    const { slug, county: countySlug } = await params;
 
-  // Look up from DB
-  const category = await prisma.category
-    .findUnique({ where: { slug } })
-    .catch(() => null);
-  if (!category) notFound();
+    if (!countySlug) notFound();
 
-  // Derive county name from slug
-  const countyName = countySlug
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    // Look up from DB
+    const category = await prisma.category
+      .findUnique({ where: { slug } })
+      .catch(() => null);
+    if (!category) notFound();
+
+    // Derive county name from slug
+    const countyName = countySlug
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
 
   // Fetch secondary data in parallel with error fallbacks
   const [listings, subcategories, countiesWithCounts] = await Promise.all([
@@ -276,5 +285,8 @@ export default async function CategoryCountyPage({
         </div>
       </div>
     </main>
-  );
+    );
+  } catch {
+    notFound();
+  }
 }
