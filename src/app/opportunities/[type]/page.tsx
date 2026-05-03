@@ -44,9 +44,7 @@ export async function generateMetadata({
   };
 }
 
-export async function generateStaticParams() {
-  return OPPORTUNITY_TYPES.map((opp) => ({ type: opp.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function OpportunityTypePage({
   params,

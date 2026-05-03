@@ -84,10 +84,7 @@ export async function generateMetadata({
   };
 }
 
-// Only pre-generate when DB confirms ≥3 listings
-export async function generateStaticParams() {
-  return [];
-}
+export const dynamic = "force-dynamic";
 
 export default async function OpportunityCountyPage({
   params,
