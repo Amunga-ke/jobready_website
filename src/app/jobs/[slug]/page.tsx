@@ -1,10 +1,14 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Clock, Building2, ExternalLink } from "lucide-react";
 import { formatDateUTC } from "@/lib/format-date";
 import { getJobBySlug } from "@/lib/data";
 import ShareButton from "@/components/jobready/ShareButton";
+
+// Next.js route matching: [slug] can catch /jobs/in-{county} before in-[county].
+// Detect the "in-" prefix and redirect to ensure the county route handles it.
+const COUNTY_PREFIX = "in-";
 
 // ─── Dynamic metadata for SEO ───
 export async function generateMetadata({
@@ -14,6 +18,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { slug } = await params;
+
+    // If slug starts with "in-", this should be handled by the county route.
+    // We can't redirect from generateMetadata, so return a generic title.
+    if (slug.startsWith(COUNTY_PREFIX)) {
+      const countySlug = slug.slice(COUNTY_PREFIX.length);
+      return { title: `Jobs in ${countySlug} | JobReady` };
+    }
+
     const job = await getJobBySlug(slug);
     if (!job) return { title: "Job Not Found | JobReady" };
 
@@ -46,7 +58,17 @@ export default async function JobDetailPage({
 }) {
   try {
   const { slug } = await params;
-  const job = await getJobBySlug(slug);
+
+    // If slug starts with "in-", this URL should be handled by the county route.
+    // Redirect to the explicit county URL which Next.js will match correctly
+    // after the [slug] route has already been tried.
+    if (slug.startsWith(COUNTY_PREFIX)) {
+      // We cannot simply redirect to the same URL as it would loop.
+      // Instead, render notFound and let the in-[county] layout handle it.
+      notFound();
+    }
+
+    const job = await getJobBySlug(slug);
 
   if (!job) {
     notFound();
