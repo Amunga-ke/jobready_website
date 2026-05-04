@@ -38,6 +38,17 @@ async function getArticles() {
   return articles;
 }
 
+/* ── Fetch articles by category ── */
+async function getArticlesByCategory(category: string) {
+  const articles = await prisma.article.findMany({
+    where: { status: "PUBLISHED", category },
+    orderBy: { publishedAt: "desc" },
+    take: 50,
+  }).catch(() => []);
+
+  return articles;
+}
+
 /* ── Get category distribution ── */
 async function getCategoryCounts() {
   const rows = await prisma.$queryRaw<Array<{ category: string; _count: bigint }>>`
@@ -60,9 +71,16 @@ function formatDate(date: Date) {
   });
 }
 
-export default async function ArticlesPage() {
+interface ArticlesPageProps {
+  searchParams: Promise<{ category?: string }>;
+}
+
+export default async function ArticlesPage({ searchParams }: ArticlesPageProps) {
+  const params = await searchParams;
+  const activeCategory = params.category ? decodeURIComponent(params.category) : null;
+
   const [articles, categoryCounts] = await Promise.all([
-    getArticles(),
+    activeCategory ? getArticlesByCategory(activeCategory) : getArticles(),
     getCategoryCounts(),
   ]);
 
@@ -78,10 +96,24 @@ export default async function ArticlesPage() {
           breadcrumbs={[
             { label: "Home", href: "/" },
             { label: "Resources", href: "/articles" },
+            ...(activeCategory ? [{ label: activeCategory, href: `/articles?category=${encodeURIComponent(activeCategory)}` }] : []),
           ]}
-          title="Career Resources & Articles"
-          description="Expert career advice for Kenyan job seekers. CV writing, interview tips, salary guides, and professional development strategies to advance your career."
+          title={activeCategory ? `${activeCategory} Articles | JobReady` : "Career Resources & Articles"}
+          description={activeCategory ? `Browse ${activeCategory} articles for Kenyan job seekers.` : "Expert career advice for Kenyan job seekers. CV writing, interview tips, salary guides, and professional development strategies to advance your career."}
         />
+
+        {/* ── Active category indicator ── */}
+        {activeCategory && (
+          <div className="mb-6 flex items-center gap-3">
+            <span className="text-[13px] text-muted">Showing articles in:</span>
+            <span className="text-[13px] font-semibold text-ink bg-accent-bg text-accent px-3 py-1 rounded-lg">
+              {activeCategory}
+            </span>
+            <Link href="/articles" className="text-[12px] text-muted hover:text-ink transition-colors underline">
+              Clear filter
+            </Link>
+          </div>
+        )}
 
         {/* ── Featured articles (hero grid) ── */}
         {featured.length > 0 && (

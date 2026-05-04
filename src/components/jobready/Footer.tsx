@@ -18,8 +18,8 @@ const FOOTER_LINKS = {
   ],
   resources: [
     { label: "Resources", href: "/articles" },
-    { label: "CV Writing", href: "/articles/cv-writing" },
-    { label: "Interview Tips", href: "/articles/interview-tips" },
+    { label: "CV Writing", href: "/articles?category=CV Writing" },
+    { label: "Interview Tips", href: "/articles?category=Interview Tips" },
   ],
   company: [
     { label: "About", href: "/about" },
