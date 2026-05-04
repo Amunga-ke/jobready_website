@@ -82,7 +82,7 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
   },
-  verification: { google: "ca-pub-8031704055036556" },
+  // verification: { google: "YOUR_GOOGLE_SEARCH_CONSOLE_CODE" }, // TODO: Add real GSC verification code
   alternates: { canonical: SITE_URL },
   category: "employment",
 };
@@ -95,6 +95,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
+        {/* Google AdSense auto-ads verification */}
         <meta name="google-adsense-account" content="ca-pub-8031704055036556" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0f172a" />

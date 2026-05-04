@@ -3,7 +3,21 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Service | JobReady",
-  description: "Read the terms and conditions governing the use of JobReady's services.",
+  description:
+    "Read the terms and conditions governing the use of JobReady's job board services, employer accounts, and job listings.",
+  alternates: { canonical: "https://jobreadyke.co.ke/terms" },
+  openGraph: {
+    title: "Terms of Service | JobReady",
+    description: "Terms and conditions for using JobReady's services.",
+    url: "https://jobreadyke.co.ke/terms",
+    siteName: "JobReady",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms of Service | JobReady",
+    description: "Terms and conditions for using JobReady's services.",
+  },
 };
 
 export default function Terms_Page() {

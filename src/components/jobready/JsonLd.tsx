@@ -87,6 +87,7 @@ export function JobPostingJsonLd({
   validThrough,
   employmentType,
   hiringOrganization,
+  companyLogo,
   jobLocation,
   salaryMin,
   salaryMax,
@@ -101,6 +102,7 @@ export function JobPostingJsonLd({
   validThrough?: string | null;
   employmentType?: string | null;
   hiringOrganization: string;
+  companyLogo?: string | null;
   jobLocation: string;
   salaryMin?: number | null;
   salaryMax?: number | null;
@@ -127,7 +129,7 @@ export function JobPostingJsonLd({
         datePosted,
         validThrough: validThrough || undefined,
         employmentType: employmentType ? empMap[employmentType] || "FULL_TIME" : "FULL_TIME",
-        hiringOrganization: { "@type": "Organization", name: hiringOrganization },
+        hiringOrganization: { "@type": "Organization", name: hiringOrganization, ...(companyLogo && { logo: companyLogo }) },
         jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: jobLocation, addressCountry: "KE" } },
         ...(baseSalary && { baseSalary }),
         url,
@@ -201,6 +203,26 @@ export function CollectionPageJsonLd({ name, description, url, numberOfItems }: 
         url,
         isPartOf: { "@type": "WebSite", name: "JobReady", url: "https://jobreadyke.co.ke" },
         ...(numberOfItems !== undefined && { numberOfItems }),
+      }}
+    />
+  );
+}
+
+/** FAQPage — for pages with frequently asked questions */
+export function FAQJsonLd({ faqs }: { faqs: { question: string; answer: string }[] }) {
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: faq.answer,
+          },
+        })),
       }}
     />
   );

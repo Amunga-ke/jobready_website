@@ -6,6 +6,7 @@ import { getGovernmentJobsByLevel } from "@/lib/data";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { formatDateShortUTC } from "@/lib/format-date";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import type { Job } from "@/types";
 import prisma from "@/lib/prisma";
 
@@ -120,6 +121,12 @@ export default async function GovernmentLevelPage({
 
     return (
       <main className="bg-surface">
+        <BreadcrumbJsonLd items={[
+          { name: "Home", url: "https://jobreadyke.co.ke/" },
+          { name: "Government Jobs", url: "https://jobreadyke.co.ke/government" },
+          { name: gov.label, url: `https://jobreadyke.co.ke/government/${level}` },
+        ]} />
+        <CollectionPageJsonLd name={`${gov.label} Jobs`} description={gov.description} url={`https://jobreadyke.co.ke/government/${level}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[

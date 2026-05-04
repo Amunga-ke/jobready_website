@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { KE_COUNTIES, slugifyCounty, PROVINCES } from "@/lib/constants";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
+import { BreadcrumbJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/jobready/JsonLd";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import GovTabs from "./GovTabs";
 import prisma from "@/lib/prisma";
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
     url: "https://jobreadyke.co.ke/government",
     siteName: "JobReady",
     type: "website",
+    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -114,6 +116,8 @@ export default async function GovernmentPage() {
 
   return (
     <main className="bg-surface">
+      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Government Jobs", url: "https://jobreadyke.co.ke/government" }]} />
+      <CollectionPageJsonLd name="Government Jobs in Kenya" description="Browse national, county and state corporation jobs from the Kenya Gazette" url="https://jobreadyke.co.ke/government" numberOfItems={data.total} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[
@@ -226,6 +230,20 @@ export default async function GovernmentPage() {
           </Link>
         </div>
       </div>
+      <FAQJsonLd faqs={[
+        {
+          question: "How do I apply for government jobs in Kenya?",
+          answer: "Check official announcements from the Public Service Commission (PSC) or County Public Service Boards. Prepare your CV, cover letter, and certified copies of certificates. Submit before the deadline. Shortlisted candidates are contacted for interviews."
+        },
+        {
+          question: "Are government job applications free in Kenya?",
+          answer: "Yes, all government job applications in Kenya are free. Never pay anyone to apply for a government position. All applications must comply with Chapter Six of the Constitution on Leadership and Integrity."
+        },
+        {
+          question: "Where are government jobs advertised in Kenya?",
+          answer: "Government jobs are advertised through the Kenya Gazette, Public Service Commission website, County Public Service Board notices, and on job boards like JobReady. National, county, and state corporation positions are all listed."
+        },
+      ]} />
     </main>
   );
 }

@@ -3,7 +3,21 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | JobReady",
-  description: "Learn how JobReady collects, uses, and protects your personal information.",
+  description:
+    "Learn how JobReady collects, uses, and protects your personal information. Our privacy policy covers data handling, cookies, and your rights.",
+  alternates: { canonical: "https://jobreadyke.co.ke/privacy" },
+  openGraph: {
+    title: "Privacy Policy | JobReady",
+    description: "How JobReady handles and protects your personal data.",
+    url: "https://jobreadyke.co.ke/privacy",
+    siteName: "JobReady",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy Policy | JobReady",
+    description: "How JobReady handles and protects your personal data.",
+  },
 };
 
 export default function Privacy_Page() {

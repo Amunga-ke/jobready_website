@@ -53,6 +53,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       url: "https://jobreadyke.co.ke/jobs",
       siteName: "JobReady",
       type: "website",
+      images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
     },
     twitter: {
       card: "summary_large_image",

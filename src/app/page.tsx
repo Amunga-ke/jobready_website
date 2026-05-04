@@ -15,7 +15,7 @@ import CareerResources from '@/components/jobready/CareerResources';
 import Newsletter from '@/components/jobready/Newsletter';
 import StickyNewsletter from '@/components/jobready/StickyNewsletter';
 import AdSlot from '@/components/jobready/AdSlot';
-import { WebSiteJsonLd, BreadcrumbJsonLd } from '@/components/jobready/JsonLd';
+import { WebSiteJsonLd, BreadcrumbJsonLd, FAQJsonLd } from '@/components/jobready/JsonLd';
 import type { Job } from '@/types';
 import type { Category, County } from '@prisma/client';
 import type { Metadata } from 'next';
@@ -121,6 +121,24 @@ export default async function Home() {
       <div className="max-w-4xl mx-auto px-5 pb-8">
         <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
       </div>
+      <FAQJsonLd faqs={[
+        {
+          question: "How do I find a job on JobReady?",
+          answer: "Browse thousands of verified job listings on JobReady by category, location, or keyword. Use the search bar to find specific roles, filter by employment type (full-time, part-time, internship), and apply directly through employer links."
+        },
+        {
+          question: "Is JobReady free for job seekers?",
+          answer: "Yes, JobReady is completely free for job seekers. You can browse, search, and apply for jobs without any charges. We never ask job seekers to pay for job applications."
+        },
+        {
+          question: "What types of jobs are listed on JobReady?",
+          answer: "JobReady lists government jobs, private sector positions, casual and part-time work, internships, scholarships, fellowships, grants, and entry-level roles. Jobs are available across all 47 counties in Kenya including Nairobi, Mombasa, Kisumu, and Nakuru."
+        },
+        {
+          question: "How often are new jobs posted on JobReady?",
+          answer: "New jobs are posted daily on JobReady from verified employers across Kenya. We aggregate listings from government bodies, private companies, NGOs, and international organizations operating in Kenya."
+        },
+      ]} />
     </>
   );
 }

@@ -2,8 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Salary Guide | JobReady",
-  description: "Explore salary benchmarks and compensation insights across industries in Kenya.",
+  title: "Salary Guide — Kenya Salary Benchmarks 2025 | JobReady",
+  description:
+    "Explore salary benchmarks and compensation insights across industries in Kenya. Compare salaries by role, experience, and location.",
+  alternates: { canonical: "https://jobreadyke.co.ke/salary-guide" },
+  openGraph: {
+    title: "Salary Guide — Kenya Salary Benchmarks | JobReady",
+    description: "Salary benchmarks and compensation insights across Kenyan industries.",
+    url: "https://jobreadyke.co.ke/salary-guide",
+    siteName: "JobReady",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Salary Guide | JobReady",
+    description: "Salary benchmarks and compensation insights across Kenyan industries.",
+  },
 };
 
 export default function SalaryGuide_Page() {

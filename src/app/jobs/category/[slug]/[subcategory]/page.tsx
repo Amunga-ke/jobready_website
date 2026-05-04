@@ -6,6 +6,7 @@ import { slugifyCounty, getCountyBySlug, KE_COUNTIES } from "@/lib/constants";
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 
 export const dynamic = "force-dynamic";
 
@@ -157,6 +158,13 @@ async function CategoryCountyView({
 
   return (
     <main className="bg-surface">
+      <BreadcrumbJsonLd items={[
+        { name: "Home", url: "https://jobreadyke.co.ke/" },
+        { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
+        { name: category.name, url: `https://jobreadyke.co.ke/jobs/category/${slug}` },
+        { name: county, url: `https://jobreadyke.co.ke/jobs/category/${slug}/in-${countySlug}` },
+      ]} />
+      <CollectionPageJsonLd name={`${category.name} Jobs in ${county}`} description={`Browse ${category.name.toLowerCase()} job openings in ${county}, Kenya.`} url={`https://jobreadyke.co.ke/jobs/category/${slug}/in-${countySlug}`} numberOfItems={count || undefined} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[
@@ -333,6 +341,13 @@ async function SubcategoryView({ slug, subSlug }: { slug: string; subSlug: strin
 
   return (
     <main className="bg-surface">
+      <BreadcrumbJsonLd items={[
+        { name: "Home", url: "https://jobreadyke.co.ke/" },
+        { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
+        { name: category.name, url: `https://jobreadyke.co.ke/jobs/category/${slug}` },
+        { name: sub.name, url: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}` },
+      ]} />
+      <CollectionPageJsonLd name={`${sub.name} Jobs in Kenya`} description={`Browse ${count} ${sub.name.toLowerCase()} job openings across Kenya.`} url={`https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}`} numberOfItems={count || undefined} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

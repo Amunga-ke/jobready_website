@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import UpdateDetailPage from "./UpdateDetailPage";
+import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
 
 export const dynamic = "force-dynamic";
 
@@ -49,5 +50,14 @@ export default async function UpdateSlugPage({ params }: Props) {
     notFound();
   }
 
-  return <UpdateDetailPage update={update} />;
+  return (
+    <>
+      <BreadcrumbJsonLd items={[
+        { name: "Home", url: "https://jobreadyke.co.ke/" },
+        { name: "Updates", url: "https://jobreadyke.co.ke/updates" },
+        { name: update.title, url: `https://jobreadyke.co.ke/updates/${slug}` },
+      ]} />
+      <UpdateDetailPage update={update} />
+    </>
+  );
 }

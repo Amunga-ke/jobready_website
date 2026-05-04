@@ -1,11 +1,33 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { OPPORTUNITY_TYPES, KE_COUNTIES, slugifyCounty } from "@/lib/constants";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Opportunities — Scholarships, Internships & More | JobReady",
+  description:
+    "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities from top organizations across Kenya.",
+  alternates: { canonical: "https://jobreadyke.co.ke/opportunities" },
+  openGraph: {
+    title: "Opportunities — Scholarships, Internships & More | JobReady",
+    description:
+      "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities across Kenya.",
+    url: "https://jobreadyke.co.ke/opportunities",
+    siteName: "JobReady",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Opportunities — Scholarships, Internships & More | JobReady",
+    description:
+      "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities across Kenya.",
+  },
+};
 
 /* ── Fetch counts for every opportunity type in one round-trip ── */
 async function getTypeCounts() {
@@ -89,6 +111,8 @@ export default async function OpportunitiesPage() {
 
   return (
     <main className="bg-surface">
+      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Opportunities", url: "https://jobreadyke.co.ke/opportunities" }]} />
+      <CollectionPageJsonLd name="Opportunities" description="Scholarships, internships, fellowships, grants, bursaries and more from top organizations in Kenya" url="https://jobreadyke.co.ke/opportunities" numberOfItems={totalCount} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

@@ -2,8 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Pricing | JobReady",
-  description: "Find the right plan to advertise your job openings and reach top talent.",
+  title: "Pricing — Advertise Jobs on JobReady Kenya",
+  description:
+    "Find the right plan to advertise your job openings and reach top talent across Kenya. Affordable employer pricing for businesses of all sizes.",
+  alternates: { canonical: "https://jobreadyke.co.ke/pricing" },
+  openGraph: {
+    title: "Pricing — Advertise Jobs on JobReady",
+    description: "Affordable employer pricing to reach top Kenyan talent.",
+    url: "https://jobreadyke.co.ke/pricing",
+    siteName: "JobReady",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pricing | JobReady",
+    description: "Affordable employer pricing to reach top Kenyan talent.",
+  },
 };
 
 export default function Pricing_Page() {

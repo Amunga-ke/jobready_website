@@ -7,6 +7,7 @@ import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCategoryIntro, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 
 export const dynamic = "force-dynamic";
 
@@ -128,6 +129,12 @@ export default async function CategoryPage({
 
   return (
     <main className="bg-surface">
+      <BreadcrumbJsonLd items={[
+        { name: "Home", url: "https://jobreadyke.co.ke/" },
+        { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
+        { name: label, url: `https://jobreadyke.co.ke/jobs/category/${slug}` },
+      ]} />
+      <CollectionPageJsonLd name={`${label} Jobs in Kenya`} description={description} url={`https://jobreadyke.co.ke/jobs/category/${slug}`} numberOfItems={count || undefined} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

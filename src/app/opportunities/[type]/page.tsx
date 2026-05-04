@@ -6,6 +6,7 @@ import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getOpportunityIntro } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -137,6 +138,12 @@ export default async function OpportunityTypePage({
 
     return (
       <main className="bg-surface">
+        <BreadcrumbJsonLd items={[
+          { name: "Home", url: "https://jobreadyke.co.ke/" },
+          { name: "Opportunities", url: "https://jobreadyke.co.ke/opportunities" },
+          { name: opp.label, url: `https://jobreadyke.co.ke/opportunities/${typeSlug}` },
+        ]} />
+        <CollectionPageJsonLd name={`${opp.label} in Kenya`} description={getOpportunityIntro(opp.label)} url={`https://jobreadyke.co.ke/opportunities/${typeSlug}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[
