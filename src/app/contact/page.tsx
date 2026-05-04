@@ -3,7 +3,21 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Contact Us | JobReady",
-  description: "Get in touch with the JobReady team for support, partnerships, or inquiries.",
+  description:
+    "Get in touch with the JobReady team for support, employer partnerships, advertising inquiries, or general questions.",
+  alternates: { canonical: "https://jobreadyke.co.ke/contact" },
+  openGraph: {
+    title: "Contact Us | JobReady",
+    description: "Reach the JobReady team for support and partnerships.",
+    url: "https://jobreadyke.co.ke/contact",
+    siteName: "JobReady",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Contact Us | JobReady",
+    description: "Reach the JobReady team for support and partnerships.",
+  },
 };
 
 export default function Contact_Page() {

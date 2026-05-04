@@ -2,8 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About JobReady | JobReady",
-  description: "Learn about JobReady, Kenya's most trusted job board connecting verified employers with talented job seekers.",
+  title: "About JobReady — Kenya's Most Trusted Job Board",
+  description:
+    "Learn about JobReady, Kenya's fastest-growing job board connecting verified employers with talented job seekers across all 47 counties. Our mission, values and team.",
+  alternates: { canonical: "https://jobreadyke.co.ke/about" },
+  openGraph: {
+    title: "About JobReady",
+    description: "Kenya's most trusted job board connecting verified employers with talented job seekers.",
+    url: "https://jobreadyke.co.ke/about",
+    siteName: "JobReady",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About JobReady",
+    description: "Kenya's most trusted job board connecting verified employers with talented job seekers.",
+  },
 };
 
 export default function About_Page() {

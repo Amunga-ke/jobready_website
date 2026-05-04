@@ -5,7 +5,7 @@ import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import prisma from "@/lib/prisma";
 import { Hammer } from "lucide-react";
-import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
+import { BreadcrumbJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     url: "https://jobreadyke.co.ke/casual",
     siteName: "JobReady",
     type: "website",
+    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -350,6 +351,20 @@ export default async function CasualPage() {
           </Link>
         </div>
       </div>
+      <FAQJsonLd faqs={[
+        {
+          question: "How much do casual jobs pay in Kenya?",
+          answer: "Casual job pay in Kenya varies by industry and location. Construction labourers earn KES 800-1,500 per day, waiters KES 500-1,200 per day, and office assistants KES 15,000-25,000 per month. Delivery riders earn KES 800-2,000 per day."
+        },
+        {
+          question: "Where can I find casual jobs in Kenya?",
+          answer: "You can find casual jobs on JobReady, social media groups (Facebook, Telegram), local notice boards, county labour offices, and through word-of-mouth referrals. JobReady aggregates casual listings from employers across all 47 counties."
+        },
+        {
+          question: "What documents do I need for casual work in Kenya?",
+          answer: "Most casual employers require a valid national ID. Some may also ask for a KRA PIN and good conduct certificate. Always have your documents ready and negotiate pay terms before starting work."
+        },
+      ]} />
     </main>
   );
 }
