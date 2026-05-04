@@ -355,3 +355,79 @@ export async function getJobs(params: {
     totalPages: Math.ceil(total / limit),
   };
 }
+
+// ─── Companies with listing counts (for /companies page) ───
+export async function getCompanies(params?: {
+  q?: string;
+  industry?: string;
+  county?: string;
+}) {
+  const where: Record<string, unknown> = {};
+
+  if (params?.q) {
+    where.OR = [
+      { name: { contains: params.q } },
+      { industry: { contains: params.q } },
+      { description: { contains: params.q } },
+    ];
+  }
+  if (params?.industry) where.industry = params.industry;
+  if (params?.county) where.county = params.county;
+
+  const companies = await prisma.company.findMany({
+    where,
+    include: {
+      _count: {
+        select: { listings: { where: { status: "ACTIVE" } } },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+  }).catch(() => []);
+
+  // Sort by active listing count (descending), then alphabetically
+  return companies.sort((a, b) => {
+    const countDiff = b._count.listings - a._count.listings;
+    if (countDiff !== 0) return countDiff;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+// ─── Get available industries for filtering ───
+export async function getCompanyIndustries() {
+  const rows = await prisma.$queryRaw<Array<{ industry: string; _count: bigint }>>`
+    SELECT industry, COUNT(*) as _count
+    FROM Company
+    WHERE industry IS NOT NULL AND industry != ''
+    GROUP BY industry
+    ORDER BY _count DESC
+  `.catch(() => []);
+
+  return rows.map((r) => ({ industry: r.industry, count: Number(r._count) }));
+}
+
+// ─── Company by slug (for /companies/[slug] detail page) ───
+export async function getCompanyBySlug(slug: string) {
+  const company = await prisma.company.findUnique({
+    where: { slug },
+    include: {
+      _count: {
+        select: { listings: { where: { status: "ACTIVE" } } },
+      },
+    },
+  }).catch(() => null);
+
+  return company;
+}
+
+// ─── Active listings for a company (for /companies/[slug] detail page) ───
+export async function getCompanyJobs(companyId: string, limit = 20) {
+  const listings = await prisma.listing.findMany({
+    where: { status: "ACTIVE", companyId },
+    include: { company: true, category: true, subcategory: true, tags: { include: { tag: true } } },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  }).catch(() => []);
+
+  return listings.map(listingToJob);
+}
