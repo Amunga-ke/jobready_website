@@ -3,8 +3,30 @@ import { Building2, CheckCircle, MapPin, Briefcase } from "lucide-react";
 import { getCompanies, getCompanyIndustries } from "@/lib/data";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import CompanySearchBar from "@/components/jobready/CompanySearchBar";
+import type { Metadata } from "next";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
+import AdSlot from "@/components/jobready/AdSlot";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Verified Employers & Companies in Kenya | JobReady",
+  description:
+    "Browse verified companies and employers hiring in Kenya. Explore open positions, company profiles, and apply directly. Over 500+ trusted employers on JobReady.",
+  alternates: { canonical: "https://jobreadyke.co.ke/companies" },
+  openGraph: {
+    title: "Verified Employers & Companies in Kenya | JobReady",
+    description: "Browse verified companies and employers hiring in Kenya. Explore open positions and company profiles on JobReady.",
+    url: "https://jobreadyke.co.ke/companies",
+    siteName: "JobReady",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Verified Employers & Companies in Kenya | JobReady",
+    description: "Browse verified companies and employers hiring in Kenya on JobReady.",
+  },
+};
 
 export default async function CompaniesPage({
   searchParams,
@@ -25,6 +47,8 @@ export default async function CompaniesPage({
 
   return (
     <main className="bg-surface min-h-screen">
+      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Companies", url: "https://jobreadyke.co.ke/companies" }]} />
+      <CollectionPageJsonLd name="Verified Employers & Companies" description="Browse verified companies and employers hiring in Kenya" url="https://jobreadyke.co.ke/companies" numberOfItems={companies.length} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[
@@ -82,6 +106,11 @@ export default async function CompaniesPage({
               </Link>
             </div>
           )}
+        </div>
+
+        {/* Ad slot above listing */}
+        <div className="mb-6">
+          <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
         </div>
 
         {/* Company listing — same row style as /casual, /jobs */}
@@ -179,6 +208,10 @@ export default async function CompaniesPage({
             <p className="text-center text-[11px] text-muted mt-8">
               {companies.length} verified employer{companies.length !== 1 ? "s" : ""}
             </p>
+            {/* Ad slot below listing */}
+            <div className="mt-6">
+              <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+            </div>
           </>
         )}
       </div>

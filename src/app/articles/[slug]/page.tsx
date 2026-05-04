@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { Clock, ArrowLeft, ArrowRight, Calendar, User, BookOpen } from "lucide-react";
 import ArticleShareButton from "@/components/jobready/ArticleShareButton";
+import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import AdSlot from "@/components/jobready/AdSlot";
 
 /* ── Generate static params for known slugs ── */
 export async function generateStaticParams() {
@@ -296,9 +298,26 @@ export default async function ArticleDetailPage({
   `.catch(() => []);
 
   const parsedContent = renderMarkdown(article.body);
+  const articleUrl = `https://jobreadyke.co.ke/articles/${article.slug}`;
 
   return (
     <main className="bg-surface min-h-screen">
+      {/* JSON-LD structured data */}
+      <ArticleJsonLd
+        title={article.title}
+        description={article.excerpt}
+        url={articleUrl}
+        image={article.coverImage}
+        datePublished={article.publishedAt.toISOString()}
+        dateModified={article.updatedAt.toISOString()}
+        author={article.author}
+      />
+      <BreadcrumbJsonLd items={[
+        { name: "Home", url: "https://jobreadyke.co.ke/" },
+        { name: "Resources", url: "https://jobreadyke.co.ke/articles" },
+        { name: article.category, url: `https://jobreadyke.co.ke/articles?category=${encodeURIComponent(article.category)}` },
+        { name: article.title, url: articleUrl },
+      ]} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-[12px] text-muted mb-6 flex-wrap">
@@ -361,6 +380,10 @@ export default async function ArticleDetailPage({
 
             {/* Article body */}
             <div className="bg-white rounded-xl border border-divider p-6 md:p-8 mb-6">
+              {/* In-article ad slot */}
+              <div className="mb-4">
+                <AdSlot format="fluid" style={{ display: 'block', minHeight: '100px' }} />
+              </div>
               <div>
                 {parsedContent.map((element, i) => {
                   switch (element.type) {
@@ -472,6 +495,11 @@ export default async function ArticleDetailPage({
                   }
                 })}
               </div>
+            </div>
+
+            {/* Below-article ad slot */}
+            <div className="mb-6">
+              <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
             </div>
 
             {/* Share + Tags */}

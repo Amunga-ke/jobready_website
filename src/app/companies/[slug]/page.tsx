@@ -16,6 +16,8 @@ import {
   Users,
 } from "lucide-react";
 import { getCompanyBySlug, getCompanyJobs } from "@/lib/data";
+import { CompanyJsonLd, BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import AdSlot from "@/components/jobready/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -130,9 +132,25 @@ export default async function CompanyDetailPage({
   const orgTypeDisplay = company.orgType
     .replace(/_/g, " ")
     .replace(/\b\w/g, (l) => l.toUpperCase());
+  const companyUrl = `https://jobreadyke.co.ke/companies/${company.slug}`;
 
   return (
     <main className="bg-surface min-h-screen">
+      {/* JSON-LD structured data */}
+      <CompanyJsonLd
+        name={company.name}
+        description={company.description}
+        url={companyUrl}
+        logo={company.logo}
+        location={company.location}
+        industry={company.industry}
+        website={company.website}
+      />
+      <BreadcrumbJsonLd items={[
+        { name: "Home", url: "https://jobreadyke.co.ke/" },
+        { name: "Companies", url: "https://jobreadyke.co.ke/companies" },
+        { name: company.name, url: companyUrl },
+      ]} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-[12px] text-muted mb-6 flex-wrap">
@@ -240,6 +258,11 @@ export default async function CompanyDetailPage({
               )}
             </div>
 
+            {/* Ad slot between profile and jobs */}
+            <div className="mb-6">
+              <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+            </div>
+
             {/* Job listings — same row style as /casual, /jobs */}
             {jobs.length > 0 ? (
               <div className="mb-10">
@@ -313,6 +336,10 @@ export default async function CompanyDetailPage({
                       </div>
                     </JobRowClickable>
                   ))}
+                </div>
+                {/* Below-jobs ad slot */}
+                <div className="mt-6">
+                  <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
                 </div>
               </div>
             ) : (

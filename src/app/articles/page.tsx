@@ -3,6 +3,8 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import { Clock, ArrowRight, BookOpen, TrendingUp } from "lucide-react";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
+import AdSlot from "@/components/jobready/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +93,8 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
 
   return (
     <main className="bg-surface">
+      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Resources", url: "https://jobreadyke.co.ke/articles" }]} />
+      <CollectionPageJsonLd name="Career Resources & Articles" description="Expert career advice for Kenyan job seekers" url="https://jobreadyke.co.ke/articles" numberOfItems={articles.length} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[
@@ -166,6 +170,11 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
           </div>
         )}
 
+        {/* Ad slot between featured and latest */}
+        <div className="mb-8">
+          <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+        </div>
+
         {/* ── Latest articles ── */}
         {latest.length > 0 && (
           <div className="mb-10">
@@ -210,6 +219,11 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
             </div>
           </div>
         )}
+
+        {/* Ad slot above categories */}
+        <div className="mb-8">
+          <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+        </div>
 
         {/* ── Browse by category ── */}
         {categories.length > 0 && (

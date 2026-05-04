@@ -8,6 +8,8 @@ import { UpdateModalProvider } from "@/components/jobready/UpdateModalContext";
 import UpdateDetailSheet from "@/components/jobready/UpdateDetailSheet";
 import Navbar from "@/components/jobready/Navbar";
 import Footer from "@/components/jobready/Footer";
+import AdSenseScript from "@/components/jobready/AdSenseScript";
+import { OrganizationJsonLd } from "@/components/jobready/JsonLd";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -34,25 +36,55 @@ const jetbrains = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+const SITE_URL = "https://jobreadyke.co.ke";
+const SITE_TITLE = "JobReady — Jobs for Kenyans";
+const SITE_DESCRIPTION =
+  "Kenya's most trusted job board. Browse thousands of jobs from verified employers across Nairobi, Mombasa, Kisumu and all 47 counties. Government, private sector, internships and more.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jobreadyke.co.ke"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "JobReady — Jobs for Kenyans",
+    default: SITE_TITLE,
     template: "%s | JobReady",
   },
-  description:
-    "Kenya's most trusted job board. Real jobs from verified employers.",
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "jobs in Kenya", "Kenya jobs", "job vacancies Kenya", "Nairobi jobs",
+    "government jobs Kenya", "county government jobs", "internships Kenya",
+    "scholarships Kenya", "careers Kenya", "employment Kenya", "job board Kenya",
+    "JobReady", "entry level jobs Kenya", "casual jobs Kenya", "graduate jobs Kenya",
+  ],
+  authors: [{ name: "JobReady", url: SITE_URL }],
+  creator: "JobReady",
+  publisher: "JobReady",
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
   },
   openGraph: {
     siteName: "JobReady",
     type: "website",
     locale: "en_KE",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady — Jobs for Kenyans" }],
   },
   twitter: {
     card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  verification: { google: "ca-pub-8031704055036556" },
+  alternates: { canonical: SITE_URL },
+  category: "employment",
 };
 
 export default function RootLayout({
@@ -62,6 +94,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        <meta name="google-adsense-account" content="ca-pub-8031704055036556" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0f172a" />
+        <OrganizationJsonLd />
+      </head>
       <body
         className={`${playfair.variable} ${spaceGrotesk.variable} ${inter.variable} ${jetbrains.variable} font-inter antialiased bg-surface text-ink`}
       >
@@ -78,6 +116,7 @@ export default function RootLayout({
           </UpdateModalProvider>
         </JobModalProvider>
         </Providers>
+        <AdSenseScript />
       </body>
     </html>
   );

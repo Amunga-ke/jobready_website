@@ -5,6 +5,8 @@ import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import prisma from "@/lib/prisma";
 import { Hammer } from "lucide-react";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
+import AdSlot from "@/components/jobready/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +91,8 @@ export default async function CasualPage() {
 
   return (
     <main className="bg-surface">
+      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Casual & Part-Time", url: "https://jobreadyke.co.ke/casual" }]} />
+      <CollectionPageJsonLd name="Casual & Part-Time Jobs" description="Find daily-wage, weekend and flexible part-time jobs across Kenya" url="https://jobreadyke.co.ke/casual" numberOfItems={total || undefined} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[
@@ -229,6 +233,11 @@ export default async function CasualPage() {
             </div>
           </div>
         )}
+
+        {/* Ad slot below listings */}
+        <div className="mb-8">
+          <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+        </div>
 
         {/* ── Browse by county ── */}
         <div className="mb-10">
