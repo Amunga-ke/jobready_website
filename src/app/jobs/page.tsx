@@ -4,6 +4,8 @@ import { getJobs } from "@/lib/data";
 import { formatDateShortUTC } from "@/lib/format-date";
 import JobClickable from "@/components/jobready/JobClickable";
 import { Search, SlidersHorizontal, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
+import AdSlot from "@/components/jobready/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -148,6 +150,8 @@ export default async function JobsPage({
 
   return (
     <main className="bg-surface">
+      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" }]} />
+      <CollectionPageJsonLd name="Job Listings" description="Browse and search job listings from verified employers across Kenya" url="https://jobreadyke.co.ke/jobs" numberOfItems={total} />
       <div className="max-w-6xl mx-auto px-5 py-10">
         {/* Header */}
         <div className="mb-8">
@@ -258,6 +262,11 @@ export default async function JobsPage({
           ))}
         </div>
 
+        {/* Ad slot above listings */}
+        <div className="mb-6">
+          <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+        </div>
+
         {/* Job list */}
         {jobs.length === 0 ? (
           <div className="text-center py-20">
@@ -338,6 +347,11 @@ export default async function JobsPage({
             </div>
           </>
         )}
+
+        {/* Ad slot below listings */}
+        <div className="mt-6">
+          <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (

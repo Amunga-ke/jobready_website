@@ -10,6 +10,8 @@ import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCountyIntro, getNearbyCounties } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
+import { JobPostingJsonLd, BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import AdSlot from "@/components/jobready/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -60,14 +62,16 @@ export async function generateMetadata({
     const job = await getJobBySlug(slug);
     if (!job) return { title: "Job Not Found | JobReady" };
 
+    const jobUrl = `https://jobreadyke.co.ke/jobs/${slug}`;
     return {
       title: `${job.title} at ${job.companyName} | JobReady`,
       description: `Apply for ${job.title} at ${job.companyName} in ${job.location}. ${job.listingType === "JOB" ? "Job" : "Opportunity"} posted on JobReady — Kenya's most trusted job board.`,
+      alternates: { canonical: jobUrl },
       openGraph: {
         title: `${job.title} at ${job.companyName}`,
         description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`,
-        url: `https://jobreadyke.co.ke/jobs/${slug}`,
-        type: "article",
+        url: jobUrl,
+        type: "website",
         siteName: "JobReady",
       },
       twitter: {
@@ -268,6 +272,7 @@ export default async function SlugPage({
 
     // ── Job detail page ──
     const job = await getJobBySlug(slug);
+    const jobUrl = `https://jobreadyke.co.ke/jobs/${slug}`;
 
     if (!job) {
       notFound();
@@ -275,6 +280,26 @@ export default async function SlugPage({
 
     return (
       <main className="bg-surface">
+        {/* JSON-LD structured data */}
+        <JobPostingJsonLd
+          title={job.title}
+          description={job.description || ""}
+          datePosted={new Date(job.createdAt).toISOString()}
+          validThrough={job.deadline ? new Date(job.deadline).toISOString() : undefined}
+          employmentType={job.employmentType}
+          hiringOrganization={job.companyName}
+          jobLocation={job.location || job.county || "Kenya"}
+          salaryMin={job.salaryMin}
+          salaryMax={job.salaryMax}
+          salaryPeriod={job.salaryPeriod}
+          url={jobUrl}
+          workMode={job.workMode}
+        />
+        <BreadcrumbJsonLd items={[
+          { name: "Home", url: "https://jobreadyke.co.ke/" },
+          { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
+          { name: job.title, url: jobUrl },
+        ]} />
         {/* Top bar */}
         <div className="border-b border-divider bg-white/60 backdrop-blur-sm sticky top-0 z-30">
           <div className="max-w-3xl mx-auto px-5 py-3 flex items-center gap-3">
@@ -433,6 +458,10 @@ export default async function SlugPage({
             )}
           </div>
         </article>
+        {/* Below-content ad slot */}
+        <div className="max-w-3xl mx-auto px-5 pb-8">
+          <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+        </div>
       </main>
     );
   } catch {

@@ -1,0 +1,14 @@
+{
+  "name": "JobReady",
+  "short_name": "JobReady",
+  "description": "Kenya's most trusted job board. Real jobs from verified employers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [{ "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }],
+  "categories": ["employment", "business"],
+  "lang": "en",
+  "dir": "ltr"
+}

@@ -14,6 +14,8 @@ import CasualJobs from '@/components/jobready/CasualJobs';
 import CareerResources from '@/components/jobready/CareerResources';
 import Newsletter from '@/components/jobready/Newsletter';
 import StickyNewsletter from '@/components/jobready/StickyNewsletter';
+import AdSlot from '@/components/jobready/AdSlot';
+import { WebSiteJsonLd, BreadcrumbJsonLd } from '@/components/jobready/JsonLd';
 import type { Job } from '@/types';
 import type { Category, County } from '@prisma/client';
 import type { Metadata } from 'next';
@@ -85,23 +87,40 @@ export default async function Home() {
 
   return (
     <>
+      <WebSiteJsonLd />
+      <BreadcrumbJsonLd items={[{ name: 'Home', url: 'https://jobreadyke.co.ke/' }]} />
       <Hero jobs={justPosted} />
+      <div className="max-w-4xl mx-auto px-5 mt-6">
+        <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+      </div>
       <TrustedBy />
       <JobUpdates />
       <ClosingSoon jobs={closingSoonJobs} />
       <Featured jobs={featuredJobs} />
       <TrendingMarquee />
       <Categories categories={categories} />
+      {/* Ad slot between sections */}
+      <div className="max-w-4xl mx-auto px-5">
+        <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+      </div>
       <OpportunitiesHub opportunities={opportunities} />
       <OpportunitiesTabs opportunities={opportunities} />
       <ByLocation counties={counties} />
       <Government nationalJobs={governmentJobs.national} countyJobs={governmentJobs.county} />
       <CVBanner variant="light" />
       <CasualJobs jobs={casualJobs} />
+      {/* Ad slot before resources */}
+      <div className="max-w-4xl mx-auto px-5">
+        <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+      </div>
       <CareerResources />
       <CVBanner variant="dark" />
       <Newsletter />
       <StickyNewsletter />
+      {/* Footer ad slot */}
+      <div className="max-w-4xl mx-auto px-5 pb-8">
+        <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
+      </div>
     </>
   );
 }
