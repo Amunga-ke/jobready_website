@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { Clock, ArrowLeft, Calendar, User, Share2, BookOpen } from "lucide-react";
+import { Clock, ArrowLeft, ArrowRight, Calendar, User, Share2, BookOpen } from "lucide-react";
 
 /* ── Generate static params for known slugs ── */
 export async function generateStaticParams() {
