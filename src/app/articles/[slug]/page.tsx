@@ -99,6 +99,11 @@ function renderMarkdown(body: string) {
     }
 
     // Headings
+    if (trimmed.startsWith("# ") && !trimmed.startsWith("## ")) {
+      flushList();
+      elements.push({ type: "h1", content: trimmed.slice(2) });
+      continue;
+    }
     if (trimmed.startsWith("## ")) {
       flushList();
       elements.push({ type: "h2", content: trimmed.slice(3) });
@@ -359,9 +364,12 @@ export default async function ArticleDetailPage({
               <div>
                 {parsedContent.map((element, i) => {
                   switch (element.type) {
+                    case "h1":
+                      // H1 is the article title, already shown in header — skip
+                      return null;
                     case "h2":
                       return (
-                        <h2 key={i} className="text-xl font-heading font-bold text-ink mt-8 mb-3 first:mt-0">
+                        <h2 key={i} className="text-xl font-heading font-bold text-ink mt-8 mb-3">
                           {renderInline(element.content)}
                         </h2>
                       );
