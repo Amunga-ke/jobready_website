@@ -1,6 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
-import { Building2, CheckCircle, MapPin, Briefcase, Search, Globe, ExternalLink } from "lucide-react";
+import { Building2, CheckCircle, MapPin, Briefcase } from "lucide-react";
 import { getCompanies, getCompanyIndustries } from "@/lib/data";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import CompanySearchBar from "@/components/jobready/CompanySearchBar";
@@ -40,7 +39,7 @@ export default async function CompaniesPage({
         {/* Search + Industry filter */}
         <div className="mb-8 space-y-4">
           <CompanySearchBar initialQuery={query} />
-          
+
           {/* Industry chips */}
           {activeIndustries.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -85,7 +84,7 @@ export default async function CompaniesPage({
           )}
         </div>
 
-        {/* Company grid */}
+        {/* Company listing — same row style as /casual, /jobs */}
         {companies.length === 0 ? (
           /* Empty state */
           <div className="text-center py-20 bg-white rounded-xl border border-divider">
@@ -111,70 +110,68 @@ export default async function CompaniesPage({
           </div>
         ) : (
           <>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Table header */}
+            <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest mb-1">
+              <div className="col-span-5">Company</div>
+              <div className="col-span-3">Industry</div>
+              <div className="col-span-2">Location</div>
+              <div className="col-span-2 text-right">Open Jobs</div>
+            </div>
+            <div className="divide-y divide-subtle">
               {companies.map((company) => (
                 <Link
                   key={company.id}
                   href={`/companies/${company.slug}`}
-                  className="group border border-divider rounded-xl p-5 hover:bg-white transition-all hover:border-accent/20 hover:shadow-sm"
+                  className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors"
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Logo or initial */}
-                    {company.logo ? (
-                      <div className="w-14 h-14 border border-divider rounded-xl overflow-hidden shrink-0 bg-white group-hover:border-accent/30 transition-colors">
-                        <Image
-                          src={company.logo}
-                          alt={company.name}
-                          width={56}
-                          height={56}
-                          unoptimized
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-14 h-14 border border-divider rounded-xl flex items-center justify-center shrink-0 font-heading font-bold text-xl text-muted bg-white group-hover:border-accent/30 transition-colors">
-                        {company.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                      {/* Name & verified */}
-                      <div className="flex items-center gap-1.5">
-                        <h3 className="font-heading text-[15px] font-bold truncate group-hover:text-accent transition-colors">
-                          {company.name}
-                        </h3>
-                        {company.verified && (
-                          <CheckCircle className="w-3.5 h-3.5 text-accent shrink-0" />
-                        )}
-                      </div>
-
-                      {/* Industry */}
-                      {company.industry && (
-                        <p className="text-[11px] text-muted mt-0.5 flex items-center gap-1">
-                          <Briefcase className="w-3 h-3" />
-                          {company.industry}
-                        </p>
-                      )}
-
-                      {/* Org type */}
-                      <p className="text-[11px] text-muted/60 mt-0.5">
-                        {company.orgType.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                  {/* Name + verified */}
+                  <div className="col-span-12 sm:col-span-5 min-w-0 flex items-center gap-2">
+                    <span className="w-8 h-8 border border-divider rounded-lg flex items-center justify-center shrink-0 font-heading font-bold text-sm text-muted bg-surface group-hover:border-accent/30 transition-colors">
+                      {company.name.charAt(0).toUpperCase()}
+                    </span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
+                        {company.name}
                       </p>
-
-                      {/* Meta row */}
-                      <div className="flex items-center gap-3 mt-3 pt-3 border-t border-subtle">
-                        <span className="flex items-center gap-1 text-[11px] text-muted">
-                          <Briefcase className="w-3 h-3" />
-                          <span className="font-medium text-ink">{company._count.listings}</span> open
-                        </span>
-                        {company.location && (
-                          <span className="flex items-center gap-1 text-[11px] text-muted">
-                            <MapPin className="w-3 h-3" />
-                            {company.location}
-                          </span>
-                        )}
-                      </div>
+                      {company.verified && (
+                        <CheckCircle className="w-3.5 h-3.5 text-accent shrink-0" />
+                      )}
                     </div>
+                    {/* Mobile meta */}
+                    <div className="sm:hidden flex items-center gap-2 ml-auto text-[11px] text-muted">
+                      {company.industry && <span>{company.industry}</span>}
+                      {company.location && (
+                        <>
+                          <span className="text-subtle">&middot;</span>
+                          <span>{company.location}</span>
+                        </>
+                      )}
+                      <span className="text-subtle">&middot;</span>
+                      <span className="font-medium text-ink">{company._count.listings}</span>
+                    </div>
+                  </div>
+
+                  {/* Industry */}
+                  <div className="hidden sm:flex sm:col-span-3 items-center text-[12px] text-muted truncate">
+                    {company.industry || "\u2014"}
+                  </div>
+
+                  {/* Location */}
+                  <div className="hidden sm:flex sm:col-span-2 items-center">
+                    <span className="text-[11px] text-muted">
+                      {company.location || company.county || "\u2014"}
+                    </span>
+                  </div>
+
+                  {/* Open jobs count */}
+                  <div className="hidden sm:flex sm:col-span-2 sm:justify-end items-center">
+                    {company._count.listings > 0 ? (
+                      <span className="font-mono text-[12px] font-medium text-ink/70">
+                        {company._count.listings} open
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-muted/50">&mdash;</span>
+                    )}
                   </div>
                 </Link>
               ))}
