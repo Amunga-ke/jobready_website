@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     categoryCountyCounts,
     opportunityCountyCounts,
     articles,
+    companies,
   ] = await Promise.all([
     prisma.category.findMany({
       where: { active: true },
@@ -49,6 +50,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { status: "PUBLISHED" },
       select: { slug: true, updatedAt: true },
       orderBy: { publishedAt: "desc" },
+      take: 200,
+    }).catch(() => []),
+    prisma.company.findMany({
+      select: { slug: true, updatedAt: true },
+      orderBy: { createdAt: "desc" },
       take: 200,
     }).catch(() => []),
     // Get counts for all category × county combos to filter thin pages
@@ -197,6 +203,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // 11. Individual company pages
+  const companyPages: MetadataRoute.Sitemap = companies.map((company) => ({
+    url: `${SITE_URL}/companies/${company.slug}`,
+    lastModified: company.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
   return [
     ...staticPages,
     ...governmentLevels,
@@ -208,6 +222,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...jobPages,
     ...updatePages,
     ...articlePages,
+    ...companyPages,
   ];
   } catch {
     // Fallback: return static pages only if DB queries fail
