@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 
@@ -39,8 +40,11 @@ export default function Navbar() {
       <nav className="pt-4 pb-4">
         <div className="max-w-6xl mx-auto px-5 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="font-heading font-bold text-lg tracking-tight">
-            JOB<span className="text-accent">READY</span>
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/logo.svg" alt="JobReady" width={32} height={32} className="shrink-0" priority />
+            <span className="font-heading font-bold text-lg tracking-tight">
+              JOB<span className="text-accent">READY</span>
+            </span>
           </Link>
 
           {/* Desktop links */}
@@ -106,9 +110,12 @@ export default function Navbar() {
           <div className="absolute inset-y-0 right-0 w-[280px] max-w-[85vw] bg-surface shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-divider">
-              <span className="font-heading font-bold text-lg tracking-tight">
-                JOB<span className="text-accent">READY</span>
-              </span>
+              <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
+                <Image src="/logo.svg" alt="JobReady" width={28} height={28} className="shrink-0" />
+                <span className="font-heading font-bold text-lg tracking-tight">
+                  JOB<span className="text-accent">READY</span>
+                </span>
+              </Link>
               <button
                 onClick={() => setOpen(false)}
                 className="p-1 -mr-1 text-ink"
