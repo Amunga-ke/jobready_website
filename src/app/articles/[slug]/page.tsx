@@ -2,25 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { Clock, ArrowLeft, ArrowRight, Calendar, User, Share2, BookOpen } from "lucide-react";
-
-/* ── Client component for share button (needs onClick) ── */
-function ArticleShareButton({ slug }: { slug: string }) {
-  return (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <button
-      onClick={() => {
-        if (typeof navigator !== "undefined") {
-          navigator.clipboard.writeText(`https://jobreadyke.co.ke/articles/${slug}`);
-        }
-      }}
-      className="flex items-center gap-1.5 text-[12px] font-medium text-muted hover:text-accent transition-colors shrink-0"
-    >
-      <Share2 className="w-3.5 h-3.5" />
-      Share Article
-    </button>
-  );
-}
+import { Clock, ArrowLeft, ArrowRight, Calendar, User, BookOpen } from "lucide-react";
+import ArticleShareButton from "@/components/jobready/ArticleShareButton";
 
 /* ── Generate static params for known slugs ── */
 export async function generateStaticParams() {
@@ -496,7 +479,7 @@ export default async function ArticleDetailPage({
                   </Link>
                 ))}
               </div>
-              <ArticleShareButton slug={article.slug} />
+              <ArticleShareButton url={`https://jobreadyke.co.ke/articles/${article.slug}`} />
             </div>
           </article>
 
