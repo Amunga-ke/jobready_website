@@ -4,6 +4,24 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { Clock, ArrowLeft, ArrowRight, Calendar, User, Share2, BookOpen } from "lucide-react";
 
+/* ── Client component for share button (needs onClick) ── */
+function ArticleShareButton({ slug }: { slug: string }) {
+  return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <button
+      onClick={() => {
+        if (typeof navigator !== "undefined") {
+          navigator.clipboard.writeText(`https://jobreadyke.co.ke/articles/${slug}`);
+        }
+      }}
+      className="flex items-center gap-1.5 text-[12px] font-medium text-muted hover:text-accent transition-colors shrink-0"
+    >
+      <Share2 className="w-3.5 h-3.5" />
+      Share Article
+    </button>
+  );
+}
+
 /* ── Generate static params for known slugs ── */
 export async function generateStaticParams() {
   const articles = await prisma.article.findMany({
@@ -478,17 +496,7 @@ export default async function ArticleDetailPage({
                   </Link>
                 ))}
               </div>
-              <button
-                onClick={() => {
-                  if (typeof navigator !== "undefined") {
-                    navigator.clipboard.writeText(`https://jobreadyke.co.ke/articles/${article.slug}`);
-                  }
-                }}
-                className="flex items-center gap-1.5 text-[12px] font-medium text-muted hover:text-accent transition-colors shrink-0"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                Share Article
-              </button>
+              <ArticleShareButton slug={article.slug} />
             </div>
           </article>
 
