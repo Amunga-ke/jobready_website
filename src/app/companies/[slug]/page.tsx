@@ -13,9 +13,7 @@ import {
   ExternalLink,
   ArrowLeft,
   ArrowRight,
-  Clock,
   Users,
-  BadgeDollarSign,
 } from "lucide-react";
 import { getCompanyBySlug, getCompanyJobs } from "@/lib/data";
 
@@ -68,33 +66,18 @@ export async function generateMetadata({
   };
 }
 
-/* ── Format date ── */
-function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-KE", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-/* ── Format salary ── */
-function formatSalary(job: { salaryMin?: number | null; salaryMax?: number | null; salaryPeriod?: string | undefined }) {
+/* ── Format salary (used in mobile row) ── */
+function formatSalary(job: { salaryMin?: number | null; salaryMax?: number | null; salaryPeriod?: string | undefined; predictedSalary?: string }) {
   if (job.salaryMin != null && job.salaryMax != null) {
     return `KES ${job.salaryMin.toLocaleString()} – ${job.salaryMax.toLocaleString()}`;
   }
   if (job.salaryMin != null) {
-    return `From KES ${job.salaryMin.toLocaleString()}`;
+    return `KES ${job.salaryMin.toLocaleString()}`;
   }
   if (job.predictedSalary) {
     return `~${job.predictedSalary}`;
   }
   return null;
-}
-
-/* ── Format work mode ── */
-function formatWorkMode(mode: string) {
-  return mode.charAt(0) + mode.slice(1).toLowerCase();
 }
 
 /* ── Company detail page ── */
@@ -257,117 +240,99 @@ export default async function CompanyDetailPage({
               )}
             </div>
 
-            {/* Job listings */}
-            <div className="bg-white rounded-xl border border-divider overflow-hidden">
-              <div className="px-6 py-4 border-b border-divider flex items-center justify-between">
-                <h2 className="text-[15px] font-heading font-bold text-ink">
+            {/* Job listings — same row style as /casual, /jobs */}
+            {jobs.length > 0 ? (
+              <div className="mb-10">
+                <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">
                   Open Positions
                   <span className="ml-2 text-[12px] font-mono text-muted font-normal">
                     ({jobs.length})
                   </span>
                 </h2>
-              </div>
-
-              {jobs.length === 0 ? (
-                <div className="px-6 py-16 text-center">
-                  <Briefcase className="w-8 h-8 text-muted/30 mx-auto mb-3" />
-                  <h3 className="font-heading text-[15px] font-bold text-ink/70 mb-1">
-                    No open positions right now
-                  </h3>
-                  <p className="text-[13px] text-muted mb-4">
-                    Check back later or explore jobs from other companies.
-                  </p>
-                  <Link
-                    href="/jobs"
-                    className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
-                  >
-                    Browse All Jobs
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                <div className="hidden sm:grid sm:grid-cols-12 gap-4 pb-2 border-b border-divider text-[10px] font-mono text-muted uppercase tracking-widest mb-1">
+                  <div className="col-span-5">Position</div>
+                  <div className="col-span-3">Location</div>
+                  <div className="col-span-2">Type</div>
+                  <div className="col-span-2 text-right">Pay</div>
                 </div>
-              ) : (
-                <div className="divide-y divide-divider">
+                <div className="divide-y divide-subtle">
                   {jobs.map((job) => (
                     <JobRowClickable
                       key={job.id}
                       slug={job.slug}
-                      className="px-6 py-4 hover:bg-ink/[0.015] transition-colors cursor-pointer"
+                      className="grid grid-cols-12 gap-4 py-3.5 group cursor-pointer hover:bg-ink/[0.02] rounded-lg -mx-2 px-2 transition-colors"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                        {/* Title & category */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-[14px] font-medium text-ink truncate group-hover:text-accent transition-colors">
-                              {job.title}
-                            </h3>
-                            {job.featured && (
-                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 shrink-0">
-                                Featured
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-[12px] text-muted">
-                            {job.category && (
-                              <span>{job.category}</span>
-                            )}
-                            {job.location && (
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                {job.location}
-                              </span>
-                            )}
-                            {job.county && (
-                              <span>{job.county}</span>
-                            )}
-                            <span>{formatWorkMode(job.workMode)}</span>
-                            <span>{job.employmentType}</span>
-                          </div>
-                        </div>
-
-                        {/* Right meta: salary, deadline, arrow */}
-                        <div className="flex items-center gap-4 shrink-0 text-[12px] text-muted">
-                          {/* Salary */}
-                          {formatSalary(job) && (
-                            <span className="hidden md:flex items-center gap-1 text-[12px] font-medium text-emerald-600">
-                              <BadgeDollarSign className="w-3 h-3" />
-                              {formatSalary(job)}
+                      {/* Title */}
+                      <div className="col-span-12 sm:col-span-5 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-[13px] font-medium truncate group-hover:text-accent transition-colors">
+                            {job.title}
+                          </p>
+                          {job.featured && (
+                            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 shrink-0 uppercase tracking-wide">
+                              Featured
                             </span>
                           )}
-
-                          {/* Posted date */}
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{formatDate(job.createdAt)}</span>
-                          </div>
-
-                          {/* Mobile salary */}
-                          {formatSalary(job) && (
-                            <span className="md:hidden text-[12px] font-medium text-emerald-600">
-                              {formatSalary(job)}
-                            </span>
-                          )}
-
-                          <ArrowRight className="w-3.5 h-3.5 text-muted/40 group-hover:text-accent transition-colors" />
                         </div>
+                        <div className="sm:hidden flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] text-muted">{job.location || job.county || ""}</span>
+                          <span className="text-[11px] text-subtle">&middot;</span>
+                          <span className="text-[11px] text-muted">{job.employmentType}</span>
+                          {formatSalary(job) && (
+                            <>
+                              <span className="text-[11px] text-subtle">&middot;</span>
+                              <span className="text-[11px] font-mono font-medium text-ink/70">{formatSalary(job)}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Location */}
+                      <div className="hidden sm:flex sm:col-span-3 items-center text-[12px] text-muted truncate">
+                        {job.location || job.county || "\u2014"}
+                      </div>
+
+                      {/* Type */}
+                      <div className="hidden sm:flex sm:col-span-2 items-center">
+                        <span className="text-[11px] text-muted">
+                          {job.employmentType}
+                        </span>
+                      </div>
+
+                      {/* Pay */}
+                      <div className="hidden sm:flex sm:col-span-2 sm:justify-end items-center">
+                        {job.salaryMin ? (
+                          <span className="font-mono text-[12px] font-medium text-ink/70">
+                            KES {job.salaryMin.toLocaleString()}{job.salaryPeriod ? `/${job.salaryPeriod}` : ""}
+                          </span>
+                        ) : job.predictedSalary ? (
+                          <span className="text-[11px] text-muted">{job.predictedSalary}</span>
+                        ) : (
+                          <span className="text-[11px] text-muted/50">&mdash;</span>
+                        )}
                       </div>
                     </JobRowClickable>
                   ))}
                 </div>
-              )}
-
-              {/* Browse more jobs CTA */}
-              {jobs.length > 0 && (
-                <div className="px-6 py-4 border-t border-divider bg-ink/[0.01]">
-                  <Link
-                    href="/jobs"
-                    className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
-                  >
-                    View all jobs across Kenya
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="mb-10 rounded-xl border border-divider p-8 text-center">
+                <Briefcase className="w-8 h-8 text-muted/30 mx-auto mb-3" />
+                <h3 className="font-heading text-[15px] font-bold text-ink/70 mb-1">
+                  No open positions right now
+                </h3>
+                <p className="text-[13px] text-muted mb-4">
+                  Check back later or explore jobs from other companies.
+                </p>
+                <Link
+                  href="/jobs"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
+                >
+                  Browse All Jobs
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* ── Sidebar ── */}
