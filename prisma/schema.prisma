@@ -182,6 +182,34 @@ model JobUpdate {
   @@index([slug])
 }
 
+// ─── Articles (Career blog posts, guides, resources) ───
+
+model Article {
+  id          String   @id @default(cuid()) @db.VarChar(64)
+  slug        String   @unique @db.VarChar(191)
+  title       String   @db.VarChar(500)
+  excerpt     String   @db.Text
+  body        String   @db.LongText
+  coverImage  String?  @db.VarChar(500)
+  category    String   @default("Career Tips") @db.VarChar(100)
+  tags        String?  @db.VarChar(500)
+  author      String   @default("JobReady Team") @db.VarChar(191)
+  authorImage String?  @db.VarChar(500)
+  status      String   @default("PUBLISHED") @db.VarChar(20)
+  featured    Boolean  @default(false)
+  readTime    Int      @default(5)
+  viewCount   Int      @default(0)
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([slug])
+  @@index([featured])
+}
+
 // ─── Listing ↔ Tag junction ───
 
 model ListingTag {
