@@ -133,7 +133,7 @@ export function JobPostingJsonLd({
         jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: jobLocation, addressCountry: "KE" } },
         ...(baseSalary && { baseSalary }),
         url,
-        ...(workMode && { jobLocationType: workMode === "REMOTE" ? "TELECOMMUTE" : undefined }),
+        ...(workMode === "REMOTE" && { jobLocationType: "TELECOMMUTE" }),
       }}
     />
   );
