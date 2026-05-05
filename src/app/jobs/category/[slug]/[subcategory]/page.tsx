@@ -8,7 +8,7 @@ import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 /**
  * Detect whether the second URL segment is a location (in-nairobi) or a subcategory slug.

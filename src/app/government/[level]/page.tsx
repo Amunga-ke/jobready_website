@@ -68,7 +68,7 @@ export async function generateMetadata({
   }
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export default async function GovernmentLevelPage({
   params,

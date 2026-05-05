@@ -9,7 +9,7 @@ import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export async function generateMetadata({
   params,
@@ -62,7 +62,7 @@ export async function generateMetadata({
   }
 }
 
-// No generateStaticParams — page is force-dynamic, all slugs handled at runtime
+// No generateStaticParams — page uses ISR, all slugs handled at runtime
 
 export default async function CategoryPage({
   params,

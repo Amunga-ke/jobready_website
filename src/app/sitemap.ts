@@ -5,7 +5,7 @@ import { SEO_THRESHOLDS } from "@/lib/seo/page-thresholds";
 
 const SITE_URL = "https://jobreadyke.co.ke";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: revalidate sitemap every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {

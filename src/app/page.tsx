@@ -30,7 +30,7 @@ import {
   getCounties,
 } from '@/lib/data';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

@@ -7,7 +7,7 @@ import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import prisma from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 function parseLocation(raw: string) {
   if (!raw.startsWith("in-")) return null;

@@ -9,7 +9,7 @@ import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import prisma from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 // Shared data fetcher — called by both generateMetadata and the page.
 // Next.js deduplicates fetches within the same render, but Prisma queries
@@ -115,7 +115,7 @@ export async function generateMetadata({
   }
 }
 
-// No generateStaticParams — page is force-dynamic, all types handled at runtime
+// No generateStaticParams — page uses ISR, all types handled at runtime
 
 export default async function OpportunityTypePage({
   params,

@@ -7,7 +7,7 @@ import { Search, SlidersHorizontal, Briefcase, ChevronLeft, ChevronRight } from 
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
   try {

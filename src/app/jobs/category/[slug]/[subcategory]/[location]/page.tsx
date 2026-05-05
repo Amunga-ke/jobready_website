@@ -6,7 +6,7 @@ import { getCountyBySlug } from "@/lib/constants";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 function parseLocation(raw: string) {
   if (!raw.startsWith("in-")) return null;

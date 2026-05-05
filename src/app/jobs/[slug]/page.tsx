@@ -14,7 +14,7 @@ import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { JobPostingJsonLd, BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 const COUNTY_PREFIX = "in-";
 

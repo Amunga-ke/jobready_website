@@ -8,7 +8,7 @@ import GovTabs from "./GovTabs";
 import prisma from "@/lib/prisma";
 import type { Job } from "@/types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export const metadata: Metadata = {
   title: "Government Jobs in Kenya | JobReady",

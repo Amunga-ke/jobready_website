@@ -6,7 +6,7 @@ import { Clock, ArrowRight, BookOpen, TrendingUp } from "lucide-react";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export const metadata: Metadata = {
   title: "Career Resources & Articles | JobReady",
