@@ -27,8 +27,7 @@ export default function Hero({ jobs }: HeroProps) {
               Verified jobs from 800+ employers across Kenya
             </p>
             <h1 className="font-hero text-5xl sm:text-6xl lg:text-[76px] font-black leading-[0.95] tracking-tight mb-6">
-              Your next job<br />
-              <span className="text-muted">is here.</span>
+              Jobs in Kenya<span className="text-muted">. Verified employers, zero scams.</span>
             </h1>
             <p className="text-muted text-base max-w-md leading-relaxed mb-10">
               Real jobs from verified employers. No scams, no recruiter spam, no noise.
@@ -42,6 +41,7 @@ export default function Hero({ jobs }: HeroProps) {
                       name="q"
                       type="text"
                       placeholder="Job title, company, keyword..."
+                      aria-label="Search jobs"
                       className="flex-1 text-sm bg-transparent focus:outline-none placeholder-muted/60 pl-4 py-3"
                     />
                     <button type="submit" className="text-sm font-semibold text-ink hover:text-accent transition-colors shrink-0 pr-4">

@@ -46,9 +46,9 @@ export default function Footer() {
 
           {/* Jobseekers */}
           <div>
-            <h3 className="font-mono text-[10px] text-muted uppercase tracking-widest mb-4">
+            <span className="font-mono text-[11px] text-muted uppercase tracking-widest mb-4 font-semibold block">
               Jobseekers
-            </h3>
+            </span>
             <ul className="space-y-2.5">
               {FOOTER_LINKS.jobseekers.map((link) => (
                 <li key={link.href}>
@@ -65,9 +65,9 @@ export default function Footer() {
 
           {/* Employers */}
           <div>
-            <h3 className="font-mono text-[10px] text-muted uppercase tracking-widest mb-4">
+            <span className="font-mono text-[11px] text-muted uppercase tracking-widest mb-4 font-semibold block">
               Employers
-            </h3>
+            </span>
             <ul className="space-y-2.5">
               {FOOTER_LINKS.employers.map((link) => (
                 <li key={link.href}>
@@ -84,9 +84,9 @@ export default function Footer() {
 
           {/* Resources */}
           <div>
-            <h3 className="font-mono text-[10px] text-muted uppercase tracking-widest mb-4">
+            <span className="font-mono text-[11px] text-muted uppercase tracking-widest mb-4 font-semibold block">
               Resources
-            </h3>
+            </span>
             <ul className="space-y-2.5">
               {FOOTER_LINKS.resources.map((link) => (
                 <li key={link.href}>
@@ -103,9 +103,9 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="font-mono text-[10px] text-muted uppercase tracking-widest mb-4">
+            <span className="font-mono text-[11px] text-muted uppercase tracking-widest mb-4 font-semibold block">
               Company
-            </h3>
+            </span>
             <ul className="space-y-2.5">
               {FOOTER_LINKS.company.map((link) => (
                 <li key={link.href}>
