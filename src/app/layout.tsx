@@ -90,7 +90,7 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
   },
   // verification: { google: "YOUR_GOOGLE_SEARCH_CONSOLE_CODE" }, // TODO: Add real GSC verification code
-  alternates: { canonical: SITE_URL },
+  alternates: { canonical: `${SITE_URL}/` },
   category: "employment",
 };
 
