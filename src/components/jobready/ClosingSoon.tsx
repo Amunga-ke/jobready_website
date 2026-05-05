@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import SectionNumber from './SectionNumber';
 import JobClickable from './JobClickable';
 import { formatDateShortUTC } from '@/lib/format-date';
@@ -21,9 +22,9 @@ export default function ClosingSoon({ jobs }: { jobs: Job[] }) {
       <div className="max-w-6xl mx-auto px-5 relative">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading text-xl font-bold">Closing Soon</h2>
-          <a href="/jobs?sort=closing" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
+          <Link href="/jobs?sort=closing" className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider">
             All deadlines →
-          </a>
+          </Link>
         </div>
         {jobs.length === 0 ? (
           <p className="text-sm text-muted py-8 text-center">No jobs closing soon. Check back later!</p>

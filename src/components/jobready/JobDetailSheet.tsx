@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { X, MapPin, Clock, Building2, ExternalLink, Share2, Bookmark, BookmarkCheck, LogIn } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { sanitizeHtml } from "@/lib/sanitize";
@@ -228,9 +229,9 @@ function SaveJobButton({ slug, jobId }: { slug: string; jobId: string }) {
         </button>
         {showLoginHint && (
           <div className="absolute top-full right-0 mt-1 px-2.5 py-1.5 bg-ink text-white text-[11px] rounded-lg whitespace-nowrap shadow-lg z-10">
-            <a href="/auth/login" className="inline-flex items-center gap-1 hover:underline">
+            <Link href="/auth/login" className="inline-flex items-center gap-1 hover:underline">
               <LogIn className="w-3 h-3" /> Sign in to save jobs
-            </a>
+            </Link>
           </div>
         )}
       </div>
@@ -250,9 +251,9 @@ function SaveJobButton({ slug, jobId }: { slug: string; jobId: string }) {
       </button>
       {showLoginHint && (
         <div className="absolute top-full right-0 mt-1 px-2.5 py-1.5 bg-ink text-white text-[11px] rounded-lg whitespace-nowrap shadow-lg z-10">
-          <a href="/auth/login" className="inline-flex items-center gap-1 hover:underline">
+          <Link href="/auth/login" className="inline-flex items-center gap-1 hover:underline">
             <LogIn className="w-3 h-3" /> Sign in to save jobs
-          </a>
+          </Link>
         </div>
       )}
     </div>

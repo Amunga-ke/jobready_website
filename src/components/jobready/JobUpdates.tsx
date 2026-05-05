@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import SectionNumber from "./SectionNumber";
 import { useUpdateModal } from "./UpdateModalContext";
 import type { UpdateData } from "./UpdateModalContext";
@@ -92,12 +93,12 @@ export default function JobUpdates() {
               Official
             </span>
           </div>
-          <a
+          <Link
             href="/updates"
             className="text-[11px] font-mono text-muted hover:text-ink transition-colors uppercase tracking-wider"
           >
             View all &rarr;
-          </a>
+          </Link>
         </div>
         <p className="text-[12px] text-muted mb-6">
           Ministry postings, shortlisting results, recruitment announcements, and deadlines
