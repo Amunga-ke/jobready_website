@@ -45,12 +45,14 @@ export async function generateMetadata(): Promise<Metadata> {
       url: "https://jobreadyke.co.ke/",
       siteName: "JobReady",
       type: "website",
+      images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady — Jobs for Kenyans" }],
     },
     twitter: {
       card: "summary_large_image",
       title: "JobReady — Jobs for Kenyans",
       description:
         "Kenya's most trusted job board. Real jobs from verified employers.",
+      images: ["https://jobreadyke.co.ke/opengraph-image.png"],
     },
   };
 }
