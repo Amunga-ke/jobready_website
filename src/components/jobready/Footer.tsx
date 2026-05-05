@@ -132,6 +132,7 @@ export default function Footer() {
               href="https://x.com/jobreadyke"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Follow JobReady on X (Twitter)"
               className="text-muted/30 hover:text-ink transition-colors"
             >
               <svg
@@ -148,6 +149,7 @@ export default function Footer() {
               href="https://linkedin.com/company/jobreadyke"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Follow JobReady on LinkedIn"
               className="text-muted/30 hover:text-ink transition-colors"
             >
               <Linkedin className="text-base" />
@@ -156,6 +158,7 @@ export default function Footer() {
               href="https://facebook.com/jobreadyke"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Follow JobReady on Facebook"
               className="text-muted/30 hover:text-ink transition-colors"
             >
               <Facebook className="text-base" />
@@ -164,6 +167,7 @@ export default function Footer() {
               href="https://instagram.com/jobreadyke"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Follow JobReady on Instagram"
               className="text-muted/30 hover:text-ink transition-colors"
             >
               <Instagram className="text-base" />
