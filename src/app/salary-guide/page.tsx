@@ -5,18 +5,30 @@ export const metadata: Metadata = {
   title: "Salary Guide — Kenya Salary Benchmarks 2025 | JobReady",
   description:
     "Explore salary benchmarks and compensation insights across industries in Kenya. Compare salaries by role, experience, and location.",
+  robots: { index: false, follow: true },
   alternates: { canonical: "https://jobreadyke.co.ke/salary-guide" },
   openGraph: {
     title: "Salary Guide — Kenya Salary Benchmarks | JobReady",
-    description: "Salary benchmarks and compensation insights across Kenyan industries.",
+    description:
+      "Salary benchmarks and compensation insights across Kenyan industries.",
     url: "https://jobreadyke.co.ke/salary-guide",
     siteName: "JobReady",
     type: "website",
+    images: [
+      {
+        url: "https://jobreadyke.co.ke/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Kenya Salary Guide — JobReady",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Salary Guide | JobReady",
-    description: "Salary benchmarks and compensation insights across Kenyan industries.",
+    title: "Salary Guide — Kenya Salary Benchmarks | JobReady",
+    description:
+      "Salary benchmarks and compensation insights across Kenyan industries.",
+    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
   },
 };
 

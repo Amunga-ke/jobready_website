@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Forgot Password",
-  description: "Reset your JobReady password",
+  title: "Reset Your JobReady Password",
+  description: "Reset your JobReady password securely via email. Follow the link sent to your registered address.",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "https://jobreadyke.co.ke/auth/forgot-password" },
 };
 
 export default function ForgotPasswordPage() {
@@ -15,6 +17,7 @@ export default function ForgotPasswordPage() {
           <Link href="/" className="inline-block font-heading font-bold text-lg tracking-tight">
             JOB<span className="text-accent">READY</span>
           </Link>
+          <h1 className="text-xl font-heading font-bold text-ink mb-2">Reset Your Password</h1>
           <p className="text-[13px] text-muted mt-2">
             Enter your email and we&apos;ll send you a reset link.
           </p>

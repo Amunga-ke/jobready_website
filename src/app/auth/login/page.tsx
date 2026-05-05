@@ -4,8 +4,10 @@ import Link from "next/link";
 import LoginForm from "./LoginForm";
 
 export const metadata: Metadata = {
-  title: "Sign In",
-  description: "Sign in to your JobReady account",
+  title: "Sign In to Your JobReady Account",
+  description: "Sign in securely to your JobReady account to manage job applications, saved jobs, and alerts.",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "https://jobreadyke.co.ke/auth/login" },
 };
 
 export default function LoginPage() {
@@ -17,6 +19,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-block font-heading font-bold text-lg tracking-tight">
             JOB<span className="text-accent">READY</span>
           </Link>
+          <h1 className="text-xl font-heading font-bold text-ink mb-2">Sign In to Your Account</h1>
           <p className="text-[13px] text-muted mt-2">
             Welcome back. Sign in to your account.
           </p>

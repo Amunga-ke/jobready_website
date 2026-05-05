@@ -5,18 +5,28 @@ export const metadata: Metadata = {
   title: "Pricing — Advertise Jobs on JobReady Kenya",
   description:
     "Find the right plan to advertise your job openings and reach top talent across Kenya. Affordable employer pricing for businesses of all sizes.",
+  robots: { index: false, follow: true },
   alternates: { canonical: "https://jobreadyke.co.ke/pricing" },
   openGraph: {
-    title: "Pricing — Advertise Jobs on JobReady",
+    title: "Pricing — Advertise Jobs on JobReady | JobReady",
     description: "Affordable employer pricing to reach top Kenyan talent.",
     url: "https://jobreadyke.co.ke/pricing",
     siteName: "JobReady",
     type: "website",
+    images: [
+      {
+        url: "https://jobreadyke.co.ke/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Advertise Jobs on JobReady Kenya",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pricing | JobReady",
+    title: "Pricing — Advertise Jobs on JobReady | JobReady",
     description: "Affordable employer pricing to reach top Kenyan talent.",
+    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
   },
 };
 
