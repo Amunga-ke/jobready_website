@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, MapPin, Clock, Building2, ExternalLink, Share2, Bookmark, BookmarkCheck, LogIn } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { useJobModal } from "./JobModalContext";
 import { formatDateUTC } from "@/lib/format-date";
 import type { Job } from "@/types";
@@ -370,7 +371,7 @@ export default function JobDetailSheet() {
                 className="text-[13px] text-ink/80 leading-relaxed prose prose-sm max-w-none
                   [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
                   [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-semibold [&_strong]:text-ink"
-                dangerouslySetInnerHTML={{ __html: job.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }}
               />
             </div>
           )}

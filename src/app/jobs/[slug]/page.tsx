@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, MapPin, Clock, Building2, ExternalLink } from "lucide-react";
 import { formatDateUTC } from "@/lib/format-date";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { getJobBySlug, getJobCountByCounty, getJobsByCounty } from "@/lib/data";
 import ShareButton from "@/components/jobready/ShareButton";
 import { KE_COUNTIES, slugifyCounty, JOB_CATEGORIES, getCountyBySlug } from "@/lib/constants";
@@ -432,7 +433,7 @@ export default async function SlugPage({
                 className="text-[14px] text-ink/80 leading-relaxed
                   [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
                   [&_li]:mb-1.5 [&_p]:mb-3 [&_strong]:font-semibold [&_strong]:text-ink"
-                dangerouslySetInnerHTML={{ __html: job.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }}
               />
             </div>
           )}

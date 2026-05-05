@@ -9,7 +9,23 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const rawCallbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  // Prevent open redirect: only allow relative paths or same-origin URLs
+  const callbackUrl = (() => {
+    try {
+      const url = new URL(rawCallbackUrl, window.location.origin);
+      if (url.origin === window.location.origin && url.pathname.startsWith("/")) {
+        return url.pathname;
+      }
+    } catch {
+      // Not a valid URL, might be a relative path like "/dashboard"
+      if (rawCallbackUrl.startsWith("/") && !rawCallbackUrl.startsWith("//")) {
+        return rawCallbackUrl;
+      }
+    }
+    return "/dashboard";
+  })();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

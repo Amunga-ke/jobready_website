@@ -104,10 +104,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en-KE" className="scroll-smooth" suppressHydrationWarning>
       <head>
         {/* Google AdSense auto-ads verification */}
         <meta name="google-adsense-account" content="ca-pub-8031704055036556" />
+        {/* Preconnect to third-party origins */}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="preconnect" href="https://googleads.g.doubleclick.net" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0f172a" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
