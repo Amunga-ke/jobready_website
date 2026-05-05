@@ -29,6 +29,7 @@ export const metadata: Metadata = {
     title: "Government Jobs in Kenya | JobReady",
     description:
       "Browse national, county and state corporation jobs from the Kenya Gazette.",
+    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
   },
 };
 

@@ -12,11 +12,13 @@ export const metadata: Metadata = {
     url: "https://jobreadyke.co.ke/about",
     siteName: "JobReady",
     type: "website",
+    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "About JobReady",
     description: "Kenya's most trusted job board connecting verified employers with talented job seekers.",
+    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
   },
 };
 

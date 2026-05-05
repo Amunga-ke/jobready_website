@@ -20,12 +20,14 @@ export const metadata: Metadata = {
     url: "https://jobreadyke.co.ke/opportunities",
     siteName: "JobReady",
     type: "website",
+    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Opportunities — Scholarships, Internships & More | JobReady",
     description:
       "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities across Kenya.",
+    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
   },
 };
 

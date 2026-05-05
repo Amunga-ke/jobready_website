@@ -59,6 +59,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
       card: "summary_large_image",
       title,
       description,
+      images: ["https://jobreadyke.co.ke/opengraph-image.png"],
     },
   };
   } catch {
