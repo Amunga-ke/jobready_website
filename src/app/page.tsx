@@ -88,7 +88,7 @@ export default async function Home() {
   ]);
 
   return (
-    <>
+    <main>
       <WebSiteJsonLd />
       <BreadcrumbJsonLd items={[{ name: 'Home', url: 'https://jobreadyke.co.ke/' }]} />
       <Hero jobs={justPosted} />
@@ -141,6 +141,6 @@ export default async function Home() {
           answer: "New jobs are posted daily on JobReady from verified employers across Kenya. We aggregate listings from government bodies, private companies, NGOs, and international organizations operating in Kenya."
         },
       ]} />
-    </>
+    </main>
   );
 }
