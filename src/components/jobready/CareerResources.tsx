@@ -62,7 +62,7 @@ export default async function CareerResources() {
                       alt={featured.title}
                       width={800}
                       height={450}
-                      unoptimized
+                      sizes="(max-width: 768px) 100vw, 680px"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                   ) : (
@@ -71,7 +71,7 @@ export default async function CareerResources() {
                       alt={featured.title}
                       width={800}
                       height={450}
-                      unoptimized
+                      sizes="(max-width: 768px) 100vw, 680px"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                   )}

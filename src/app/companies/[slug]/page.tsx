@@ -175,7 +175,7 @@ export default async function CompanyDetailPage({
                       alt={company.name}
                       width={80}
                       height={80}
-                      unoptimized
+                      sizes="80px"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -447,7 +447,7 @@ export default async function CompanyDetailPage({
                             alt={rc.name}
                             width={36}
                             height={36}
-                            unoptimized
+                            sizes="36px"
                             className="w-full h-full object-cover"
                           />
                         </div>
