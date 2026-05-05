@@ -37,8 +37,9 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="pt-4 pb-4">
-        <div className="max-w-6xl mx-auto px-5 flex items-center justify-between">
+      <header>
+        <nav className="pt-4 pb-4" aria-label="Main navigation">
+          <div className="max-w-6xl mx-auto px-5 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.svg" alt="JobReady" width={32} height={32} className="shrink-0" priority />
@@ -95,7 +96,8 @@ export default function Navbar() {
             <Menu className="w-6 h-6" />
           </button>
         </div>
-      </nav>
+        </nav>
+      </header>
 
       {/* ───── Full-screen overlay menu ───── */}
       {open && (
