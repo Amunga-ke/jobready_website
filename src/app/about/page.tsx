@@ -6,7 +6,7 @@ import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
 export const metadata: Metadata = {
   title: "About JobReady — Kenya's Most Trusted Job Board",
   description:
-    "Learn about JobReady, Kenya's fastest-growing job board connecting verified employers with talented job seekers across all 47 counties. Our mission, values and team.",
+    "Learn about JobReady, Kenya's fastest-growing job board connecting verified employers with job seekers across all 47 counties. Our mission, values and team.",
   alternates: { canonical: "https://jobreadyke.co.ke/about" },
   openGraph: {
     title: "About JobReady",

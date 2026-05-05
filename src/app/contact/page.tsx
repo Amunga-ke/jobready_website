@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/jobready/JsonLd";
 
 export const metadata: Metadata = {
   title: "Contact Us | JobReady",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Contact Us | JobReady",
     description: "Reach the JobReady team for support and partnerships.",
   },
@@ -139,6 +139,21 @@ export default function Contact_Page() {
             </div>
           </div>
         </div>
+
+        <FAQJsonLd faqs={[
+        {
+          question: "Is JobReady free for job seekers?",
+          answer: "Yes, JobReady is completely free for job seekers. You can browse, search, and apply for jobs without any charges. We never ask job seekers to pay for job applications or access to listings."
+        },
+        {
+          question: "How do I report a fake job listing?",
+          answer: "If you encounter a suspicious listing, please email us at support@jobreadyke.co.ke with the job title and URL. We review all reports and remove fraudulent listings promptly. All employers on JobReady are verified, but we appreciate community vigilance."
+        },
+        {
+          question: "How can my company post jobs on JobReady?",
+          answer: "Visit our Post a Job page to get started. Employers can create accounts, submit job listings, and manage applications through our employer dashboard. We offer both free and premium listing options."
+        },
+      ]} />
 
         {/* CTA */}
         <div className="text-center pt-4">

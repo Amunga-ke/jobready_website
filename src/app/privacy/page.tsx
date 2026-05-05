@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Privacy Policy | JobReady",
     description: "How JobReady handles and protects your personal data.",
   },

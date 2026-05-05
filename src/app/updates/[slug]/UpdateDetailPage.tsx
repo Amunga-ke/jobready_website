@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Clock, Building2, Download, FileText, ExternalLink } from "lucide-react";
 import { formatDateUTC } from "@/lib/format-date";
 
@@ -101,10 +102,13 @@ export default function UpdateDetailPage({ update }: { update: UpdateRecord }) {
           {/* Image if available */}
           {update.imageUrl && (
             <div className="rounded-lg overflow-hidden border border-divider mb-6">
-              <img
-                src={update.imageUrl}
+              <Image
+                src={update.imageUrl!}
                 alt={update.title}
-                className="w-full h-auto object-cover"
+                width={800}
+                height={450}
+                className="w-full h-auto object-cover rounded-lg"
+                sizes="(max-width: 768px) 100vw, 800px"
               />
             </div>
           )}

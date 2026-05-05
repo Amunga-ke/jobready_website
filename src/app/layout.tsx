@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
@@ -96,6 +96,13 @@ export const metadata: Metadata = {
   // verification: { google: "YOUR_GOOGLE_SEARCH_CONSOLE_CODE" }, // TODO: Add real GSC verification code
   alternates: { canonical: `${SITE_URL}/` },
   category: "employment",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({

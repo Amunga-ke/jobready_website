@@ -34,7 +34,7 @@ export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "JobReady — Jobs for Kenyans | Real Jobs from Verified Employers",
+    title: "JobReady — Jobs for Kenyans — Real Jobs from Verified Employers",
     description:
       "Kenya's most trusted job board. Browse verified jobs across Nairobi, Mombasa, Kisumu & all 47 counties. Government, private sector & internships.",
     alternates: { canonical: "https://jobreadyke.co.ke/" },

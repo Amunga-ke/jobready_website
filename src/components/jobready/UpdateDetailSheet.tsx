@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { X, Clock, Building2, Download, FileText, ExternalLink, ArrowRight } from "lucide-react";
 import { useUpdateModal } from "./UpdateModalContext";
 import { formatDateUTC } from "@/lib/format-date";
@@ -132,10 +133,13 @@ export default function UpdateDetailSheet() {
           {/* Image preview if available */}
           {update.imageUrl && (
             <div className="rounded-lg overflow-hidden border border-divider">
-              <img
-                src={update.imageUrl}
+              <Image
+                src={update.imageUrl!}
                 alt={update.title}
-                className="w-full h-auto object-cover"
+                width={800}
+                height={450}
+                className="w-full h-auto object-cover rounded-lg"
+                sizes="(max-width: 768px) 100vw, 800px"
               />
             </div>
           )}
