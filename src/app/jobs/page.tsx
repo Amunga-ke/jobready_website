@@ -47,6 +47,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     title,
     description,
     alternates: { canonical: "https://jobreadyke.co.ke/jobs" },
+    robots: q ? { index: false, follow: true } : undefined,
     openGraph: {
       title,
       description,
