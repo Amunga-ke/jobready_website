@@ -470,7 +470,12 @@ export default async function SlugPage({
         </div>
       </main>
     );
-  } catch {
+  } catch (error: unknown) {
+    // Re-throw NEXT_NOT_FOUND so the framework handles it as a 404
+    if (error && typeof error === "object" && "digest" in error && (error as { digest: string }).digest === "NEXT_NOT_FOUND") {
+      throw error;
+    }
+    console.error("[SlugPage] Unhandled error:", error);
     notFound();
   }
 }

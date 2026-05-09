@@ -361,7 +361,11 @@ export default async function GovernmentLevelPage({
         </div>
       </main>
     );
-  } catch {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "digest" in error && (error as { digest: string }).digest === "NEXT_NOT_FOUND") {
+      throw error;
+    }
+    console.error("[GovernmentLevelPage] Unhandled error:", error);
     notFound();
   }
 }

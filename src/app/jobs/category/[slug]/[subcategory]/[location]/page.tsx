@@ -233,7 +233,11 @@ export default async function SubcategoryCountyPage({
         </div>
       </main>
     );
-  } catch {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "digest" in error && (error as { digest: string }).digest === "NEXT_NOT_FOUND") {
+      throw error;
+    }
+    console.error("[CategorySubcountyPage] Unhandled error:", error);
     notFound();
   }
 }
