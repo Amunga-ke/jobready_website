@@ -181,7 +181,7 @@ export default function UpdatesFeed() {
                 <button
                   key={item.id}
                   onClick={() => openUpdateBySlug(item.slug)}
-                  className="py-5 w-full text-left group hover:bg-ink/[0.02] -mx-2 px-2 rounded-lg transition-colors"
+                  className="py-5 w-full text-left group hover:bg-ink/[0.02] -mx-2 px-2 rounded-lg transition-colors cursor-pointer"
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 border border-divider rounded-lg flex items-center justify-center shrink-0 bg-ink/[0.02] mt-0.5">
