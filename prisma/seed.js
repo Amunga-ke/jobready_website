@@ -1,8 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-// Explicitly set the DATABASE_URL to avoid system env override
-process.env.DATABASE_URL = 'mysql://trustfit_jobready_database_admin:Admincyber@vda7300.is.cc:3306/trustfit_jobready_database';
+// DATABASE_URL is read from .env or process environment
 const prisma = new PrismaClient();
 
 async function main() {

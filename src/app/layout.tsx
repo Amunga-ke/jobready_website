@@ -40,10 +40,7 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
-const SITE_URL = "https://jobreadyke.co.ke";
-const SITE_TITLE = "JobReady — Jobs for Kenyans";
-const SITE_DESCRIPTION =
-  "Kenya's most trusted job board. Browse thousands of jobs from verified employers across Nairobi, Mombasa, Kisumu and all 47 counties. Government, private sector, internships and more.";
+import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

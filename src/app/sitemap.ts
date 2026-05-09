@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { OPPORTUNITY_TYPES } from "@/lib/constants";
 import { SEO_THRESHOLDS } from "@/lib/seo/page-thresholds";
 
-const SITE_URL = "https://jobreadyke.co.ke";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 3600; // ISR: revalidate sitemap every hour
 

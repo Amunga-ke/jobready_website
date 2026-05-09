@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 
-const SITE_URL = "https://jobreadyke.co.ke";
+import { SITE_URL } from "@/lib/config";
 const SITE_TITLE = "JobReady Kenya — Latest Jobs & Updates";
 const SITE_DESCRIPTION =
   "Latest job listings, government opportunities, and career updates from Kenya's most trusted job board.";
