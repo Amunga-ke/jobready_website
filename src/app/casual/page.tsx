@@ -94,7 +94,7 @@ export default async function CasualPage() {
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Casual & Part-Time", url: `${SITE_URL}/casual` }]} />
-      <CollectionPageJsonLd name="Casual & Part-Time Jobs" description="Find daily-wage, weekend and flexible part-time jobs across Kenya" url=`${SITE_URL}/casual` numberOfItems={total || undefined} />
+      <CollectionPageJsonLd name="Casual & Part-Time Jobs" description="Find daily-wage, weekend and flexible part-time jobs across Kenya" url={`${SITE_URL}/casual`} numberOfItems={total || undefined} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

@@ -60,7 +60,7 @@ export default async function CompaniesPage({
   return (
     <main className="bg-surface min-h-screen">
       <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Companies", url: `${SITE_URL}/companies` }]} />
-      <CollectionPageJsonLd name="Verified Employers & Companies" description="Browse verified companies and employers hiring in Kenya" url=`${SITE_URL}/companies` numberOfItems={companies.length} />
+      <CollectionPageJsonLd name="Verified Employers & Companies" description="Browse verified companies and employers hiring in Kenya" url={`${SITE_URL}/companies`} numberOfItems={companies.length} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

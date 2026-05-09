@@ -166,7 +166,7 @@ export default async function JobsPage({
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Jobs", url: `${SITE_URL}/jobs` }]} />
-      <CollectionPageJsonLd name="Job Listings" description="Browse and search job listings from verified employers across Kenya" url=`${SITE_URL}/jobs` numberOfItems={total} />
+      <CollectionPageJsonLd name="Job Listings" description="Browse and search job listings from verified employers across Kenya" url={`${SITE_URL}/jobs`} numberOfItems={total} />
       <div className="max-w-6xl mx-auto px-5 py-10">
         {/* Header */}
         <div className="mb-8">

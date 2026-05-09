@@ -115,7 +115,7 @@ export default async function OpportunitiesPage() {
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Opportunities", url: `${SITE_URL}/opportunities` }]} />
-      <CollectionPageJsonLd name="Opportunities" description="Scholarships, internships, fellowships, grants, bursaries and more from top organizations in Kenya" url=`${SITE_URL}/opportunities` numberOfItems={totalCount} />
+      <CollectionPageJsonLd name="Opportunities" description="Scholarships, internships, fellowships, grants, bursaries and more from top organizations in Kenya" url={`${SITE_URL}/opportunities`} numberOfItems={totalCount} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

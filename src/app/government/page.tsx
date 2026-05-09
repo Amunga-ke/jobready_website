@@ -119,7 +119,7 @@ export default async function GovernmentPage() {
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Government Jobs", url: `${SITE_URL}/government` }]} />
-      <CollectionPageJsonLd name="Government Jobs in Kenya" description="Browse national, county and state corporation jobs from the Kenya Gazette" url=`${SITE_URL}/government` numberOfItems={data.total} />
+      <CollectionPageJsonLd name="Government Jobs in Kenya" description="Browse national, county and state corporation jobs from the Kenya Gazette" url={`${SITE_URL}/government`} numberOfItems={data.total} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

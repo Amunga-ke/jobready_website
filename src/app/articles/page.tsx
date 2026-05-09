@@ -105,7 +105,7 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Resources", url: `${SITE_URL}/articles` }]} />
-      <CollectionPageJsonLd name="Career Resources & Articles" description="Expert career advice for Kenyan job seekers" url=`${SITE_URL}/articles` numberOfItems={articles.length} />
+      <CollectionPageJsonLd name="Career Resources & Articles" description="Expert career advice for Kenyan job seekers" url={`${SITE_URL}/articles`} numberOfItems={articles.length} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[
