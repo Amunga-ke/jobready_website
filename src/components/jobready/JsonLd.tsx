@@ -3,14 +3,28 @@
  *
  * Renders <script type="application/ld+json"> tags for Google rich snippets.
  * Covers: WebSite, Organization, BreadcrumbList, JobPosting, Article, Company, CollectionPage.
+ *
+ * Security: Uses React 19 direct children pattern instead of dangerouslySetInnerHTML.
+ * This automatically escapes </script sequences that could break out of the script tag
+ * and execute arbitrary JavaScript (CVE class: Stored XSS via JSON-LD injection).
  */
+
+/** Escape strings to prevent breaking out of <script> tags */
+function safeJsonLd(data: unknown): string {
+  const json = JSON.stringify(data);
+  // Escape </script> and </ to prevent script tag injection.
+  // Even though React 19's direct children handle this, we add defense-in-depth.
+  return json.replace(/<\//g, "<\\/");
+}
 
 export default function JsonLd({ data }: { data: Record<string, unknown> | Record<string, unknown>[] }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+      suppressHydrationWarning
+    >
+      {safeJsonLd(data)}
+    </script>
   );
 }
 
