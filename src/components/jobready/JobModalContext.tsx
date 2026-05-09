@@ -10,7 +10,7 @@ interface JobModalContextType {
   openJobById: (idOrSlug: string) => void;
   /** Close the sidesheet */
   closeJob: () => void;
-  /** Currently open job (null if closed) */
+  /** Currently open job (null if closed or still loading) */
   currentJob: Job | null;
   /** Whether the sheet is open */
   isOpen: boolean;
@@ -40,6 +40,7 @@ function nativePushState(state: any, title: string, url: string | URL | null) {
 
 export function JobModalProvider({ children }: { children: React.ReactNode }) {
   const [currentJob, setCurrentJob] = useState<Job | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const popstateJobRef = useRef<string | null>(null);
 
@@ -53,13 +54,22 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
 
   const openJob = useCallback((job: Job) => {
     setCurrentJob(job);
+    setIsLoading(false);
+    setIsOpen(true);
     pushUrlForJob(job.slug);
   }, [pushUrlForJob]);
 
   const openJobById = useCallback(async (idOrSlug: string) => {
+    // Fire the sheet immediately with loading state
+    setIsOpen(true);
     setIsLoading(true);
+    setCurrentJob(null);
+    // Push URL optimistically
+    if (typeof window !== "undefined") {
+      popstateJobRef.current = idOrSlug;
+      nativePushState({ jobSlug: idOrSlug }, "", `/jobs/${idOrSlug}`);
+    }
     try {
-      // First try fetching by slug via our API
       const res = await fetch(`/api/jobs/${idOrSlug}`);
       if (!res.ok) throw new Error("Job not found");
       const data = await res.json();
@@ -69,6 +79,8 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("[openJobById] Failed to fetch job:", error);
+      // Close on failure — no point showing an empty sheet
+      setIsOpen(false);
     } finally {
       setIsLoading(false);
     }
@@ -78,14 +90,15 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined" && popstateJobRef.current) {
       window.history.back();
       popstateJobRef.current = null;
-    } else {
-      setCurrentJob(null);
     }
+    setIsOpen(false);
+    setCurrentJob(null);
   }, []);
 
   // When the user presses the browser back button, close the sidesheet.
   useEffect(() => {
     const onPopState = () => {
+      setIsOpen(false);
       setCurrentJob(null);
       popstateJobRef.current = null;
     };
@@ -95,7 +108,7 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <JobModalContext.Provider
-      value={{ openJob, openJobById, closeJob, currentJob, isOpen: currentJob !== null, isLoading }}
+      value={{ openJob, openJobById, closeJob, currentJob, isOpen, isLoading }}
     >
       {children}
     </JobModalContext.Provider>

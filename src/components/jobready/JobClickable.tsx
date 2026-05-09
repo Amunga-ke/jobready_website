@@ -24,7 +24,7 @@ export default function JobClickable({ job, children, className }: JobClickableP
   return (
     <div
       onClick={() => openJob(job)}
-      className={className}
+      className={`cursor-pointer ${className || ""}`}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {

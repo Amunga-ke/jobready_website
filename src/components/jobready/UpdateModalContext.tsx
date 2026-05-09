@@ -23,7 +23,7 @@ interface UpdateModalContextType {
   openUpdateBySlug: (slug: string) => void;
   /** Close the sidesheet */
   closeUpdate: () => void;
-  /** Currently open update (null if closed) */
+  /** Currently open update (null if closed or still loading) */
   currentUpdate: UpdateData | null;
   /** Whether the sheet is open */
   isOpen: boolean;
@@ -49,6 +49,7 @@ function nativePushState(state: any, title: string, url: string | URL | null) {
 
 export function UpdateModalProvider({ children }: { children: React.ReactNode }) {
   const [currentUpdate, setCurrentUpdate] = useState<UpdateData | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const popstateRef = useRef<string | null>(null);
 
@@ -62,11 +63,21 @@ export function UpdateModalProvider({ children }: { children: React.ReactNode })
 
   const openUpdate = useCallback((update: UpdateData) => {
     setCurrentUpdate(update);
+    setIsLoading(false);
+    setIsOpen(true);
     pushUrlForUpdate(update.slug);
   }, [pushUrlForUpdate]);
 
   const openUpdateBySlug = useCallback(async (slug: string) => {
+    // Fire the sheet immediately with loading state
+    setIsOpen(true);
     setIsLoading(true);
+    setCurrentUpdate(null);
+    // Push URL optimistically
+    if (typeof window !== "undefined") {
+      popstateRef.current = slug;
+      nativePushState({ updateSlug: slug }, "", `/updates/${slug}`);
+    }
     try {
       const res = await fetch(`/api/updates/${slug}`);
       if (!res.ok) throw new Error("Update not found");
@@ -77,6 +88,8 @@ export function UpdateModalProvider({ children }: { children: React.ReactNode })
       }
     } catch (error) {
       console.error("[openUpdateBySlug] Failed to fetch update:", error);
+      // Close on failure
+      setIsOpen(false);
     } finally {
       setIsLoading(false);
     }
@@ -86,14 +99,15 @@ export function UpdateModalProvider({ children }: { children: React.ReactNode })
     if (typeof window !== "undefined" && popstateRef.current) {
       window.history.back();
       popstateRef.current = null;
-    } else {
-      setCurrentUpdate(null);
     }
+    setIsOpen(false);
+    setCurrentUpdate(null);
   }, []);
 
   // Close on browser back
   useEffect(() => {
     const onPopState = () => {
+      setIsOpen(false);
       setCurrentUpdate(null);
       popstateRef.current = null;
     };
@@ -108,7 +122,7 @@ export function UpdateModalProvider({ children }: { children: React.ReactNode })
         openUpdateBySlug,
         closeUpdate,
         currentUpdate,
-        isOpen: currentUpdate !== null,
+        isOpen,
         isLoading,
       }}
     >

@@ -23,7 +23,7 @@ export default function JobRowClickable({ slug, children, className }: JobRowCli
   return (
     <div
       onClick={() => openJobById(slug)}
-      className={className}
+      className={`cursor-pointer ${className || ""}`}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {

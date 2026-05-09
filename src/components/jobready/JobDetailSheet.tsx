@@ -261,7 +261,7 @@ function SaveJobButton({ slug, jobId }: { slug: string; jobId: string }) {
 }
 
 export default function JobDetailSheet() {
-  const { currentJob: job, closeJob, isOpen } = useJobModal();
+  const { currentJob: job, closeJob, isOpen, isLoading } = useJobModal();
   const sheetRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
 
@@ -284,9 +284,9 @@ export default function JobDetailSheet() {
     };
   }, [isOpen]);
 
-  if (!job || !isOpen) return null;
+  if (!isOpen) return null;
 
-  const deadlineText = daysUntil(job.deadline);
+  const deadlineText = !isLoading && job ? daysUntil(job.deadline) : null;
 
   return (
     <div className="fixed inset-0 z-[60]" aria-modal="true" role="dialog">
@@ -302,116 +302,147 @@ export default function JobDetailSheet() {
         ref={sheetRef}
         className="absolute inset-y-0 right-0 w-full max-w-lg bg-surface shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
       >
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-divider">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-heading font-bold text-ink leading-tight truncate">
-              {job.title}
-            </h2>
-            <p className="text-[13px] text-muted mt-0.5 truncate">
-              {job.companyName}
-              {job.companyVerified && (
-                <span className="inline-block ml-1.5 text-[11px] text-accent font-medium">
-                  Verified
+        {isLoading || !job ? (
+          <>
+            {/* Loading skeleton */}
+            <div className="px-5 pt-5 pb-3 border-b border-divider">
+              <div className="h-5 bg-subtle rounded w-3/4 mb-2 animate-pulse" />
+              <div className="h-3.5 bg-subtle rounded w-1/2 animate-pulse" />
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+              <div className="flex gap-3">
+                <div className="h-3.5 bg-subtle rounded w-24 animate-pulse" />
+                <div className="h-3.5 bg-subtle rounded w-28 animate-pulse" />
+                <div className="h-3.5 bg-subtle rounded w-20 animate-pulse" />
+              </div>
+              <div className="h-20 bg-subtle rounded-lg animate-pulse" />
+              <div className="space-y-2">
+                <div className="h-3 bg-subtle rounded w-full animate-pulse" />
+                <div className="h-3 bg-subtle rounded w-5/6 animate-pulse" />
+                <div className="h-3 bg-subtle rounded w-4/6 animate-pulse" />
+                <div className="h-3 bg-subtle rounded w-full animate-pulse" />
+                <div className="h-3 bg-subtle rounded w-3/4 animate-pulse" />
+              </div>
+            </div>
+            <div className="px-5 py-4 border-t border-divider flex items-center justify-between">
+              <div className="h-8 bg-subtle rounded w-40 animate-pulse" />
+              <div className="h-10 bg-subtle rounded-lg w-28 animate-pulse" />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-divider">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg font-heading font-bold text-ink leading-tight truncate">
+                  {job.title}
+                </h2>
+                <p className="text-[13px] text-muted mt-0.5 truncate">
+                  {job.companyName}
+                  {job.companyVerified && (
+                    <span className="inline-block ml-1.5 text-[11px] text-accent font-medium">
+                      Verified
+                    </span>
+                  )}
+                </p>
+              </div>
+              <button
+                onClick={closeJob}
+                className="p-1.5 -mt-0.5 -mr-1 rounded-lg hover:bg-ink/[0.06] text-muted hover:text-ink transition-colors shrink-0"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+              {/* Meta row — inline compact */}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-muted">
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  {job.location}
                 </span>
+                <span className="inline-flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {formatDate(job.createdAt)}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Building2 className="w-3 h-3" />
+                  {job.employmentType}
+                </span>
+                {job.workMode && <span>{job.workMode}</span>}
+                {deadlineText && (
+                  <span className={deadlineText === "Closed" ? "text-red-500 font-medium" : "text-accent font-medium"}>
+                    {deadlineText}
+                  </span>
+                )}
+              </div>
+
+              {/* Type badges */}
+              <div className="flex flex-wrap gap-1.5">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-ink/[0.05] text-ink/70">
+                  {job.category}
+                </span>
+                <GovernmentBadge level={job.governmentLevel} />
+                <OpportunityBadge type={job.opportunityType} />
+              </div>
+
+              {/* Salary / Compensation */}
+              <SalaryBlock job={job} />
+
+              {/* Description */}
+              {job.description && (
+                <div>
+                  <h3 className="text-[12px] font-medium text-muted uppercase tracking-wider mb-2">
+                    Description
+                  </h3>
+                  <div
+                    className="text-[13px] text-ink/80 leading-relaxed prose prose-sm max-w-none
+                      [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
+                      [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-semibold [&_strong]:text-ink"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }}
+                  />
+                </div>
               )}
-            </p>
-          </div>
-          <button
-            onClick={closeJob}
-            className="p-1.5 -mt-0.5 -mr-1 rounded-lg hover:bg-ink/[0.06] text-muted hover:text-ink transition-colors shrink-0"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-          {/* Meta row — inline compact */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[12px] text-muted">
-            <span className="inline-flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {job.location}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {formatDate(job.createdAt)}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Building2 className="w-3 h-3" />
-              {job.employmentType}
-            </span>
-            {job.workMode && <span>{job.workMode}</span>}
-            {deadlineText && (
-              <span className={deadlineText === "Closed" ? "text-red-500 font-medium" : "text-accent font-medium"}>
-                {deadlineText}
-              </span>
-            )}
-          </div>
-
-          {/* Type badges */}
-          <div className="flex flex-wrap gap-1.5">
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-ink/[0.05] text-ink/70">
-              {job.category}
-            </span>
-            <GovernmentBadge level={job.governmentLevel} />
-            <OpportunityBadge type={job.opportunityType} />
-          </div>
-
-          {/* Salary / Compensation */}
-          <SalaryBlock job={job} />
-
-          {/* Description */}
-          {job.description && (
-            <div>
-              <h3 className="text-[12px] font-medium text-muted uppercase tracking-wider mb-2">
-                Description
-              </h3>
-              <div
-                className="text-[13px] text-ink/80 leading-relaxed prose prose-sm max-w-none
-                  [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4
-                  [&_li]:mb-1 [&_p]:mb-2 [&_strong]:font-semibold [&_strong]:text-ink"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }}
-              />
+              {/* Tags */}
+              {job.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {job.tags.map((tag) => (
+                    <span key={tag} className="text-[11px] text-muted">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Tags */}
-          {job.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {job.tags.map((tag) => (
-                <span key={tag} className="text-[11px] text-muted">
-                  #{tag}
-                </span>
-              ))}
+            {/* Footer */}
+            <div className="px-5 py-4 border-t border-divider flex items-center justify-between gap-3">
+              <div className="flex items-center gap-1">
+                <ShareButton slug={job.slug} title={job.title} />
+                <SaveJobButton key={job.slug} slug={job.slug} jobId={job.id} />
+              </div>
+              {job.applicationUrl ? (
+                <a
+                  href={job.applicationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-ink text-white text-[13px] font-medium hover:bg-ink/90 transition-colors"
+                >
+                  Apply Now
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              ) : (
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-ink text-white text-[13px] font-medium hover:bg-ink/90 transition-colors">
+                  Apply Now
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 py-4 border-t border-divider flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1">
-            <ShareButton slug={job.slug} title={job.title} />
-            <SaveJobButton key={job.slug} slug={job.slug} jobId={job.id} />
-          </div>
-          {job.applicationUrl ? (
-            <a
-              href={job.applicationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-ink text-white text-[13px] font-medium hover:bg-ink/90 transition-colors"
-            >
-              Apply Now
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          ) : (
-            <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-ink text-white text-[13px] font-medium hover:bg-ink/90 transition-colors">
-              Apply Now
-              <ExternalLink className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -129,7 +129,7 @@ export default function JobUpdates() {
               <button
                 key={item.id}
                 onClick={() => openUpdateBySlug(item.slug)}
-                className="py-3.5 w-full text-left group hover:bg-surface -mx-2 px-2 rounded-lg transition-colors"
+                className="py-3.5 w-full text-left group hover:bg-surface -mx-2 px-2 rounded-lg transition-colors cursor-pointer"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 border border-divider rounded-lg flex items-center justify-center shrink-0 bg-ink/[0.02] mt-0.5">
