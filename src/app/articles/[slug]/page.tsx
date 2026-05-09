@@ -24,43 +24,47 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const article = await prisma.article.findUnique({
-    where: { slug, status: "PUBLISHED" },
-    select: {
-      title: true,
-      excerpt: true,
-      coverImage: true,
-      category: true,
-      publishedAt: true,
-    },
-  }).catch(() => null);
+  try {
+    const { slug } = await params;
+    const article = await prisma.article.findUnique({
+      where: { slug, status: "PUBLISHED" },
+      select: {
+        title: true,
+        excerpt: true,
+        coverImage: true,
+        category: true,
+        publishedAt: true,
+      },
+    }).catch(() => null);
 
-  if (!article) return { title: "Article Not Found | JobReady" };
+    if (!article) return { title: "Article Not Found | JobReady" };
 
-  const ogUrl = `https://jobreadyke.co.ke/articles/${slug}`;
+    const ogUrl = `https://jobreadyke.co.ke/articles/${slug}`;
 
-  return {
-    title: `${article.title} | JobReady`,
-    description: article.excerpt,
-    alternates: { canonical: ogUrl },
-    openGraph: {
-      title: article.title,
+    return {
+      title: `${article.title} | JobReady`,
       description: article.excerpt,
-      url: ogUrl,
-      siteName: "JobReady",
-      type: "article",
-      publishedTime: article.publishedAt.toISOString(),
-      section: article.category,
-      ...(article.coverImage && { images: [{ url: article.coverImage }] }),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: article.title,
-      description: article.excerpt,
-      ...(article.coverImage && { images: [article.coverImage] }),
-    },
-  };
+      alternates: { canonical: ogUrl },
+      openGraph: {
+        title: article.title,
+        description: article.excerpt,
+        url: ogUrl,
+        siteName: "JobReady",
+        type: "article",
+        publishedTime: article.publishedAt.toISOString(),
+        section: article.category,
+        ...(article.coverImage && { images: [{ url: article.coverImage }] }),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: article.title,
+        description: article.excerpt,
+        ...(article.coverImage && { images: [article.coverImage] }),
+      },
+    };
+  } catch {
+    return { title: "Article Not Found | JobReady" };
+  }
 }
 
 /* ── Format date ── */

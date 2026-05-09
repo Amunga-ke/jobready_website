@@ -38,10 +38,19 @@ export default async function CompaniesPage({
   const query = params.q || undefined;
   const industry = params.industry || undefined;
 
-  const [companies, industries] = await Promise.all([
-    getCompanies({ q: query, industry }),
-    getCompanyIndustries(),
-  ]);
+  let companies: Awaited<ReturnType<typeof getCompanies>> = [];
+  let industries: Awaited<ReturnType<typeof getCompanyIndustries>> = [];
+
+  try {
+    const [c, i] = await Promise.all([
+      getCompanies({ q: query, industry }),
+      getCompanyIndustries(),
+    ]);
+    companies = c;
+    industries = i;
+  } catch (error) {
+    console.error("[CompaniesPage] data fetch error:", error);
+  }
 
   // Only show industries that have companies
   const activeIndustries = industries.filter((ind) => ind.count > 0);

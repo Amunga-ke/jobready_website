@@ -37,35 +37,39 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const company = await getCompanyBySlug(slug);
+  try {
+    const { slug } = await params;
+    const company = await getCompanyBySlug(slug).catch(() => null);
 
-  if (!company) return { title: "Company Not Found | JobReady" };
+    if (!company) return { title: "Company Not Found | JobReady" };
 
-  const ogUrl = `https://jobreadyke.co.ke/companies/${slug}`;
-  const jobCount = company._count.listings;
+    const ogUrl = `https://jobreadyke.co.ke/companies/${slug}`;
+    const jobCount = company._count.listings;
 
-  return {
-    title: `${company.name} Jobs & Careers | JobReady`,
-    description: company.description
-      ? `${company.description.slice(0, 155)}${company.description.length > 155 ? "..." : ""}`
-      : `Explore ${jobCount} open positions at ${company.name}. Apply now on JobReady — Kenya's most trusted job board.`,
-    alternates: { canonical: ogUrl },
-    openGraph: {
+    return {
       title: `${company.name} Jobs & Careers | JobReady`,
-      description: `Explore ${jobCount} open positions at ${company.name}. Apply now on JobReady.`,
-      url: ogUrl,
-      siteName: "JobReady",
-      type: "website",
-      ...(company.logo && { images: [{ url: company.logo }] }),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${company.name} Jobs & Careers | JobReady`,
-      description: `Explore ${jobCount} open positions at ${company.name}.`,
-      ...(company.logo && { images: [company.logo] }),
-    },
-  };
+      description: company.description
+        ? `${company.description.slice(0, 155)}${company.description.length > 155 ? "..." : ""}`
+        : `Explore ${jobCount} open positions at ${company.name}. Apply now on JobReady — Kenya's most trusted job board.`,
+      alternates: { canonical: ogUrl },
+      openGraph: {
+        title: `${company.name} Jobs & Careers | JobReady`,
+        description: `Explore ${jobCount} open positions at ${company.name}. Apply now on JobReady.`,
+        url: ogUrl,
+        siteName: "JobReady",
+        type: "website",
+        ...(company.logo && { images: [{ url: company.logo }] }),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${company.name} Jobs & Careers | JobReady`,
+        description: `Explore ${jobCount} open positions at ${company.name}.`,
+        ...(company.logo && { images: [company.logo] }),
+      },
+    };
+  } catch {
+    return { title: "Company Not Found | JobReady" };
+  }
 }
 
 /* ── Format salary (used in mobile row) ── */
@@ -91,7 +95,7 @@ export default async function CompanyDetailPage({
   const { slug } = await params;
 
   // Fetch company first (needed for notFound + dependent queries)
-  const company = await getCompanyBySlug(slug);
+  const company = await getCompanyBySlug(slug).catch(() => null);
 
   if (!company) {
     notFound();

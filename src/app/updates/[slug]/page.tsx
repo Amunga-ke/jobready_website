@@ -11,13 +11,14 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const update = await prisma.jobUpdate.findUnique({
-    where: { slug, status: "PUBLISHED" },
-    select: { title: true, updateType: true, source: true, createdAt: true },
-  });
+  try {
+    const { slug } = await params;
+    const update = await prisma.jobUpdate.findUnique({
+      where: { slug, status: "PUBLISHED" },
+      select: { title: true, updateType: true, source: true, createdAt: true },
+    }).catch(() => null);
 
-  if (!update) return { title: "Update Not Found | JobReady" };
+    if (!update) return { title: "Update Not Found | JobReady" };
 
   return {
     title: `${update.title} | JobReady`,
@@ -37,6 +38,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: `${update.updateType} from ${update.source}`,
     },
   };
+  } catch {
+    return { title: "Update Not Found | JobReady" };
+  }
 }
 
 export default async function UpdateSlugPage({ params }: Props) {

@@ -82,10 +82,19 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
   const params = await searchParams;
   const activeCategory = params.category ? decodeURIComponent(params.category) : null;
 
-  const [articles, categoryCounts] = await Promise.all([
-    activeCategory ? getArticlesByCategory(activeCategory) : getArticles(),
-    getCategoryCounts(),
-  ]);
+  let articles: Awaited<ReturnType<typeof getArticles>> = [];
+  let categoryCounts: { category: string; count: number }[] = [];
+
+  try {
+    const [a, cc] = await Promise.all([
+      activeCategory ? getArticlesByCategory(activeCategory) : getArticles(),
+      getCategoryCounts(),
+    ]);
+    articles = a;
+    categoryCounts = cc;
+  } catch (error) {
+    console.error("[ArticlesPage] data fetch error:", error);
+  }
 
   const featured = articles.filter((a) => a.featured);
   const latest = articles.filter((a) => !a.featured);
