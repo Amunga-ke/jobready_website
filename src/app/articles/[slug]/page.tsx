@@ -51,7 +51,7 @@ export async function generateMetadata({
         url: ogUrl,
         siteName: "JobReady",
         type: "article",
-        publishedTime: article.publishedAt.toISOString(),
+        ...(article.publishedAt && { publishedTime: article.publishedAt.toISOString() }),
         section: article.category,
         ...(article.coverImage && { images: [{ url: article.coverImage }] }),
       },
@@ -263,6 +263,7 @@ export default async function ArticleDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  try {
   const { slug } = await params;
 
   const article = await prisma.article.findUnique({
@@ -301,7 +302,7 @@ export default async function ArticleDetailPage({
     ORDER BY _count DESC
   `.catch(() => []);
 
-  const parsedContent = renderMarkdown(article.body);
+  const parsedContent = renderMarkdown(article.body || "");
   const articleUrl = `https://jobreadyke.co.ke/articles/${article.slug}`;
 
   return (
@@ -312,9 +313,9 @@ export default async function ArticleDetailPage({
         description={article.excerpt}
         url={articleUrl}
         image={article.coverImage}
-        datePublished={article.publishedAt.toISOString()}
-        dateModified={article.updatedAt.toISOString()}
-        author={article.author}
+        datePublished={article.publishedAt ? article.publishedAt.toISOString() : undefined}
+        dateModified={article.updatedAt ? article.updatedAt.toISOString() : undefined}
+        author={article.author || "JobReady"}
       />
       <BreadcrumbJsonLd items={[
         { name: "Home", url: "https://jobreadyke.co.ke/" },
@@ -367,14 +368,18 @@ export default async function ArticleDetailPage({
 
               {/* Meta bar */}
               <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-divider text-[12px] text-muted">
+                {article.author && (
                 <div className="flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5" />
                   <span className="font-medium text-ink/70">{article.author}</span>
                 </div>
+                )}
+                {article.publishedAt && (
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{formatDate(article.publishedAt)}</span>
                 </div>
+                )}
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5" />
                   <span>{article.readTime} min read</span>
@@ -578,7 +583,7 @@ export default async function ArticleDetailPage({
                       <div className="flex items-center gap-2 mt-1 text-[11px] text-muted">
                         <span>{r.readTime} min</span>
                         <span>·</span>
-                        <span>{formatDate(r.publishedAt)}</span>
+                        <span>{r.publishedAt ? formatDate(r.publishedAt) : ""}</span>
                       </div>
                     </Link>
                   ))}
@@ -608,4 +613,7 @@ export default async function ArticleDetailPage({
       </div>
     </main>
   );
+  } catch (error) {
+    notFound();
+  }
 }

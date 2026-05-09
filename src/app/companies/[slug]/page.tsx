@@ -92,6 +92,7 @@ export default async function CompanyDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  try {
   const { slug } = await params;
 
   // Fetch company first (needed for notFound + dependent queries)
@@ -132,10 +133,10 @@ export default async function CompanyDetailPage({
 
   const jobCount = company._count.listings;
 
-  // Format org type for display
-  const orgTypeDisplay = company.orgType
+  // Format org type for display (null-safe)
+  const orgTypeDisplay = (company.orgType ?? "")
     .replace(/_/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase());
+    .replace(/\b\w/g, (l) => l.toUpperCase()) || "N/A";
   const companyUrl = `https://jobreadyke.co.ke/companies/${company.slug}`;
 
   return (
@@ -499,4 +500,7 @@ export default async function CompanyDetailPage({
       </div>
     </main>
   );
+  } catch (error) {
+    notFound();
+  }
 }
