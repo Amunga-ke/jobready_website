@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Salary Guide — Kenya Salary Benchmarks 2025 | JobReady",
+  title: "Salary Guide — Kenya Salary Benchmarks | JobReady",
   description:
     "Explore salary benchmarks and compensation insights across industries in Kenya. Compare salaries by role, experience, and location.",
   robots: { index: false, follow: true },

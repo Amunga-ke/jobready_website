@@ -10,7 +10,7 @@ import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { getCountyIntro, getNearbyCounties } from "@/lib/seo/fallback-content";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
-import { JobPostingJsonLd, BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { JobPostingJsonLd, BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
 
 export const revalidate = 300;
@@ -100,6 +100,12 @@ export default async function SlugPage({
 
     return (
       <main className="bg-surface">
+        <BreadcrumbJsonLd items={[
+          { name: "Home", url: "https://jobreadyke.co.ke/" },
+          { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
+          { name: countyName, url: `https://jobreadyke.co.ke/jobs/in-${countySlug}` },
+        ]} />
+        <CollectionPageJsonLd name={`Jobs in ${countyName}`} description={getCountyIntro(countyName)} url={`https://jobreadyke.co.ke/jobs/in-${countySlug}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[

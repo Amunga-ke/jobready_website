@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Briefcase, ArrowRight, Search } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "404 — Page Not Found | JobReady",
+  description: "The page you are looking for does not exist. Browse thousands of verified job listings across Kenya on JobReady.",
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (

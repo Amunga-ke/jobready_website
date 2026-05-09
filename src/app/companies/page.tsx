@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Verified Employers & Companies in Kenya | JobReady",
     description: "Browse verified companies and employers hiring in Kenya on JobReady.",
+    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
   },
 };
 

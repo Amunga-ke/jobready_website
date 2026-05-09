@@ -144,7 +144,7 @@ export function JobPostingJsonLd({
         validThrough: validThrough || undefined,
         employmentType: employmentType ? empMap[employmentType] || "FULL_TIME" : "FULL_TIME",
         hiringOrganization: { "@type": "Organization", name: hiringOrganization, ...(companyLogo && { logo: companyLogo }) },
-        jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: jobLocation, addressCountry: "KE" } },
+        jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: jobLocation, addressRegion: "Kenya", addressCountry: "KE" } },
         ...(baseSalary && { baseSalary }),
         url,
         ...(workMode === "REMOTE" && { jobLocationType: "TELECOMMUTE" }),

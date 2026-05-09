@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { getCountyBySlug } from "@/lib/constants";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -104,6 +105,14 @@ export default async function SubcategoryCountyPage({
 
     return (
       <main className="bg-surface">
+        <BreadcrumbJsonLd items={[
+          { name: "Home", url: "https://jobreadyke.co.ke/" },
+          { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
+          { name: category.name, url: `https://jobreadyke.co.ke/jobs/category/${slug}` },
+          { name: sub.name, url: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}` },
+          { name: county, url: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
+        ]} />
+        <CollectionPageJsonLd name={`${sub.name} Jobs in ${county}`} description={`Browse ${sub.name.toLowerCase()} jobs in ${county}, Kenya.`} url={`https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}/in-${countySlug}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[

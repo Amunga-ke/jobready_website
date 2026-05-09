@@ -4,6 +4,7 @@ import DashboardShell from "./DashboardShell";
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Your JobSeeker dashboard",
+  robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";

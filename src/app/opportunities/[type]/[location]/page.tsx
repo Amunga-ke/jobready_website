@@ -5,6 +5,7 @@ import { OPPORTUNITY_TYPES, KE_COUNTIES, slugifyCounty, getCountyBySlug } from "
 import { getRobotsMeta, type SeoTier } from "@/lib/seo/page-thresholds";
 import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
+import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import prisma from "@/lib/prisma";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
@@ -153,6 +154,13 @@ export default async function OpportunityCountyPage({
 
     return (
       <main className="bg-surface">
+        <BreadcrumbJsonLd items={[
+          { name: "Home", url: "https://jobreadyke.co.ke/" },
+          { name: "Opportunities", url: "https://jobreadyke.co.ke/opportunities" },
+          { name: opp.label, url: `https://jobreadyke.co.ke/opportunities/${typeSlug}` },
+          { name: county, url: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}` },
+        ]} />
+        <CollectionPageJsonLd name={`${opp.label} in ${county}`} description={`Browse ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`} url={`https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[
