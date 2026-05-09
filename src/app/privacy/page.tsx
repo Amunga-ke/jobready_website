@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | JobReady",
   description:
     "Learn how JobReady collects, uses, and protects your personal information. Our privacy policy covers data handling, cookies, and your rights.",
-  alternates: { canonical: "https://jobreadyke.co.ke/privacy" },
+  alternates: { canonical: `${SITE_URL}/privacy` },
   openGraph: {
     title: "Privacy Policy | JobReady",
     description: "How JobReady handles and protects your personal data.",
-    url: "https://jobreadyke.co.ke/privacy",
+    url: `${SITE_URL}/privacy`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -26,8 +27,8 @@ export default function Privacy_Page() {
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "Privacy Policy", url: "https://jobreadyke.co.ke/privacy" },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Privacy Policy", url: `${SITE_URL}/privacy` },
       ]} />
       <div className="max-w-3xl mx-auto px-5 py-16 md:py-20">
         {/* Breadcrumbs */}

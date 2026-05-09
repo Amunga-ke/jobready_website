@@ -12,6 +12,7 @@ import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { JobPostingJsonLd, BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300;
 
@@ -54,8 +55,8 @@ export async function generateMetadata({
         title: `Jobs in ${countyName}, Kenya (${count || ""} Openings) | JobReady`,
         description: getCountyIntro(countyName),
         robots,
-        alternates: { canonical: `https://jobreadyke.co.ke/jobs/in-${countySlug}` },
-        openGraph: { title: `Jobs in ${countyName} | JobReady`, description: getCountyIntro(countyName), url: `https://jobreadyke.co.ke/jobs/in-${countySlug}`, type: "website", siteName: "JobReady" },
+        alternates: { canonical: `${SITE_URL}/jobs/in-${countySlug}` },
+        openGraph: { title: `Jobs in ${countyName} | JobReady`, description: getCountyIntro(countyName), url: `${SITE_URL}/jobs/in-${countySlug}`, type: "website", siteName: "JobReady" },
         twitter: { card: "summary_large_image", title: `Jobs in ${countyName} | JobReady`, description: getCountyIntro(countyName) },
       };
     }
@@ -63,7 +64,7 @@ export async function generateMetadata({
     const job = await getJobBySlug(slug).catch(() => null);
     if (!job) return { title: "Job Not Found | JobReady" };
 
-    const jobUrl = `https://jobreadyke.co.ke/jobs/${slug}`;
+    const jobUrl = `${SITE_URL}/jobs/${slug}`;
     return {
       title: `${job.title} at ${job.companyName} | JobReady`,
       description: `Apply for ${job.title} at ${job.companyName} in ${job.location}. ${job.listingType === "JOB" ? "Job" : "Opportunity"} posted on JobReady — Kenya's most trusted job board.`,
@@ -101,11 +102,11 @@ export default async function SlugPage({
     return (
       <main className="bg-surface">
         <BreadcrumbJsonLd items={[
-          { name: "Home", url: "https://jobreadyke.co.ke/" },
-          { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
-          { name: countyName, url: `https://jobreadyke.co.ke/jobs/in-${countySlug}` },
+          { name: "Home", url: `${SITE_URL}/` },
+          { name: "Jobs", url: `${SITE_URL}/jobs` },
+          { name: countyName, url: `${SITE_URL}/jobs/in-${countySlug}` },
         ]} />
-        <CollectionPageJsonLd name={`Jobs in ${countyName}`} description={getCountyIntro(countyName)} url={`https://jobreadyke.co.ke/jobs/in-${countySlug}`} numberOfItems={count || undefined} />
+        <CollectionPageJsonLd name={`Jobs in ${countyName}`} description={getCountyIntro(countyName)} url={`${SITE_URL}/jobs/in-${countySlug}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[
@@ -199,7 +200,7 @@ export default async function SlugPage({
   // ── Job detail page ──
   const job = await getJobBySlug(slug).catch(() => null);
   if (!job) notFound();
-  const jobUrl = `https://jobreadyke.co.ke/jobs/${slug}`;
+  const jobUrl = `${SITE_URL}/jobs/${slug}`;
 
   return (
     <main className="bg-surface">
@@ -213,8 +214,8 @@ export default async function SlugPage({
         url={jobUrl} workMode={job.workMode}
       />
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Jobs", url: `${SITE_URL}/jobs` },
         { name: job.title, url: jobUrl },
       ]} />
       <div className="border-b border-divider bg-white/60 backdrop-blur-sm sticky top-0 z-30">

@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Employer Branding in Kenya — Attract Top Talent",
   description:
     "Enhance your employer brand and attract top talent with JobReady's branding solutions. Showcase your company culture to Kenyan job seekers.",
   robots: { index: false, follow: true },
-  alternates: { canonical: "https://jobreadyke.co.ke/branding" },
+  alternates: { canonical: `${SITE_URL}/branding` },
   openGraph: {
     title: "Employer Branding in Kenya — Attract Top Talent | JobReady",
     description:
       "Enhance your employer brand and attract top talent with JobReady's branding solutions.",
-    url: "https://jobreadyke.co.ke/branding",
+    url: `${SITE_URL}/branding`,
     siteName: "JobReady",
     type: "website",
     images: [
       {
-        url: "https://jobreadyke.co.ke/opengraph-image.png",
+        url: `${SITE_URL}/opengraph-image.png`,
         width: 1200,
         height: 630,
         alt: "Employer Branding on JobReady Kenya",
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     title: "Employer Branding in Kenya — Attract Top Talent | JobReady",
     description:
       "Enhance your employer brand and attract top talent with JobReady's branding solutions.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 

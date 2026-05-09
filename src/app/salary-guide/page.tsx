@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Salary Guide — Kenya Salary Benchmarks | JobReady",
   description:
     "Explore salary benchmarks and compensation insights across industries in Kenya. Compare salaries by role, experience, and location.",
   robots: { index: false, follow: true },
-  alternates: { canonical: "https://jobreadyke.co.ke/salary-guide" },
+  alternates: { canonical: `${SITE_URL}/salary-guide` },
   openGraph: {
     title: "Salary Guide — Kenya Salary Benchmarks | JobReady",
     description:
       "Salary benchmarks and compensation insights across Kenyan industries.",
-    url: "https://jobreadyke.co.ke/salary-guide",
+    url: `${SITE_URL}/salary-guide`,
     siteName: "JobReady",
     type: "website",
     images: [
       {
-        url: "https://jobreadyke.co.ke/opengraph-image.png",
+        url: `${SITE_URL}/opengraph-image.png`,
         width: 1200,
         height: 630,
         alt: "Kenya Salary Guide — JobReady",
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     title: "Salary Guide — Kenya Salary Benchmarks | JobReady",
     description:
       "Salary benchmarks and compensation insights across Kenyan industries.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 

@@ -5,6 +5,7 @@ import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/Js
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import prisma from "@/lib/prisma";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -12,22 +13,22 @@ export const metadata: Metadata = {
   title: "Opportunities — Scholarships, Internships & More | JobReady",
   description:
     "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities from top organizations across Kenya.",
-  alternates: { canonical: "https://jobreadyke.co.ke/opportunities" },
+  alternates: { canonical: `${SITE_URL}/opportunities` },
   openGraph: {
     title: "Opportunities — Scholarships, Internships & More | JobReady",
     description:
       "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities across Kenya.",
-    url: "https://jobreadyke.co.ke/opportunities",
+    url: `${SITE_URL}/opportunities`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Opportunities — Scholarships, Internships & More | JobReady",
     description:
       "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities across Kenya.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 
@@ -113,8 +114,8 @@ export default async function OpportunitiesPage() {
 
   return (
     <main className="bg-surface">
-      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Opportunities", url: "https://jobreadyke.co.ke/opportunities" }]} />
-      <CollectionPageJsonLd name="Opportunities" description="Scholarships, internships, fellowships, grants, bursaries and more from top organizations in Kenya" url="https://jobreadyke.co.ke/opportunities" numberOfItems={totalCount} />
+      <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Opportunities", url: `${SITE_URL}/opportunities` }]} />
+      <CollectionPageJsonLd name="Opportunities" description="Scholarships, internships, fellowships, grants, bursaries and more from top organizations in Kenya" url=`${SITE_URL}/opportunities` numberOfItems={totalCount} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

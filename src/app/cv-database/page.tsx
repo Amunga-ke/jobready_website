@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "CV Database — Search Kenyan Professionals",
   description:
     "Search our database of qualified Kenyan professionals. Connect with skilled candidates across Nairobi, Mombasa, Kisumu and all 47 counties.",
   robots: { index: false, follow: true },
-  alternates: { canonical: "https://jobreadyke.co.ke/cv-database" },
+  alternates: { canonical: `${SITE_URL}/cv-database` },
   openGraph: {
     title: "CV Database — Search Kenyan Professionals | JobReady",
     description:
       "Search our database of qualified Kenyan professionals. Connect with skilled candidates across all 47 counties.",
-    url: "https://jobreadyke.co.ke/cv-database",
+    url: `${SITE_URL}/cv-database`,
     siteName: "JobReady",
     type: "website",
     images: [
       {
-        url: "https://jobreadyke.co.ke/opengraph-image.png",
+        url: `${SITE_URL}/opengraph-image.png`,
         width: 1200,
         height: 630,
         alt: "CV Database on JobReady Kenya",
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     title: "CV Database — Search Kenyan Professionals | JobReady",
     description:
       "Search our database of qualified Kenyan professionals and connect with potential candidates.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 

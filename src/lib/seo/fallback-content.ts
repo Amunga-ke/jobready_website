@@ -8,6 +8,7 @@
 
 import { JOB_CATEGORIES, KE_COUNTIES, OPPORTUNITY_TYPES } from "@/lib/constants";
 import type { JobCategory } from "@/lib/constants";
+import { SITE_URL } from "@/lib/config";
 
 /**
  * Generate SEO-friendly intro text for a category page.
@@ -95,7 +96,7 @@ export function generateBreadcrumbs(
 ): { name: string; item: string }[] {
   return items.map((item) => ({
     name: item.label,
-    item: `https://jobreadyke.co.ke${item.href}`,
+    item: `${SITE_URL}${item.href}`,
   }));
 }
 
@@ -119,7 +120,7 @@ export function generateJobListingLd(
     isPartOf: {
       "@type": "WebSite",
       name: "JobReady",
-      url: "https://jobreadyke.co.ke",
+      url: `${SITE_URL}`,
     },
   };
 }

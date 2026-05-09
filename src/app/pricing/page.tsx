@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Pricing — Advertise Jobs on JobReady Kenya",
   description:
     "Find the right plan to advertise your job openings and reach top talent across Kenya. Affordable employer pricing for businesses of all sizes.",
   robots: { index: false, follow: true },
-  alternates: { canonical: "https://jobreadyke.co.ke/pricing" },
+  alternates: { canonical: `${SITE_URL}/pricing` },
   openGraph: {
     title: "Pricing — Advertise Jobs on JobReady | JobReady",
     description: "Affordable employer pricing to reach top Kenyan talent.",
-    url: "https://jobreadyke.co.ke/pricing",
+    url: `${SITE_URL}/pricing`,
     siteName: "JobReady",
     type: "website",
     images: [
       {
-        url: "https://jobreadyke.co.ke/opengraph-image.png",
+        url: `${SITE_URL}/opengraph-image.png`,
         width: 1200,
         height: 630,
         alt: "Advertise Jobs on JobReady Kenya",
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Pricing — Advertise Jobs on JobReady | JobReady",
     description: "Affordable employer pricing to reach top Kenyan talent.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 

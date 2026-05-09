@@ -6,6 +6,7 @@ import { Clock, ArrowLeft, ArrowRight, Calendar, User, BookOpen } from "lucide-r
 import ArticleShareButton from "@/components/jobready/ArticleShareButton";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
+import { SITE_URL } from "@/lib/config";
 
 /* ── Generate static params for known slugs ── */
 export async function generateStaticParams() {
@@ -39,7 +40,7 @@ export async function generateMetadata({
 
     if (!article) return { title: "Article Not Found | JobReady" };
 
-    const ogUrl = `https://jobreadyke.co.ke/articles/${slug}`;
+    const ogUrl = `${SITE_URL}/articles/${slug}`;
 
     return {
       title: `${article.title} | JobReady`,
@@ -303,7 +304,7 @@ export default async function ArticleDetailPage({
   `.catch(() => []);
 
   const parsedContent = renderMarkdown(article.body || "");
-  const articleUrl = `https://jobreadyke.co.ke/articles/${article.slug}`;
+  const articleUrl = `${SITE_URL}/articles/${article.slug}`;
 
   return (
     <main className="bg-surface min-h-screen">
@@ -318,9 +319,9 @@ export default async function ArticleDetailPage({
         author={article.author || "JobReady"}
       />
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "Resources", url: "https://jobreadyke.co.ke/articles" },
-        { name: article.category, url: `https://jobreadyke.co.ke/articles?category=${encodeURIComponent(article.category)}` },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Resources", url: `${SITE_URL}/articles` },
+        { name: article.category, url: `${SITE_URL}/articles?category=${encodeURIComponent(article.category)}` },
         { name: article.title, url: articleUrl },
       ]} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
@@ -524,7 +525,7 @@ export default async function ArticleDetailPage({
                   </Link>
                 ))}
               </div>
-              <ArticleShareButton url={`https://jobreadyke.co.ke/articles/${article.slug}`} />
+              <ArticleShareButton url={`${SITE_URL}/articles/${article.slug}`} />
             </div>
           </article>
 

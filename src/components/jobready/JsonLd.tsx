@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/config";
 /**
  * JSON-LD Structured Data Component
  *
@@ -36,7 +37,7 @@ export function WebSiteJsonLd() {
         "@context": "https://schema.org",
         "@type": "WebSite",
         name: "JobReady",
-        url: "https://jobreadyke.co.ke",
+        url: `${SITE_URL}`,
         description:
           "Kenya's most trusted job board. Real jobs from verified employers across all 47 counties.",
         inLanguage: "en-KE",
@@ -44,7 +45,7 @@ export function WebSiteJsonLd() {
           "@type": "SearchAction",
           target: {
             "@type": "EntryPoint",
-            urlTemplate: "https://jobreadyke.co.ke/jobs?q={search_term_string}",
+            urlTemplate: `${SITE_URL}/jobs?q={search_term_string}`,
           },
           "query-input": "required name=search_term_string",
         },
@@ -61,14 +62,14 @@ export function OrganizationJsonLd() {
         "@context": "https://schema.org",
         "@type": "Organization",
         name: "JobReady",
-        url: "https://jobreadyke.co.ke",
-        logo: "https://jobreadyke.co.ke/logo.svg",
+        url: `${SITE_URL}`,
+        logo: `${SITE_URL}/logo.svg`,
         description:
           "Kenya's most trusted job board connecting job seekers with verified employers across all 47 counties.",
         contactPoint: {
           "@type": "ContactPoint",
           contactType: "customer service",
-          url: "https://jobreadyke.co.ke/contact",
+          url: `${SITE_URL}/contact`,
         },
       }}
     />
@@ -168,11 +169,13 @@ export function ArticleJsonLd({
         headline: title,
         description: description || undefined,
         url,
-        image: image || "https://jobreadyke.co.ke/logo.svg",
+        image: image || `${SITE_URL}/logo.svg`,
         datePublished,
         dateModified: dateModified || datePublished,
-        author: { "@type": "Organization", name: author || publisher || "JobReady" },
-        publisher: { "@type": "Organization", name: publisher || "JobReady", logo: { "@type": "ImageObject", url: "https://jobreadyke.co.ke/logo.svg" } },
+        author: author && author !== "JobReady"
+          ? { "@type": "Person", name: author }
+          : { "@type": "Organization", name: author || publisher || "JobReady" },
+        publisher: { "@type": "Organization", name: publisher || "JobReady", logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.svg` } },
         mainEntityOfPage: { "@type": "WebPage", "@id": url },
       }}
     />
@@ -194,7 +197,7 @@ export function CompanyJsonLd({
         name,
         description: description || undefined,
         url,
-        logo: logo || "https://jobreadyke.co.ke/logo.svg",
+        logo: logo || `${SITE_URL}/logo.svg`,
         ...(location && { address: { "@type": "PostalAddress", addressLocality: location, addressCountry: "KE" } }),
         ...(industry && { industry }),
         ...(website && { sameAs: [website] }),
@@ -215,7 +218,7 @@ export function CollectionPageJsonLd({ name, description, url, numberOfItems }: 
         name,
         description,
         url,
-        isPartOf: { "@type": "WebSite", name: "JobReady", url: "https://jobreadyke.co.ke" },
+        isPartOf: { "@type": "WebSite", name: "JobReady", url: `${SITE_URL}` },
         ...(numberOfItems !== undefined && { numberOfItems }),
       }}
     />

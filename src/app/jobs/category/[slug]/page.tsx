@@ -8,6 +8,7 @@ import { getCategoryIntro, getSalaryContext } from "@/lib/seo/fallback-content";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -43,11 +44,11 @@ export async function generateMetadata({
     title: `${label} Jobs in Kenya${count > 0 ? ` (${count} Openings)` : ""} | JobReady`,
     description,
     robots,
-    alternates: { canonical: `https://jobreadyke.co.ke/jobs/category/${slug}` },
+    alternates: { canonical: `${SITE_URL}/jobs/category/${slug}` },
     openGraph: {
       title: `${label} Jobs in Kenya | JobReady`,
       description,
-      url: `https://jobreadyke.co.ke/jobs/category/${slug}`,
+      url: `${SITE_URL}/jobs/category/${slug}`,
       type: "website",
       siteName: "JobReady",
     },
@@ -130,11 +131,11 @@ export default async function CategoryPage({
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
-        { name: label, url: `https://jobreadyke.co.ke/jobs/category/${slug}` },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Jobs", url: `${SITE_URL}/jobs` },
+        { name: label, url: `${SITE_URL}/jobs/category/${slug}` },
       ]} />
-      <CollectionPageJsonLd name={`${label} Jobs in Kenya`} description={description} url={`https://jobreadyke.co.ke/jobs/category/${slug}`} numberOfItems={count || undefined} />
+      <CollectionPageJsonLd name={`${label} Jobs in Kenya`} description={description} url={`${SITE_URL}/jobs/category/${slug}`} numberOfItems={count || undefined} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

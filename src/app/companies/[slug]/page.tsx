@@ -18,6 +18,7 @@ import {
 import { getCompanyBySlug, getCompanyJobs } from "@/lib/data";
 import { CompanyJsonLd, BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -43,7 +44,7 @@ export async function generateMetadata({
 
     if (!company) return { title: "Company Not Found | JobReady" };
 
-    const ogUrl = `https://jobreadyke.co.ke/companies/${slug}`;
+    const ogUrl = `${SITE_URL}/companies/${slug}`;
     const jobCount = company._count.listings;
 
     return {
@@ -137,7 +138,7 @@ export default async function CompanyDetailPage({
   const orgTypeDisplay = (company.orgType ?? "")
     .replace(/_/g, " ")
     .replace(/\b\w/g, (l) => l.toUpperCase()) || "N/A";
-  const companyUrl = `https://jobreadyke.co.ke/companies/${company.slug}`;
+  const companyUrl = `${SITE_URL}/companies/${company.slug}`;
 
   return (
     <main className="bg-surface min-h-screen">
@@ -152,8 +153,8 @@ export default async function CompanyDetailPage({
         website={company.website}
       />
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "Companies", url: "https://jobreadyke.co.ke/companies" },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Companies", url: `${SITE_URL}/companies` },
         { name: company.name, url: companyUrl },
       ]} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">

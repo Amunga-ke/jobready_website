@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Terms of Service | JobReady",
   description:
     "Read the terms and conditions governing the use of JobReady's job board services, employer accounts, and job listings.",
-  alternates: { canonical: "https://jobreadyke.co.ke/terms" },
+  alternates: { canonical: `${SITE_URL}/terms` },
   openGraph: {
     title: "Terms of Service | JobReady",
     description: "Terms and conditions for using JobReady's services.",
-    url: "https://jobreadyke.co.ke/terms",
+    url: `${SITE_URL}/terms`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -26,8 +27,8 @@ export default function Terms_Page() {
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "Terms of Service", url: "https://jobreadyke.co.ke/terms" },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Terms of Service", url: `${SITE_URL}/terms` },
       ]} />
       <div className="max-w-3xl mx-auto px-5 py-16 md:py-20">
         {/* Breadcrumbs */}

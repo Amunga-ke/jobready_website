@@ -2,25 +2,26 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Briefcase, ShieldCheck, Users, TrendingUp, Globe, Award } from "lucide-react";
 import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "About JobReady — Kenya's Most Trusted Job Board",
   description:
     "Learn about JobReady, Kenya's fastest-growing job board connecting verified employers with job seekers across all 47 counties.";,
-  alternates: { canonical: "https://jobreadyke.co.ke/about" },
+  alternates: { canonical: `${SITE_URL}/about` },
   openGraph: {
     title: "About JobReady",
     description: "Kenya's most trusted job board connecting verified employers with talented job seekers.",
-    url: "https://jobreadyke.co.ke/about",
+    url: `${SITE_URL}/about`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "About JobReady",
     description: "Kenya's most trusted job board connecting verified employers with talented job seekers.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 
@@ -61,8 +62,8 @@ export default function About_Page() {
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "About", url: "https://jobreadyke.co.ke/about" },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "About", url: `${SITE_URL}/about` },
       ]} />
       <div className="max-w-3xl mx-auto px-5 py-16 md:py-20">
         {/* Breadcrumbs */}

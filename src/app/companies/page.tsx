@@ -6,6 +6,7 @@ import CompanySearchBar from "@/components/jobready/CompanySearchBar";
 import type { Metadata } from "next";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -13,20 +14,20 @@ export const metadata: Metadata = {
   title: "Verified Employers & Companies in Kenya | JobReady",
   description:
     "Browse verified companies and employers hiring in Kenya. Explore open positions, company profiles, and apply directly. Over 500+ trusted employers on JobReady.",
-  alternates: { canonical: "https://jobreadyke.co.ke/companies" },
+  alternates: { canonical: `${SITE_URL}/companies` },
   openGraph: {
     title: "Verified Employers & Companies in Kenya | JobReady",
     description: "Browse verified companies and employers hiring in Kenya. Explore open positions and company profiles on JobReady.",
-    url: "https://jobreadyke.co.ke/companies",
+    url: `${SITE_URL}/companies`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Verified Employers & Companies in Kenya | JobReady",
     description: "Browse verified companies and employers hiring in Kenya on JobReady.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 
@@ -58,8 +59,8 @@ export default async function CompaniesPage({
 
   return (
     <main className="bg-surface min-h-screen">
-      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Companies", url: "https://jobreadyke.co.ke/companies" }]} />
-      <CollectionPageJsonLd name="Verified Employers & Companies" description="Browse verified companies and employers hiring in Kenya" url="https://jobreadyke.co.ke/companies" numberOfItems={companies.length} />
+      <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Companies", url: `${SITE_URL}/companies` }]} />
+      <CollectionPageJsonLd name="Verified Employers & Companies" description="Browse verified companies and employers hiring in Kenya" url=`${SITE_URL}/companies` numberOfItems={companies.length} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

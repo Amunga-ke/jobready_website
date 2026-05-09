@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/jobready/JsonLd";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Contact Us | JobReady",
   description:
     "Get in touch with the JobReady team for support, employer partnerships, advertising inquiries, or general questions about our job board services.",
-  alternates: { canonical: "https://jobreadyke.co.ke/contact" },
+  alternates: { canonical: `${SITE_URL}/contact` },
   openGraph: {
     title: "Contact Us | JobReady",
     description: "Reach the JobReady team for support and partnerships.",
-    url: "https://jobreadyke.co.ke/contact",
+    url: `${SITE_URL}/contact`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -26,8 +27,8 @@ export default function Contact_Page() {
   return (
     <main className="bg-surface">
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "Contact", url: "https://jobreadyke.co.ke/contact" },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Contact", url: `${SITE_URL}/contact` },
       ]} />
       <div className="max-w-3xl mx-auto px-5 py-16 md:py-20">
         {/* Breadcrumbs */}

@@ -6,6 +6,8 @@ import { getCountyBySlug } from "@/lib/constants";
 import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
+import { getRobotsMeta } from "@/lib/seo/page-thresholds";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -50,9 +52,10 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: { canonical: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
+      alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
       openGraph: { title, description, siteName: "JobReady", type: "website" },
       twitter: { card: "summary_large_image", title, description },
+      robots: getRobotsMeta(count, "SUBCAT_COUNTY"),
     };
   } catch {
     return { title: "Not Found | JobReady" };
@@ -106,13 +109,13 @@ export default async function SubcategoryCountyPage({
     return (
       <main className="bg-surface">
         <BreadcrumbJsonLd items={[
-          { name: "Home", url: "https://jobreadyke.co.ke/" },
-          { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" },
-          { name: category.name, url: `https://jobreadyke.co.ke/jobs/category/${slug}` },
-          { name: sub.name, url: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}` },
-          { name: county, url: `https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
+          { name: "Home", url: `${SITE_URL}/` },
+          { name: "Jobs", url: `${SITE_URL}/jobs` },
+          { name: category.name, url: `${SITE_URL}/jobs/category/${slug}` },
+          { name: sub.name, url: `${SITE_URL}/jobs/category/${slug}/${subSlug}` },
+          { name: county, url: `${SITE_URL}/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
         ]} />
-        <CollectionPageJsonLd name={`${sub.name} Jobs in ${county}`} description={`Browse ${sub.name.toLowerCase()} jobs in ${county}, Kenya.`} url={`https://jobreadyke.co.ke/jobs/category/${slug}/${subSlug}/in-${countySlug}`} numberOfItems={count || undefined} />
+        <CollectionPageJsonLd name={`${sub.name} Jobs in ${county}`} description={`Browse ${sub.name.toLowerCase()} jobs in ${county}, Kenya.`} url={`${SITE_URL}/jobs/category/${slug}/${subSlug}/in-${countySlug}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[

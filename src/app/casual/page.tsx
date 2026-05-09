@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { Hammer } from "lucide-react";
 import { BreadcrumbJsonLd, CollectionPageJsonLd, FAQJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -14,15 +15,15 @@ export const metadata: Metadata = {
   title: "Casual & Part-Time Jobs in Kenya | JobReady",
   description:
     "Find daily-wage, weekend and flexible part-time jobs across Kenya. Browse casual positions in Nairobi, Mombasa, Kisumu and all 47 counties.",
-  alternates: { canonical: "https://jobreadyke.co.ke/casual" },
+  alternates: { canonical: `${SITE_URL}/casual` },
   openGraph: {
     title: "Casual & Part-Time Jobs in Kenya | JobReady",
     description:
       "Find daily-wage, weekend and flexible part-time jobs across Kenya.",
-    url: "https://jobreadyke.co.ke/casual",
+    url: `${SITE_URL}/casual`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -92,8 +93,8 @@ export default async function CasualPage() {
 
   return (
     <main className="bg-surface">
-      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Casual & Part-Time", url: "https://jobreadyke.co.ke/casual" }]} />
-      <CollectionPageJsonLd name="Casual & Part-Time Jobs" description="Find daily-wage, weekend and flexible part-time jobs across Kenya" url="https://jobreadyke.co.ke/casual" numberOfItems={total || undefined} />
+      <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Casual & Part-Time", url: `${SITE_URL}/casual` }]} />
+      <CollectionPageJsonLd name="Casual & Part-Time Jobs" description="Find daily-wage, weekend and flexible part-time jobs across Kenya" url=`${SITE_URL}/casual` numberOfItems={total || undefined} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

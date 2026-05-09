@@ -19,6 +19,7 @@ import { WebSiteJsonLd, BreadcrumbJsonLd, FAQJsonLd } from '@/components/jobread
 import type { Job } from '@/types';
 import type { Category, County } from '@prisma/client';
 import type { Metadata } from 'next';
+import { SITE_URL } from "@/lib/config";
 import {
   getFeaturedJobs,
   getJustPosted,
@@ -37,22 +38,22 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "JobReady — Jobs for Kenyans — Real Jobs from Verified Employers",
     description:
       "Kenya's most trusted job board. Browse verified jobs across Nairobi, Mombasa, Kisumu & all 47 counties. Government, private sector & internships.",
-    alternates: { canonical: "https://jobreadyke.co.ke/" },
+    alternates: { canonical: `${SITE_URL}/` },
     openGraph: {
       title: "JobReady — Jobs for Kenyans",
       description:
         "Kenya's most trusted job board. Real jobs from verified employers.",
-      url: "https://jobreadyke.co.ke/",
+      url: `${SITE_URL}/`,
       siteName: "JobReady",
       type: "website",
-      images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady — Jobs for Kenyans" }],
+      images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady — Jobs for Kenyans" }],
     },
     twitter: {
       card: "summary_large_image",
       title: "JobReady — Jobs for Kenyans",
       description:
         "Kenya's most trusted job board. Real jobs from verified employers.",
-      images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+      images: [`${SITE_URL}/opengraph-image.png`],
     },
   };
 }
@@ -90,7 +91,7 @@ export default async function Home() {
   return (
     <main>
       <WebSiteJsonLd />
-      <BreadcrumbJsonLd items={[{ name: 'Home', url: 'https://jobreadyke.co.ke/' }]} />
+      <BreadcrumbJsonLd items={[{ name: 'Home', url: `${SITE_URL}/` }]} />
       <Hero jobs={justPosted} />
       <div className="max-w-4xl mx-auto px-5 mt-6">
         <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />

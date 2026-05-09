@@ -7,6 +7,7 @@ import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import prisma from "@/lib/prisma";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -112,12 +113,12 @@ export async function generateMetadata({
       description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya. Application details and deadlines on JobReady.`,
       robots,
       alternates: {
-        canonical: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`,
+        canonical: `${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}`,
       },
       openGraph: {
         title: `${opp.label} in ${county} | JobReady`,
         description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`,
-        url: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`,
+        url: `${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}`,
         type: "website",
         siteName: "JobReady",
       },
@@ -155,12 +156,12 @@ export default async function OpportunityCountyPage({
     return (
       <main className="bg-surface">
         <BreadcrumbJsonLd items={[
-          { name: "Home", url: "https://jobreadyke.co.ke/" },
-          { name: "Opportunities", url: "https://jobreadyke.co.ke/opportunities" },
-          { name: opp.label, url: `https://jobreadyke.co.ke/opportunities/${typeSlug}` },
-          { name: county, url: `https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}` },
+          { name: "Home", url: `${SITE_URL}/` },
+          { name: "Opportunities", url: `${SITE_URL}/opportunities` },
+          { name: opp.label, url: `${SITE_URL}/opportunities/${typeSlug}` },
+          { name: county, url: `${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}` },
         ]} />
-        <CollectionPageJsonLd name={`${opp.label} in ${county}`} description={`Browse ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`} url={`https://jobreadyke.co.ke/opportunities/${typeSlug}/in-${countySlug}`} numberOfItems={count || undefined} />
+        <CollectionPageJsonLd name={`${opp.label} in ${county}`} description={`Browse ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`} url={`${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[

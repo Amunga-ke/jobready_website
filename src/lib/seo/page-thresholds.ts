@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/lib/config";
 /**
  * SEO Page Threshold System
  *
@@ -99,7 +100,7 @@ export function buildCanonicalUrl(
   basePath: string,
   params: Record<string, string>
 ): string {
-  const url = new URL(basePath, "https://jobreadyke.co.ke");
+  const url = new URL(basePath, `${SITE_URL}`);
   Object.entries(params).forEach(([key, value]) => {
     url.searchParams.set(key, value);
   });

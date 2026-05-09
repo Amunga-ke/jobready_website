@@ -6,6 +6,7 @@ import JobClickable from "@/components/jobready/JobClickable";
 import { Search, SlidersHorizontal, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -46,21 +47,21 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   return {
     title,
     description,
-    alternates: { canonical: "https://jobreadyke.co.ke/jobs" },
+    alternates: { canonical: `${SITE_URL}/jobs` },
     robots: q ? { index: false, follow: true } : undefined,
     openGraph: {
       title,
       description,
-      url: "https://jobreadyke.co.ke/jobs",
+      url: `${SITE_URL}/jobs`,
       siteName: "JobReady",
       type: "website",
-      images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+      images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+      images: [`${SITE_URL}/opengraph-image.png`],
     },
   };
   } catch {
@@ -164,8 +165,8 @@ export default async function JobsPage({
 
   return (
     <main className="bg-surface">
-      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Jobs", url: "https://jobreadyke.co.ke/jobs" }]} />
-      <CollectionPageJsonLd name="Job Listings" description="Browse and search job listings from verified employers across Kenya" url="https://jobreadyke.co.ke/jobs" numberOfItems={total} />
+      <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Jobs", url: `${SITE_URL}/jobs` }]} />
+      <CollectionPageJsonLd name="Job Listings" description="Browse and search job listings from verified employers across Kenya" url=`${SITE_URL}/jobs` numberOfItems={total} />
       <div className="max-w-6xl mx-auto px-5 py-10">
         {/* Header */}
         <div className="mb-8">

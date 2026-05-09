@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Post a Job in Kenya — Reach Thousands of Candidates",
   description:
     "Post your job openings to thousands of qualified candidates across Kenya. Reach top talent with JobReady's verified job board — free and premium plans available.",
   robots: { index: false, follow: true },
-  alternates: { canonical: "https://jobreadyke.co.ke/post-job" },
+  alternates: { canonical: `${SITE_URL}/post-job` },
   openGraph: {
     title: "Post a Job in Kenya — Reach Thousands of Candidates | JobReady",
     description:
       "Post your job openings to thousands of qualified candidates across Kenya. Free and premium employer plans available.",
-    url: "https://jobreadyke.co.ke/post-job",
+    url: `${SITE_URL}/post-job`,
     siteName: "JobReady",
     type: "website",
     images: [
       {
-        url: "https://jobreadyke.co.ke/opengraph-image.png",
+        url: `${SITE_URL}/opengraph-image.png`,
         width: 1200,
         height: 630,
         alt: "Post a Job on JobReady Kenya",
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
     title: "Post a Job in Kenya — Reach Thousands of Candidates | JobReady",
     description:
       "Post your job openings to thousands of qualified candidates across Kenya.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 

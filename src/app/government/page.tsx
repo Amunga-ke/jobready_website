@@ -7,6 +7,7 @@ import JobRowClickable from "@/components/jobready/JobRowClickable";
 import GovTabs from "./GovTabs";
 import prisma from "@/lib/prisma";
 import type { Job } from "@/types";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -14,22 +15,22 @@ export const metadata: Metadata = {
   title: "Government Jobs in Kenya | JobReady",
   description:
     "Browse national, county and state corporation jobs from the Kenya Gazette. TSC, PSC, KRA and all 47 county government positions.",
-  alternates: { canonical: "https://jobreadyke.co.ke/government" },
+  alternates: { canonical: `${SITE_URL}/government` },
   openGraph: {
     title: "Government Jobs in Kenya | JobReady",
     description:
       "Browse national, county and state corporation jobs from the Kenya Gazette.",
-    url: "https://jobreadyke.co.ke/government",
+    url: `${SITE_URL}/government`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Government Jobs in Kenya | JobReady",
     description:
       "Browse national, county and state corporation jobs from the Kenya Gazette.",
-    images: ["https://jobreadyke.co.ke/opengraph-image.png"],
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 
@@ -117,8 +118,8 @@ export default async function GovernmentPage() {
 
   return (
     <main className="bg-surface">
-      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Government Jobs", url: "https://jobreadyke.co.ke/government" }]} />
-      <CollectionPageJsonLd name="Government Jobs in Kenya" description="Browse national, county and state corporation jobs from the Kenya Gazette" url="https://jobreadyke.co.ke/government" numberOfItems={data.total} />
+      <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Government Jobs", url: `${SITE_URL}/government` }]} />
+      <CollectionPageJsonLd name="Government Jobs in Kenya" description="Browse national, county and state corporation jobs from the Kenya Gazette" url=`${SITE_URL}/government` numberOfItems={data.total} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

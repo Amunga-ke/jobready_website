@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Reset Your JobReady Password",
   description: "Reset your JobReady password securely via email. Follow the link sent to your registered address.",
   robots: { index: false, follow: false },
-  alternates: { canonical: "https://jobreadyke.co.ke/auth/forgot-password" },
+  alternates: { canonical: `${SITE_URL}/auth/forgot-password` },
 };
 
 export default function ForgotPasswordPage() {

@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import LoginForm from "./LoginForm";
+import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Sign In to Your JobReady Account",
   description: "Sign in securely to your JobReady account to manage job applications, saved jobs, and alerts.",
   robots: { index: false, follow: false },
-  alternates: { canonical: "https://jobreadyke.co.ke/auth/login" },
+  alternates: { canonical: `${SITE_URL}/auth/login` },
 };
 
 export default function LoginPage() {

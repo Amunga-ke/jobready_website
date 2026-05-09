@@ -9,6 +9,7 @@ import { formatDateShortUTC } from "@/lib/format-date";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import type { Job } from "@/types";
 import prisma from "@/lib/prisma";
+import { SITE_URL } from "@/lib/config";
 
 const GOV_LEVELS = [
   {
@@ -48,12 +49,12 @@ export async function generateMetadata({
       title: `${gov.label} Jobs in Kenya | JobReady`,
       description: gov.description,
       alternates: {
-        canonical: `https://jobreadyke.co.ke/government/${level}`,
+        canonical: `${SITE_URL}/government/${level}`,
       },
       openGraph: {
         title: `${gov.label} Jobs | JobReady`,
         description: gov.description,
-        url: `https://jobreadyke.co.ke/government/${level}`,
+        url: `${SITE_URL}/government/${level}`,
         type: "website",
         siteName: "JobReady",
       },
@@ -122,11 +123,11 @@ export default async function GovernmentLevelPage({
     return (
       <main className="bg-surface">
         <BreadcrumbJsonLd items={[
-          { name: "Home", url: "https://jobreadyke.co.ke/" },
-          { name: "Government Jobs", url: "https://jobreadyke.co.ke/government" },
-          { name: gov.label, url: `https://jobreadyke.co.ke/government/${level}` },
+          { name: "Home", url: `${SITE_URL}/` },
+          { name: "Government Jobs", url: `${SITE_URL}/government` },
+          { name: gov.label, url: `${SITE_URL}/government/${level}` },
         ]} />
-        <CollectionPageJsonLd name={`${gov.label} Jobs`} description={gov.description} url={`https://jobreadyke.co.ke/government/${level}`} numberOfItems={count || undefined} />
+        <CollectionPageJsonLd name={`${gov.label} Jobs`} description={gov.description} url={`${SITE_URL}/government/${level}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[

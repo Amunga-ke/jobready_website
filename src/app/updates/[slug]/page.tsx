@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import UpdateDetailPage from "./UpdateDetailPage";
 import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { SITE_URL } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -23,11 +24,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${update.title} | JobReady`,
     description: `${update.updateType} from ${update.source} — posted on JobReady Kenya.`,
-    alternates: { canonical: `https://jobreadyke.co.ke/updates/${slug}` },
+    alternates: { canonical: `${SITE_URL}/updates/${slug}` },
     openGraph: {
       title: update.title,
       description: `${update.updateType} from ${update.source}`,
-      url: `https://jobreadyke.co.ke/updates/${slug}`,
+      url: `${SITE_URL}/updates/${slug}`,
       type: "article",
       siteName: "JobReady",
       publishedTime: update.createdAt.toISOString(),
@@ -62,9 +63,9 @@ export default async function UpdateSlugPage({ params }: Props) {
   return (
     <>
       <BreadcrumbJsonLd items={[
-        { name: "Home", url: "https://jobreadyke.co.ke/" },
-        { name: "Updates", url: "https://jobreadyke.co.ke/updates" },
-        { name: update.title, url: `https://jobreadyke.co.ke/updates/${slug}` },
+        { name: "Home", url: `${SITE_URL}/` },
+        { name: "Updates", url: `${SITE_URL}/updates` },
+        { name: update.title, url: `${SITE_URL}/updates/${slug}` },
       ]} />
       <UpdateDetailPage update={update} />
     </>

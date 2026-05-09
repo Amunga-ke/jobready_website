@@ -5,6 +5,7 @@ import { SeoPageHeader } from "@/components/jobready/SeoPageLayout";
 import { Clock, ArrowRight, BookOpen, TrendingUp } from "lucide-react";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -12,15 +13,15 @@ export const metadata: Metadata = {
   title: "Career Resources & Articles | JobReady",
   description:
     "Expert career advice for Kenyan job seekers. CV writing tips, interview preparation, salary negotiation guides and career growth strategies.",
-  alternates: { canonical: "https://jobreadyke.co.ke/articles" },
+  alternates: { canonical: `${SITE_URL}/articles` },
   openGraph: {
     title: "Career Resources & Articles | JobReady",
     description:
       "Expert career advice for Kenyan job seekers. CV writing tips, interview preparation and salary guides.",
-    url: "https://jobreadyke.co.ke/articles",
+    url: `${SITE_URL}/articles`,
     siteName: "JobReady",
     type: "website",
-    images: [{ url: "https://jobreadyke.co.ke/opengraph-image.png", width: 1200, height: 630, alt: "JobReady" }],
+    images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -103,8 +104,8 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
 
   return (
     <main className="bg-surface">
-      <BreadcrumbJsonLd items={[{ name: "Home", url: "https://jobreadyke.co.ke/" }, { name: "Resources", url: "https://jobreadyke.co.ke/articles" }]} />
-      <CollectionPageJsonLd name="Career Resources & Articles" description="Expert career advice for Kenyan job seekers" url="https://jobreadyke.co.ke/articles" numberOfItems={articles.length} />
+      <BreadcrumbJsonLd items={[{ name: "Home", url: `${SITE_URL}/` }, { name: "Resources", url: `${SITE_URL}/articles` }]} />
+      <CollectionPageJsonLd name="Career Resources & Articles" description="Expert career advice for Kenyan job seekers" url=`${SITE_URL}/articles` numberOfItems={articles.length} />
       <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
         <SeoPageHeader
           breadcrumbs={[

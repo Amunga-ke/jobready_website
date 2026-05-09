@@ -8,6 +8,7 @@ import { SeoPageHeader, RichFallback } from "@/components/jobready/SeoPageLayout
 import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import prisma from "@/lib/prisma";
+import { SITE_URL } from "@/lib/config";
 
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
@@ -95,12 +96,12 @@ export async function generateMetadata({
       description: getOpportunityIntro(opp.label),
       robots,
       alternates: {
-        canonical: `https://jobreadyke.co.ke/opportunities/${typeSlug}`,
+        canonical: `${SITE_URL}/opportunities/${typeSlug}`,
       },
       openGraph: {
         title: `${opp.label} in Kenya | JobReady`,
         description: getOpportunityIntro(opp.label),
-        url: `https://jobreadyke.co.ke/opportunities/${typeSlug}`,
+        url: `${SITE_URL}/opportunities/${typeSlug}`,
         type: "website",
         siteName: "JobReady",
       },
@@ -139,11 +140,11 @@ export default async function OpportunityTypePage({
     return (
       <main className="bg-surface">
         <BreadcrumbJsonLd items={[
-          { name: "Home", url: "https://jobreadyke.co.ke/" },
-          { name: "Opportunities", url: "https://jobreadyke.co.ke/opportunities" },
-          { name: opp.label, url: `https://jobreadyke.co.ke/opportunities/${typeSlug}` },
+          { name: "Home", url: `${SITE_URL}/` },
+          { name: "Opportunities", url: `${SITE_URL}/opportunities` },
+          { name: opp.label, url: `${SITE_URL}/opportunities/${typeSlug}` },
         ]} />
-        <CollectionPageJsonLd name={`${opp.label} in Kenya`} description={getOpportunityIntro(opp.label)} url={`https://jobreadyke.co.ke/opportunities/${typeSlug}`} numberOfItems={count || undefined} />
+        <CollectionPageJsonLd name={`${opp.label} in Kenya`} description={getOpportunityIntro(opp.label)} url={`${SITE_URL}/opportunities/${typeSlug}`} numberOfItems={count || undefined} />
         <div className="max-w-6xl mx-auto px-5 py-8 md:py-12">
           <SeoPageHeader
             breadcrumbs={[
