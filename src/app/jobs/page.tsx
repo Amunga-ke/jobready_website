@@ -122,20 +122,31 @@ export default async function JobsPage({
   const sort = typeof params.sort === "string" ? params.sort : "latest";
   const page = Number(params.page) || 1;
 
-  const { jobs, total, totalPages } = await getJobs({
-    q,
-    category,
-    county,
-    listingType,
-    employmentType,
-    experienceLevel,
-    workMode,
-    governmentLevel,
-    opportunityType,
-    sort,
-    page,
-    limit: 20,
-  });
+  let jobs: Awaited<ReturnType<typeof getJobs>>["jobs"] = [];
+  let total = 0;
+  let totalPages = 0;
+
+  try {
+    const result = await getJobs({
+      q,
+      category,
+      county,
+      listingType,
+      employmentType,
+      experienceLevel,
+      workMode,
+      governmentLevel,
+      opportunityType,
+      sort,
+      page,
+      limit: 20,
+    });
+    jobs = result.jobs;
+    total = result.total;
+    totalPages = result.totalPages;
+  } catch (error) {
+    console.error("[JobsPage] getJobs error:", error);
+  }
 
   const currentUrlParams = new URLSearchParams(
     Object.entries(params).filter(([, v]) => typeof v === "string") as [string, string][]

@@ -42,9 +42,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function UpdateSlugPage({ params }: Props) {
   const { slug } = await params;
 
-  const update = await prisma.jobUpdate.findUnique({
-    where: { slug, status: "PUBLISHED" },
-  });
+  let update = null;
+  try {
+    update = await prisma.jobUpdate.findUnique({
+      where: { slug, status: "PUBLISHED" },
+    });
+  } catch (error) {
+    console.error("[UpdateSlugPage] DB error:", error);
+  }
 
   if (!update) {
     notFound();

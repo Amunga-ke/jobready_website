@@ -272,7 +272,12 @@ export default async function SlugPage({
     }
 
     // ── Job detail page ──
-    const job = await getJobBySlug(slug);
+    let job: Awaited<ReturnType<typeof getJobBySlug>> = null;
+    try {
+      job = await getJobBySlug(slug);
+    } catch (error) {
+      console.error("[SlugPage] getJobBySlug error:", error);
+    }
     const jobUrl = `https://jobreadyke.co.ke/jobs/${slug}`;
 
     if (!job) {
