@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { getJobBySlug } from "@/lib/data";
 import { JobPostingJsonLd, BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
 import { formatDateUTC } from "@/lib/format-date";
-import { sanitizeHtml } from "@/lib/sanitize";
 
 export const revalidate = 300;
 
@@ -38,7 +37,7 @@ export default async function SlugPage({ params }: { params: Promise<{ slug: str
         <p className="text-muted">{job.companyName} — {job.location}</p>
         <p className="text-sm">{formatDateUTC(job.createdAt)}</p>
         {job.description && (
-          <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }} />
+          <div dangerouslySetInnerHTML={{ __html: job.description }} />
         )}
       </div>
     </main>
