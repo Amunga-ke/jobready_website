@@ -73,11 +73,6 @@ export function UpdateModalProvider({ children }: { children: React.ReactNode })
     setIsOpen(true);
     setIsLoading(true);
     setCurrentUpdate(null);
-    // Push URL optimistically
-    if (typeof window !== "undefined") {
-      popstateRef.current = slug;
-      nativePushState({ updateSlug: slug }, "", `/updates/${slug}`);
-    }
     try {
       const res = await fetch(`/api/updates/${slug}`);
       if (!res.ok) throw new Error("Update not found");

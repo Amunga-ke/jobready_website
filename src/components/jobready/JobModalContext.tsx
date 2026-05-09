@@ -64,11 +64,6 @@ export function JobModalProvider({ children }: { children: React.ReactNode }) {
     setIsOpen(true);
     setIsLoading(true);
     setCurrentJob(null);
-    // Push URL optimistically
-    if (typeof window !== "undefined") {
-      popstateJobRef.current = idOrSlug;
-      nativePushState({ jobSlug: idOrSlug }, "", `/jobs/${idOrSlug}`);
-    }
     try {
       const res = await fetch(`/api/jobs/${idOrSlug}`);
       if (!res.ok) throw new Error("Job not found");
