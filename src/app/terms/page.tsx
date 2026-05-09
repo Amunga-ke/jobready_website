@@ -4,12 +4,12 @@ import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
 import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | JobReady",
+  title: "Terms of Service",
   description:
     "Read the terms and conditions governing the use of JobReady's job board services, employer accounts, and job listings.",
   alternates: { canonical: `${SITE_URL}/terms` },
   openGraph: {
-    title: "Terms of Service | JobReady",
+    title: "Terms of Service",
     description: "Terms and conditions for using JobReady's services.",
     url: `${SITE_URL}/terms`,
     siteName: "JobReady",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Terms of Service | JobReady",
+    title: "Terms of Service",
     description: "Terms and conditions for using JobReady's services.",
   },
 };

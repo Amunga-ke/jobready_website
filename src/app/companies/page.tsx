@@ -11,12 +11,12 @@ import { SITE_URL } from "@/lib/config";
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export const metadata: Metadata = {
-  title: "Verified Employers & Companies in Kenya | JobReady",
+  title: "Verified Employers & Companies in Kenya",
   description:
     "Browse verified companies and employers hiring in Kenya. Explore open positions, company profiles, and apply directly. Over 500+ trusted employers on JobReady.",
   alternates: { canonical: `${SITE_URL}/companies` },
   openGraph: {
-    title: "Verified Employers & Companies in Kenya | JobReady",
+    title: "Verified Employers & Companies in Kenya",
     description: "Browse verified companies and employers hiring in Kenya. Explore open positions and company profiles on JobReady.",
     url: `${SITE_URL}/companies`,
     siteName: "JobReady",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Verified Employers & Companies in Kenya | JobReady",
+    title: "Verified Employers & Companies in Kenya",
     description: "Browse verified companies and employers hiring in Kenya on JobReady.",
     images: [`${SITE_URL}/opengraph-image.png`],
   },

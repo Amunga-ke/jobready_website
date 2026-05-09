@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
   alternates: { canonical: `${SITE_URL}/post-job` },
   openGraph: {
-    title: "Post a Job in Kenya — Reach Thousands of Candidates | JobReady",
+    title: "Post a Job in Kenya — Reach Thousands of Candidates",
     description:
       "Post your job openings to thousands of qualified candidates across Kenya. Free and premium employer plans available.",
     url: `${SITE_URL}/post-job`,
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Post a Job in Kenya — Reach Thousands of Candidates | JobReady",
+    title: "Post a Job in Kenya — Reach Thousands of Candidates",
     description:
       "Post your job openings to thousands of qualified candidates across Kenya.",
     images: [`${SITE_URL}/opengraph-image.png`],

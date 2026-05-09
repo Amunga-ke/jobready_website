@@ -99,37 +99,39 @@ export async function generateMetadata({
   try {
     const { type: typeSlug, location: rawLocation } = await params;
     const loc = parseLocation(rawLocation);
-    if (!loc) return { title: "Not Found | JobReady" };
+    if (!loc) return { title: "Not Found" };
 
     const { countySlug, county } = loc;
     const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
-    if (!opp) return { title: "Not Found | JobReady" };
+    if (!opp) return { title: "Not Found" };
 
     const { count } = await getOppByCounty(typeSlug, county, 20);
     const robots = getRobotsMeta(count, "OPP_COUNTY" as SeoTier);
 
     return {
-      title: `${opp.label} in ${county}, Kenya${count > 0 ? ` (${count} Openings)` : ""} | JobReady`,
+      title: `${opp.label} in ${county}, Kenya${count > 0 ? ` (${count} Openings)` : ""}`,
       description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya. Application details and deadlines on JobReady.`,
       robots,
       alternates: {
         canonical: `${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}`,
       },
       openGraph: {
-        title: `${opp.label} in ${county} | JobReady`,
+        title: `${opp.label} in ${county}`,
         description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`,
         url: `${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}`,
         type: "website",
         siteName: "JobReady",
+        images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
       },
       twitter: {
         card: "summary_large_image",
-        title: `${opp.label} in ${county} | JobReady`,
+        title: `${opp.label} in ${county}`,
         description: `Find ${opp.label.toLowerCase()} opportunities in ${county}, Kenya.`,
+        images: [`${SITE_URL}/opengraph-image.png`],
       },
     };
   } catch {
-    return { title: "Not Found | JobReady" };
+    return { title: "Not Found" };
   }
 }
 

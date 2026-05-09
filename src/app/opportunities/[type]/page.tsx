@@ -86,33 +86,35 @@ export async function generateMetadata({
   try {
     const { type: typeSlug } = await params;
     const opp = OPPORTUNITY_TYPES.find((t) => t.slug === typeSlug);
-    if (!opp) return { title: "Not Found | JobReady" };
+    if (!opp) return { title: "Not Found" };
 
     const { count } = await getOpportunities(typeSlug, 20);
     const robots = getRobotsMeta(count, "OPPORTUNITY" as SeoTier);
 
     return {
-      title: `${opp.label} Opportunities in Kenya | JobReady`,
+      title: `${opp.label} Opportunities in Kenya`,
       description: getOpportunityIntro(opp.label),
       robots,
       alternates: {
         canonical: `${SITE_URL}/opportunities/${typeSlug}`,
       },
       openGraph: {
-        title: `${opp.label} in Kenya | JobReady`,
+        title: `${opp.label} in Kenya`,
         description: getOpportunityIntro(opp.label),
         url: `${SITE_URL}/opportunities/${typeSlug}`,
         type: "website",
         siteName: "JobReady",
+        images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
       },
       twitter: {
         card: "summary_large_image",
-        title: `${opp.label} in Kenya | JobReady`,
+        title: `${opp.label} in Kenya`,
         description: getOpportunityIntro(opp.label),
+        images: [`${SITE_URL}/opengraph-image.png`],
       },
     };
   } catch {
-    return { title: "Not Found | JobReady" };
+    return { title: "Not Found" };
   }
 }
 

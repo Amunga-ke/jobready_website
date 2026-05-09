@@ -46,17 +46,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       orderBy: { createdAt: "desc" },
       take: 200,
     }).catch(() => []),
-    prisma.article.findMany({
-      where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true },
-      orderBy: { publishedAt: "desc" },
-      take: 200,
-    }).catch(() => []),
-    prisma.company.findMany({
-      select: { slug: true, updatedAt: true },
-      orderBy: { createdAt: "desc" },
-      take: 200,
-    }).catch(() => []),
     // Get counts for all category × county combos to filter thin pages
     prisma.listing.groupBy({
       by: ["categoryId", "county"],
@@ -68,6 +57,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       by: ["opportunityType", "county"],
       where: { status: "ACTIVE", opportunityType: { not: null }, county: { not: "" } },
       _count: true,
+    }).catch(() => []),
+    prisma.article.findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true, updatedAt: true },
+      orderBy: { publishedAt: "desc" },
+      take: 200,
+    }).catch(() => []),
+    prisma.company.findMany({
+      select: { slug: true, updatedAt: true },
+      orderBy: { createdAt: "desc" },
+      take: 200,
     }).catch(() => []),
   ]);
 

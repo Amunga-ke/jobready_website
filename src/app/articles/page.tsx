@@ -10,12 +10,12 @@ import { SITE_URL } from "@/lib/config";
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export const metadata: Metadata = {
-  title: "Career Resources & Articles | JobReady",
+  title: "Career Resources & Articles",
   description:
     "Expert career advice for Kenyan job seekers. CV writing tips, interview preparation, salary negotiation guides and career growth strategies.",
   alternates: { canonical: `${SITE_URL}/articles` },
   openGraph: {
-    title: "Career Resources & Articles | JobReady",
+    title: "Career Resources & Articles",
     description:
       "Expert career advice for Kenyan job seekers. CV writing tips, interview preparation and salary guides.",
     url: `${SITE_URL}/articles`,
@@ -25,9 +25,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Career Resources & Articles | JobReady",
+    title: "Career Resources & Articles",
     description:
       "Expert career advice for Kenyan job seekers. CV writing tips, interview preparation and salary guides.",
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 

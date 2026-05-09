@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
   alternates: { canonical: `${SITE_URL}/pricing` },
   openGraph: {
-    title: "Pricing — Advertise Jobs on JobReady | JobReady",
+    title: "Pricing — Advertise Jobs on JobReady",
     description: "Affordable employer pricing to reach top Kenyan talent.",
     url: `${SITE_URL}/pricing`,
     siteName: "JobReady",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pricing — Advertise Jobs on JobReady | JobReady",
+    title: "Pricing — Advertise Jobs on JobReady",
     description: "Affordable employer pricing to reach top Kenyan talent.",
     images: [`${SITE_URL}/opengraph-image.png`],
   },

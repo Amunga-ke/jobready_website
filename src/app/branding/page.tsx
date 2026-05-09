@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
   alternates: { canonical: `${SITE_URL}/branding` },
   openGraph: {
-    title: "Employer Branding in Kenya — Attract Top Talent | JobReady",
+    title: "Employer Branding in Kenya — Attract Top Talent",
     description:
       "Enhance your employer brand and attract top talent with JobReady's branding solutions.",
     url: `${SITE_URL}/branding`,
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Employer Branding in Kenya — Attract Top Talent | JobReady",
+    title: "Employer Branding in Kenya — Attract Top Talent",
     description:
       "Enhance your employer brand and attract top talent with JobReady's branding solutions.",
     images: [`${SITE_URL}/opengraph-image.png`],

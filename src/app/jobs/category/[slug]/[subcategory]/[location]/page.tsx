@@ -27,18 +27,18 @@ export async function generateMetadata({
   try {
     const { slug, subcategory: subSlug, location: rawLoc } = await params;
     const loc = parseLocation(rawLoc);
-    if (!loc) return { title: "Not Found | JobReady" };
+    if (!loc) return { title: "Not Found" };
 
     const { countySlug, county } = loc;
     const category = await prisma.category
       .findUnique({ where: { slug } })
       .catch(() => null);
-    if (!category) return { title: "Not Found | JobReady" };
+    if (!category) return { title: "Not Found" };
 
     const sub = await prisma.subcategory
       .findFirst({ where: { slug: subSlug, categoryId: category.id } })
       .catch(() => null);
-    if (!sub) return { title: "Not Found | JobReady" };
+    if (!sub) return { title: "Not Found" };
 
     const count = await prisma.listing
       .count({
@@ -46,19 +46,19 @@ export async function generateMetadata({
       })
       .catch(() => 0);
 
-    const title = `${sub.name} Jobs in ${county}${count > 0 ? ` (${count})` : ""} | JobReady`;
+    const title = `${sub.name} Jobs in ${county}${count > 0 ? ` (${count})` : ""}`;
     const description = `Find ${count} ${sub.name.toLowerCase()} jobs in ${county}, Kenya.`;
 
     return {
       title,
       description,
       alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
-      openGraph: { title, description, siteName: "JobReady", type: "website" },
-      twitter: { card: "summary_large_image", title, description },
+      openGraph: { title, description, siteName: "JobReady", type: "website", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
+      twitter: { card: "summary_large_image", title, description, images: [`${SITE_URL}/opengraph-image.png`] },
       robots: getRobotsMeta(count, "SUBCAT_COUNTY"),
     };
   } catch {
-    return { title: "Not Found | JobReady" };
+    return { title: "Not Found" };
   }
 }
 

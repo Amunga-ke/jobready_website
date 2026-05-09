@@ -10,12 +10,12 @@ import { SITE_URL } from "@/lib/config";
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export const metadata: Metadata = {
-  title: "Opportunities — Scholarships, Internships & More | JobReady",
+  title: "Opportunities — Scholarships, Internships & More",
   description:
     "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities from top organizations across Kenya.",
   alternates: { canonical: `${SITE_URL}/opportunities` },
   openGraph: {
-    title: "Opportunities — Scholarships, Internships & More | JobReady",
+    title: "Opportunities — Scholarships, Internships & More",
     description:
       "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities across Kenya.",
     url: `${SITE_URL}/opportunities`,
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Opportunities — Scholarships, Internships & More | JobReady",
+    title: "Opportunities — Scholarships, Internships & More",
     description:
       "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities across Kenya.",
     images: [`${SITE_URL}/opengraph-image.png`],

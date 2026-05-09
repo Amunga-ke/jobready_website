@@ -38,12 +38,12 @@ export async function generateMetadata({
       },
     }).catch(() => null);
 
-    if (!article) return { title: "Article Not Found | JobReady" };
+    if (!article) return { title: "Article Not Found" };
 
     const ogUrl = `${SITE_URL}/articles/${slug}`;
 
     return {
-      title: `${article.title} | JobReady`,
+      title: `${article.title}`,
       description: article.excerpt,
       alternates: { canonical: ogUrl },
       openGraph: {
@@ -64,7 +64,7 @@ export async function generateMetadata({
       },
     };
   } catch {
-    return { title: "Article Not Found | JobReady" };
+    return { title: "Article Not Found" };
   }
 }
 

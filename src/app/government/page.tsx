@@ -12,12 +12,12 @@ import { SITE_URL } from "@/lib/config";
 export const revalidate = 300; // ISR: revalidate every 5 minutes
 
 export const metadata: Metadata = {
-  title: "Government Jobs in Kenya | JobReady",
+  title: "Government Jobs in Kenya",
   description:
     "Browse national, county and state corporation jobs from the Kenya Gazette. TSC, PSC, KRA and all 47 county government positions.",
   alternates: { canonical: `${SITE_URL}/government` },
   openGraph: {
-    title: "Government Jobs in Kenya | JobReady",
+    title: "Government Jobs in Kenya",
     description:
       "Browse national, county and state corporation jobs from the Kenya Gazette.",
     url: `${SITE_URL}/government`,
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Government Jobs in Kenya | JobReady",
+    title: "Government Jobs in Kenya",
     description:
       "Browse national, county and state corporation jobs from the Kenya Gazette.",
     images: [`${SITE_URL}/opengraph-image.png`],

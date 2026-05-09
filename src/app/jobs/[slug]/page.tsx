@@ -47,33 +47,33 @@ export async function generateMetadata({
     if (slug.startsWith(COUNTY_PREFIX)) {
       const countySlug = slug.slice(COUNTY_PREFIX.length);
       const countyName = getCountyBySlug(countySlug);
-      if (!countyName) return { title: "Not Found | JobReady" };
+      if (!countyName) return { title: "Not Found" };
 
       const count = await getJobCountByCounty(countySlug).catch(() => 0);
       const robots = getRobotsMeta(count, "COUNTY" as SeoTier);
       return {
-        title: `Jobs in ${countyName}, Kenya (${count || ""} Openings) | JobReady`,
+        title: `Jobs in ${countyName}, Kenya (${count || ""} Openings)`,
         description: getCountyIntro(countyName),
         robots,
         alternates: { canonical: `${SITE_URL}/jobs/in-${countySlug}` },
-        openGraph: { title: `Jobs in ${countyName} | JobReady`, description: getCountyIntro(countyName), url: `${SITE_URL}/jobs/in-${countySlug}`, type: "website", siteName: "JobReady" },
-        twitter: { card: "summary_large_image", title: `Jobs in ${countyName} | JobReady`, description: getCountyIntro(countyName) },
+        openGraph: { title: `Jobs in ${countyName}`, description: getCountyIntro(countyName), url: `${SITE_URL}/jobs/in-${countySlug}`, type: "website", siteName: "JobReady", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
+        twitter: { card: "summary_large_image", title: `Jobs in ${countyName}`, description: getCountyIntro(countyName), images: [`${SITE_URL}/opengraph-image.png`] },
       };
     }
 
     const job = await getJobBySlug(slug).catch(() => null);
-    if (!job) return { title: "Job Not Found | JobReady" };
+    if (!job) return { title: "Job Not Found" };
 
     const jobUrl = `${SITE_URL}/jobs/${slug}`;
     return {
-      title: `${job.title} at ${job.companyName} | JobReady`,
+      title: `${job.title} at ${job.companyName}`,
       description: `Apply for ${job.title} at ${job.companyName} in ${job.location}. ${job.listingType === "JOB" ? "Job" : "Opportunity"} posted on JobReady — Kenya's most trusted job board.`,
       alternates: { canonical: jobUrl },
-      openGraph: { title: `${job.title} at ${job.companyName}`, description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`, url: jobUrl, type: "website", siteName: "JobReady" },
-      twitter: { card: "summary_large_image", title: `${job.title} at ${job.companyName}`, description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady` },
+      openGraph: { title: `${job.title} at ${job.companyName}`, description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`, url: jobUrl, type: "website", siteName: "JobReady", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
+      twitter: { card: "summary_large_image", title: `${job.title} at ${job.companyName}`, description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`, images: [`${SITE_URL}/opengraph-image.png`] },
     };
   } catch {
-    return { title: "Not Found | JobReady" };
+    return { title: "Not Found" };
   }
 }
 
@@ -209,6 +209,7 @@ export default async function SlugPage({
         datePosted={new Date(job.createdAt).toISOString()}
         validThrough={job.deadline ? new Date(job.deadline).toISOString() : undefined}
         employmentType={job.employmentType} hiringOrganization={job.companyName}
+        companyLogo={job.companyLogo || undefined}
         jobLocation={job.location || job.county || "Kenya"}
         salaryMin={job.salaryMin} salaryMax={job.salaryMax} salaryPeriod={job.salaryPeriod}
         url={jobUrl} workMode={job.workMode}

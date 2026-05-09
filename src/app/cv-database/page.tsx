@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
   alternates: { canonical: `${SITE_URL}/cv-database` },
   openGraph: {
-    title: "CV Database — Search Kenyan Professionals | JobReady",
+    title: "CV Database — Search Kenyan Professionals",
     description:
       "Search our database of qualified Kenyan professionals. Connect with skilled candidates across all 47 counties.",
     url: `${SITE_URL}/cv-database`,
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "CV Database — Search Kenyan Professionals | JobReady",
+    title: "CV Database — Search Kenyan Professionals",
     description:
       "Search our database of qualified Kenyan professionals and connect with potential candidates.",
     images: [`${SITE_URL}/opengraph-image.png`],

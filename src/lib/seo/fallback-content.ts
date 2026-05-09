@@ -143,31 +143,31 @@ export function generateMeta(
   switch (type) {
     case "category":
       return {
-        title: `${category} Jobs in Kenya (${count || ""} Openings) | JobReady`,
+        title: `${category} Jobs in Kenya (${count || ""} Openings)`,
         description: `Browse the latest ${category} jobs in Kenya. ${count || ""} verified openings from top employers. Apply now on JobReady.`,
       };
 
     case "county":
       return {
-        title: `Jobs in ${county}, Kenya (${count || ""} Openings) | JobReady`,
+        title: `Jobs in ${county}, Kenya (${count || ""} Openings)`,
         description: `Find jobs in ${county}, Kenya. ${count || ""} verified openings from local and national employers. Your next career move starts here.`,
       };
 
     case "combo":
       return {
-        title: `${category} Jobs in ${county} (${count || ""} Openings) | JobReady`,
+        title: `${category} Jobs in ${county} (${count || ""} Openings)`,
         description: `Browse ${category} jobs in ${county}, Kenya. ${count || ""} verified openings. Apply now on JobReady — Kenya's trusted job board.`,
       };
 
     case "opportunity":
       return {
-        title: `${opportunity} Opportunities in Kenya | JobReady`,
+        title: `${opportunity} Opportunities in Kenya`,
         description: `Find ${opportunity} opportunities in Kenya. Deadlines, eligibility, and application guides. Updated daily on JobReady.`,
       };
 
     case "opp_county":
       return {
-        title: `${opportunity} in ${county}, Kenya | JobReady`,
+        title: `${opportunity} in ${county}, Kenya`,
         description: `Discover ${opportunity} opportunities in ${county}, Kenya. Application details and deadlines on JobReady.`,
       };
   }

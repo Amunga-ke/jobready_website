@@ -19,28 +19,28 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const employmentType = typeof params.employment === "string" ? params.employment : undefined;
   const opportunityType = typeof params.opportunity === "string" ? params.opportunity : undefined;
 
-  let title = "Browse All Jobs | JobReady";
+  let title = "Browse All Jobs";
   let description = "Search and browse thousands of jobs from verified employers across Kenya.";
 
   if (q) {
-    title = `Results for "${q}" | JobReady`;
+    title = `Results for "${q}"`;
     description = `Search results for "${q}" on JobReady Kenya. Find matching jobs from verified employers.`;
   } else if (workMode === "REMOTE") {
-    title = "Remote Jobs in Kenya | JobReady";
+    title = "Remote Jobs in Kenya";
     description = "Browse work-from-home and remote job opportunities from Kenyan and international employers.";
   } else if (listingType === "GOVERNMENT") {
-    title = "Government Jobs in Kenya | JobReady";
+    title = "Government Jobs in Kenya";
     description = "Browse government positions from national, county and state corporations.";
   } else if (listingType === "CASUAL") {
-    title = "Casual & Part-Time Jobs | JobReady";
+    title = "Casual & Part-Time Jobs";
     description = "Find daily-wage, weekend and flexible casual jobs across Kenya.";
   } else if (opportunityType) {
     const label = opportunityType.replace(/_/g, " ").toLowerCase();
-    title = `${label.charAt(0).toUpperCase() + label.slice(1)} Opportunities | JobReady`;
+    title = `${label.charAt(0).toUpperCase() + label.slice(1)} Opportunities`;
     description = `Browse the latest ${label} opportunities available in Kenya.`;
   } else if (employmentType) {
     const label = employmentType.replace(/_/g, " ").toLowerCase();
-    title = `${label.charAt(0).toUpperCase() + label.slice(1)} Jobs | JobReady`;
+    title = `${label.charAt(0).toUpperCase() + label.slice(1)} Jobs`;
     description = `Browse ${label} positions from verified employers across Kenya.`;
   }
 
@@ -65,7 +65,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     },
   };
   } catch {
-    return { title: "Browse All Jobs | JobReady", description: "Search and browse thousands of jobs from verified employers across Kenya." };
+    return { title: "Browse All Jobs", description: "Search and browse thousands of jobs from verified employers across Kenya." };
   }
 }
 

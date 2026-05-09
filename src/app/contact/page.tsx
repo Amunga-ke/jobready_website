@@ -4,12 +4,12 @@ import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/jobready/JsonLd";
 import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Contact Us | JobReady",
+  title: "Contact Us",
   description:
     "Get in touch with the JobReady team for support, employer partnerships, advertising inquiries, or general questions about our job board services.",
   alternates: { canonical: `${SITE_URL}/contact` },
   openGraph: {
-    title: "Contact Us | JobReady",
+    title: "Contact Us",
     description: "Reach the JobReady team for support and partnerships.",
     url: `${SITE_URL}/contact`,
     siteName: "JobReady",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Contact Us | JobReady",
+    title: "Contact Us",
     description: "Reach the JobReady team for support and partnerships.",
   },
 };

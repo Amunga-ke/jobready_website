@@ -24,7 +24,7 @@ export async function generateMetadata({
   const dbCategory = await prisma.category
     .findUnique({ where: { slug } })
     .catch(() => null);
-  if (!dbCategory) return { title: "Not Found | JobReady" };
+  if (!dbCategory) return { title: "Not Found" };
 
   const fallbackCategory = getCategoryBySlug(slug);
   const label = dbCategory.name;
@@ -41,25 +41,27 @@ export async function generateMetadata({
     : `Browse ${count} ${label.toLowerCase()} job openings across Kenya on JobReady.`;
 
   return {
-    title: `${label} Jobs in Kenya${count > 0 ? ` (${count} Openings)` : ""} | JobReady`,
+    title: `${label} Jobs in Kenya${count > 0 ? ` (${count} Openings)` : ""}`,
     description,
     robots,
     alternates: { canonical: `${SITE_URL}/jobs/category/${slug}` },
     openGraph: {
-      title: `${label} Jobs in Kenya | JobReady`,
+      title: `${label} Jobs in Kenya`,
       description,
       url: `${SITE_URL}/jobs/category/${slug}`,
       type: "website",
       siteName: "JobReady",
+      images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${label} Jobs in Kenya | JobReady`,
+      title: `${label} Jobs in Kenya`,
       description,
+      images: [`${SITE_URL}/opengraph-image.png`],
     },
   };
   } catch {
-    return { title: "Not Found | JobReady" };
+    return { title: "Not Found" };
   }
 }
 

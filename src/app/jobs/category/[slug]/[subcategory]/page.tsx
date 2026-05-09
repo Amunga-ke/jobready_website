@@ -40,7 +40,7 @@ export async function generateMetadata({
       const category = await prisma.category
         .findUnique({ where: { slug } })
         .catch(() => null);
-      if (!category) return { title: "Not Found | JobReady" };
+      if (!category) return { title: "Not Found" };
 
       const count = await prisma.listing
         .count({
@@ -48,7 +48,7 @@ export async function generateMetadata({
         })
         .catch(() => 0);
       const robots = getRobotsMeta(count, "CATEGORY_COUNTY" as SeoTier);
-      const title = `${category.name} Jobs in ${county}, Kenya${count > 0 ? ` (${count})` : ""} | JobReady`;
+      const title = `${category.name} Jobs in ${county}, Kenya${count > 0 ? ` (${count})` : ""}`;
       const description = `Find ${count} ${category.name.toLowerCase()} jobs in ${county}, Kenya.`;
 
       return {
@@ -56,8 +56,8 @@ export async function generateMetadata({
         description,
         robots,
         alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/in-${countySlug}` },
-        openGraph: { title, description, siteName: "JobReady", type: "website" },
-        twitter: { card: "summary_large_image", title, description },
+        openGraph: { title, description, siteName: "JobReady", type: "website", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
+        twitter: { card: "summary_large_image", title, description, images: [`${SITE_URL}/opengraph-image.png`] },
       };
     }
 
@@ -65,29 +65,29 @@ export async function generateMetadata({
     const category = await prisma.category
       .findUnique({ where: { slug } })
       .catch(() => null);
-    if (!category) return { title: "Not Found | JobReady" };
+    if (!category) return { title: "Not Found" };
 
     const sub = await prisma.subcategory
       .findFirst({ where: { slug: seg, categoryId: category.id } })
       .catch(() => null);
-    if (!sub) return { title: "Not Found | JobReady" };
+    if (!sub) return { title: "Not Found" };
 
     const count = await prisma.listing
       .count({ where: { subcategoryId: sub.id, status: "ACTIVE" } })
       .catch(() => 0);
 
-    const title = `${sub.name} Jobs in Kenya${count > 0 ? ` (${count})` : ""} | JobReady`;
+    const title = `${sub.name} Jobs in Kenya${count > 0 ? ` (${count})` : ""}`;
     const description = `Browse ${count} ${sub.name.toLowerCase()} job openings across Kenya on JobReady.`;
 
     return {
       title,
       description,
       alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/${seg}` },
-      openGraph: { title, description, siteName: "JobReady", type: "website" },
-      twitter: { card: "summary_large_image", title, description },
+      openGraph: { title, description, siteName: "JobReady", type: "website", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
+      twitter: { card: "summary_large_image", title, description, images: [`${SITE_URL}/opengraph-image.png`] },
     };
   } catch {
-    return { title: "Not Found | JobReady" };
+    return { title: "Not Found" };
   }
 }
 

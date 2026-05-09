@@ -43,29 +43,31 @@ export async function generateMetadata({
   try {
     const { level } = await params;
     const gov = GOV_LEVELS.find((g) => g.slug === level);
-    if (!gov) return { title: "Not Found | JobReady" };
+    if (!gov) return { title: "Not Found" };
 
     return {
-      title: `${gov.label} Jobs in Kenya | JobReady`,
+      title: `${gov.label} Jobs in Kenya`,
       description: gov.description,
       alternates: {
         canonical: `${SITE_URL}/government/${level}`,
       },
       openGraph: {
-        title: `${gov.label} Jobs | JobReady`,
+        title: `${gov.label} Jobs`,
         description: gov.description,
         url: `${SITE_URL}/government/${level}`,
         type: "website",
         siteName: "JobReady",
+        images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
       },
       twitter: {
         card: "summary_large_image",
-        title: `${gov.label} Jobs | JobReady`,
+        title: `${gov.label} Jobs`,
         description: gov.description,
+        images: [`${SITE_URL}/opengraph-image.png`],
       },
     };
   } catch {
-    return { title: "Not Found | JobReady" };
+    return { title: "Not Found" };
   }
 }
 

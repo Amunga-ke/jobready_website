@@ -42,19 +42,19 @@ export async function generateMetadata({
     const { slug } = await params;
     const company = await getCompanyBySlug(slug).catch(() => null);
 
-    if (!company) return { title: "Company Not Found | JobReady" };
+    if (!company) return { title: "Company Not Found" };
 
     const ogUrl = `${SITE_URL}/companies/${slug}`;
     const jobCount = company._count.listings;
 
     return {
-      title: `${company.name} Jobs & Careers | JobReady`,
+      title: `${company.name} Jobs & Careers`,
       description: company.description
         ? `${company.description.slice(0, 155)}${company.description.length > 155 ? "..." : ""}`
         : `Explore ${jobCount} open positions at ${company.name}. Apply now on JobReady — Kenya's most trusted job board.`,
       alternates: { canonical: ogUrl },
       openGraph: {
-        title: `${company.name} Jobs & Careers | JobReady`,
+        title: `${company.name} Jobs & Careers`,
         description: `Explore ${jobCount} open positions at ${company.name}. Apply now on JobReady.`,
         url: ogUrl,
         siteName: "JobReady",
@@ -63,13 +63,13 @@ export async function generateMetadata({
       },
       twitter: {
         card: "summary_large_image",
-        title: `${company.name} Jobs & Careers | JobReady`,
+        title: `${company.name} Jobs & Careers`,
         description: `Explore ${jobCount} open positions at ${company.name}.`,
         ...(company.logo && { images: [company.logo] }),
       },
     };
   } catch {
-    return { title: "Company Not Found | JobReady" };
+    return { title: "Company Not Found" };
   }
 }
 

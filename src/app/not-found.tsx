@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Briefcase, ArrowRight, Search } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "404 — Page Not Found | JobReady",
+  title: "404 — Page Not Found",
   description: "The page you are looking for does not exist. Browse thousands of verified job listings across Kenya on JobReady.",
   robots: { index: false, follow: true },
 };
@@ -15,8 +15,7 @@ export default function NotFound() {
         <div className="w-20 h-20 bg-surface border border-divider rounded-2xl flex items-center justify-center mx-auto mb-6">
           <Briefcase className="w-9 h-9 text-muted/40" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-heading font-black text-ink mb-3">404</h1>
-        <h2 className="text-lg font-heading font-bold text-ink/70 mb-3">Page Not Found</h2>
+        <h1 className="text-4xl md:text-5xl font-heading font-black text-ink mb-3">404 — Page Not Found</h1>
         <p className="text-[14px] text-muted leading-relaxed mb-8 max-w-sm mx-auto">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
           Browse thousands of verified job listings across Kenya on JobReady.

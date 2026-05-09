@@ -4,12 +4,12 @@ import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
 import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | JobReady",
+  title: "Privacy Policy",
   description:
     "Learn how JobReady collects, uses, and protects your personal information. Our privacy policy covers data handling, cookies, and your rights.",
   alternates: { canonical: `${SITE_URL}/privacy` },
   openGraph: {
-    title: "Privacy Policy | JobReady",
+    title: "Privacy Policy",
     description: "How JobReady handles and protects your personal data.",
     url: `${SITE_URL}/privacy`,
     siteName: "JobReady",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Privacy Policy | JobReady",
+    title: "Privacy Policy",
     description: "How JobReady handles and protects your personal data.",
   },
 };
