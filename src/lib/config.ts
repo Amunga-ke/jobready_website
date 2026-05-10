@@ -1,7 +1,7 @@
 /** Centralized site configuration sourced from environment variables. */
 
 export const SITE_URL =
-  process.env.SITE_URL || "https://jobreadyke.co.ke";
+  process.env.SITE_URL || "https://jobready.co.ke";
 
 export const SITE_TITLE = "JobReady — Jobs for Kenyans";
 

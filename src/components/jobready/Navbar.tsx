@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { label: "Opportunities", href: "/opportunities" },
   { label: "Companies", href: "/companies" },
   { label: "Resources", href: "/articles" },
+  { label: "Updates", href: "/updates" },
   { label: "Salary Guide", href: "/salary-guide" },
 ];
 

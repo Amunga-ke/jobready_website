@@ -18,6 +18,7 @@ const FOOTER_LINKS = {
   ],
   resources: [
     { label: "Resources", href: "/articles" },
+    { label: "Updates", href: "/updates" },
     { label: "CV Writing", href: "/articles?category=CV Writing" },
     { label: "Interview Tips", href: "/articles?category=Interview Tips" },
   ],

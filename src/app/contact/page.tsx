@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Contact Us",
     description: "Reach the JobReady team for support and partnerships.",
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 
@@ -57,10 +58,10 @@ export default function Contact_Page() {
               For questions about JobReady&apos;s services, job listings, or account issues.
             </p>
             <a
-              href="mailto:info@jobreadyke.co.ke"
+              href="mailto:info@jobready.co.ke"
               className="text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
             >
-              info@jobreadyke.co.ke
+              info@jobready.co.ke
             </a>
           </div>
 
@@ -70,10 +71,10 @@ export default function Contact_Page() {
               Interested in posting jobs, employer branding, or partnership opportunities.
             </p>
             <a
-              href="mailto:partnerships@jobreadyke.co.ke"
+              href="mailto:partnerships@jobready.co.ke"
               className="text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
             >
-              partnerships@jobreadyke.co.ke
+              partnerships@jobready.co.ke
             </a>
           </div>
 
@@ -83,10 +84,10 @@ export default function Contact_Page() {
               Found a suspicious listing or experiencing technical problems? Let us know.
             </p>
             <a
-              href="mailto:support@jobreadyke.co.ke"
+              href="mailto:support@jobready.co.ke"
               className="text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
             >
-              support@jobreadyke.co.ke
+              support@jobready.co.ke
             </a>
           </div>
 
@@ -129,7 +130,7 @@ export default function Contact_Page() {
             <div className="rounded-xl border border-divider p-5">
               <h3 className="text-[14px] font-semibold text-ink mb-2">How do I report a fake job listing?</h3>
               <p className="text-[13px] text-muted leading-relaxed">
-                If you encounter a suspicious listing, please email us at support@jobreadyke.co.ke with the job title and URL. We review all reports and remove fraudulent listings promptly. All employers on JobReady are verified, but we appreciate community vigilance.
+                If you encounter a suspicious listing, please email us at support@jobready.co.ke with the job title and URL. We review all reports and remove fraudulent listings promptly. All employers on JobReady are verified, but we appreciate community vigilance.
               </p>
             </div>
             <div className="rounded-xl border border-divider p-5">
@@ -148,7 +149,7 @@ export default function Contact_Page() {
         },
         {
           question: "How do I report a fake job listing?",
-          answer: "If you encounter a suspicious listing, please email us at support@jobreadyke.co.ke with the job title and URL. We review all reports and remove fraudulent listings promptly. All employers on JobReady are verified, but we appreciate community vigilance."
+          answer: "If you encounter a suspicious listing, please email us at support@jobready.co.ke with the job title and URL. We review all reports and remove fraudulent listings promptly. All employers on JobReady are verified, but we appreciate community vigilance."
         },
         {
           question: "How can my company post jobs on JobReady?",

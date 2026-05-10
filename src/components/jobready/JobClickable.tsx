@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useJobModal } from "./JobModalContext";
 import type { Job } from "@/types";
 
@@ -11,30 +12,23 @@ interface JobClickableProps {
 
 /**
  * Thin client wrapper that makes any children open the job sidesheet on click.
- * Server components can render this and pass children without becoming clients themselves.
- *
- * Usage:
- *   <JobClickable job={myJob}>
- *     <div className="...">Card content here</div>
- *   </JobClickable>
+ * Renders a real <Link> so search engine crawlers can discover job pages.
+ * The sidesheet opens on click; the href is a fallback for crawlers and SSR.
  */
 export default function JobClickable({ job, children, className }: JobClickableProps) {
   const { openJob } = useJobModal();
 
   return (
-    <div
-      onClick={() => openJob(job)}
-      className={`cursor-pointer ${className || ""}`}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openJob(job);
-        }
+    <Link
+      href={`/jobs/${job.slug}`}
+      onClick={(e) => {
+        e.preventDefault();
+        openJob(job);
       }}
+      className={className}
+      aria-label={`${job.title} at ${job.companyName}`}
     >
       {children}
-    </div>
+    </Link>
   );
 }

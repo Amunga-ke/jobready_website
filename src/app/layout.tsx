@@ -84,6 +84,7 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     images: [`${SITE_URL}/opengraph-image.png`],
+    site: "@jobreadyke",
   },
   robots: {
     index: true,

@@ -54,13 +54,13 @@ export async function generateMetadata({
         type: "article",
         ...(article.publishedAt && { publishedTime: article.publishedAt.toISOString() }),
         section: article.category,
-        ...(article.coverImage && { images: [{ url: article.coverImage }] }),
+        images: [{ url: article.coverImage || `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: article.title }],
       },
       twitter: {
         card: "summary_large_image",
         title: article.title,
         description: article.excerpt,
-        ...(article.coverImage && { images: [article.coverImage] }),
+        images: [article.coverImage || `${SITE_URL}/opengraph-image.png`],
       },
     };
   } catch {

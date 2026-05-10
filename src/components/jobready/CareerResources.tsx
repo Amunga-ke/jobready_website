@@ -3,8 +3,6 @@ import Link from "next/link";
 import SectionNumber from "./SectionNumber";
 import prisma from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-
 export default async function CareerResources() {
   // Fetch real articles from DB
   const articles = await prisma.article

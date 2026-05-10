@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useJobModal } from "./JobModalContext";
 
 interface JobRowClickableProps {
@@ -10,30 +11,22 @@ interface JobRowClickableProps {
 
 /**
  * Thin client wrapper that opens the job sidesheet by slug.
- * Used by server components that have raw listing data (not the full Job type).
- *
- * Usage:
- *   <JobRowClickable slug={listing.slug} className="...">
- *     <div>Row content here</div>
- *   </JobRowClickable>
+ * Renders a real <Link> so search engine crawlers can discover job pages.
+ * The sidesheet opens on click; the href is a fallback for crawlers and SSR.
  */
 export default function JobRowClickable({ slug, children, className }: JobRowClickableProps) {
   const { openJobById } = useJobModal();
 
   return (
-    <div
-      onClick={() => openJobById(slug)}
-      className={`cursor-pointer ${className || ""}`}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openJobById(slug);
-        }
+    <Link
+      href={`/jobs/${slug}`}
+      onClick={(e) => {
+        e.preventDefault();
+        openJobById(slug);
       }}
+      className={className}
     >
       {children}
-    </div>
+    </Link>
   );
 }

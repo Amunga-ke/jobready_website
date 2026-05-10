@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Clock, Building2, ExternalLink } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Building2, ExternalLink, ChevronRight } from "lucide-react";
 import { formatDateUTC } from "@/lib/format-date";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { getJobBySlug, getJobCountByCounty, getJobsByCounty } from "@/lib/data";
 import ShareButton from "@/components/jobready/ShareButton";
 import { KE_COUNTIES, slugifyCounty, JOB_CATEGORIES, getCountyBySlug } from "@/lib/constants";
@@ -13,27 +14,11 @@ import JobRowClickable from "@/components/jobready/JobRowClickable";
 import { JobPostingJsonLd, BreadcrumbJsonLd, CollectionPageJsonLd } from "@/components/jobready/JsonLd";
 import AdSlot from "@/components/jobready/AdSlot";
 import { SITE_URL } from "@/lib/config";
+import prisma from "@/lib/prisma";
 
 export const revalidate = 300;
 
 const COUNTY_PREFIX = "in-";
-
-// ─── Lightweight HTML sanitizer (no jsdom dependency) ───
-function sanitizeHtml(html: string): string {
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
-    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
-    .replace(/<embed\b[^>]*>/gi, "")
-    .replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, "")
-    .replace(/\son\w+\s*=\s*"[^"]*"/gi, "") // inline event handlers
-    .replace(/\son\w+\s*=\s*'[^']*'/gi, "")
-    .replace(/javascript\s*:/gi, "") // javascript: URLs
-    .replace(/<link\b[^>]*>/gi, "") // external stylesheets
-    .replace(/<meta\b[^>]*>/gi, "") // meta tags
-    .replace(/<base\b[^>]*>/gi, "") // base tags
-    .trim();
-}
 
 // ─── Dynamic metadata for SEO ───
 export async function generateMetadata({
@@ -202,6 +187,53 @@ export default async function SlugPage({
   if (!job) notFound();
   const jobUrl = `${SITE_URL}/jobs/${slug}`;
 
+  // Fetch listing metadata (company slug, category slug) and related jobs in parallel
+  const [listingMeta, relatedJobs] = await Promise.all([
+    prisma.listing.findUnique({
+      where: { slug },
+      select: {
+        company: { select: { slug: true } },
+        category: { select: { slug: true } },
+        county: true,
+        categoryId: true,
+      },
+    }).catch(() => null),
+    (async () => {
+      // First try same category
+      const catMatch = await prisma.listing.findFirst({
+        where: { slug },
+        select: { categoryId: true, county: true },
+      }).catch(() => null);
+      if (!catMatch) return [];
+
+      const byCategory = catMatch.categoryId
+        ? await prisma.listing.findMany({
+            where: { status: "ACTIVE", slug: { not: slug }, categoryId: catMatch.categoryId },
+            orderBy: { createdAt: "desc" },
+            take: 5,
+            select: { slug: true, title: true, town: true, county: true, company: { select: { name: true } }, deadline: true, listingType: true, employmentType: true, createdAt: true },
+          }).catch(() => [])
+        : [];
+
+      // If not enough, fill from same county
+      if (byCategory.length < 5 && catMatch.county) {
+        const existingSlugs = new Set(byCategory.map((j) => j.slug));
+        const byCounty = await prisma.listing.findMany({
+          where: { status: "ACTIVE", slug: { not: slug, notIn: [...existingSlugs] }, county: catMatch.county },
+          orderBy: { createdAt: "desc" },
+          take: 5 - byCategory.length,
+          select: { slug: true, title: true, town: true, county: true, company: { select: { name: true } }, deadline: true, listingType: true, employmentType: true, createdAt: true },
+        }).catch(() => []);
+        return [...byCategory, ...byCounty];
+      }
+      return byCategory;
+    })(),
+  ]);
+
+  const companySlug = listingMeta?.company?.slug;
+  const categorySlug = listingMeta?.category?.slug;
+  const countySlug = job.county ? slugifyCounty(job.county) : null;
+
   return (
     <main className="bg-surface">
       <JobPostingJsonLd
@@ -221,7 +253,7 @@ export default async function SlugPage({
       ]} />
       <div className="border-b border-divider bg-white/60 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-5 py-3 flex items-center gap-3">
-          <Link href="/" className="inline-flex items-center gap-1 text-[13px] text-muted hover:text-ink transition-colors"><ArrowLeft className="w-4 h-4" /> Back</Link>
+          <Link href="/jobs" className="inline-flex items-center gap-1 text-[13px] text-muted hover:text-ink transition-colors"><ArrowLeft className="w-4 h-4" /> Back</Link>
         </div>
       </div>
       <article className="max-w-3xl mx-auto px-5 py-8 space-y-6">
@@ -230,12 +262,26 @@ export default async function SlugPage({
             <div className="w-12 h-12 rounded-xl bg-ink/[0.06] flex items-center justify-center shrink-0"><Building2 className="w-5 h-5 text-muted" /></div>
             <div className="min-w-0">
               <h1 className="text-xl md:text-2xl font-heading font-bold text-ink leading-tight">{job.title}</h1>
-              <p className="text-[15px] text-muted mt-0.5">{job.companyName}{job.companyVerified && <span className="ml-2 text-[12px] text-accent font-medium">Verified</span>}</p>
+              <p className="text-[15px] text-muted mt-0.5">
+                {companySlug ? (
+                  <Link href={`/companies/${companySlug}`} className="hover:text-accent transition-colors">{job.companyName}</Link>
+                ) : (
+                  <span>{job.companyName}</span>
+                )}
+                {job.companyVerified && <span className="ml-2 text-[12px] text-accent font-medium">Verified</span>}
+              </p>
             </div>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-muted">
-          <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{job.location}</span>
+          <span className="inline-flex items-center gap-1.5">
+            <MapPin className="w-4 h-4" />
+            {countySlug ? (
+              <Link href={`/jobs/in-${countySlug}`} className="hover:text-accent transition-colors">{job.location}</Link>
+            ) : (
+              <span>{job.location}</span>
+            )}
+          </span>
           <span className="inline-flex items-center gap-1.5"><Clock className="w-4 h-4" />Posted {formatDateUTC(job.createdAt)}</span>
           <span className="inline-flex items-center gap-1.5"><Building2 className="w-4 h-4" />{job.employmentType}</span>
           <span>{job.workMode}</span>
@@ -262,6 +308,44 @@ export default async function SlugPage({
           <div>
             <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-3">Description</h2>
             <div className="text-[14px] text-ink/80 leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1.5 [&_p]:mb-3 [&_strong]:font-semibold [&_strong]:text-ink" dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }} />
+          </div>
+        )}
+        {/* Cross-links: category + county */}
+        <div className="flex flex-wrap items-center gap-2 text-[12px]">
+          {categorySlug && (
+            <Link href={`/jobs/category/${categorySlug}`} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent-bg/50 text-accent border border-accent/20 hover:bg-accent-bg hover:border-accent/40 transition-colors font-medium">
+              Browse more in {job.category}
+            </Link>
+          )}
+          {countySlug && (
+            <Link href={`/jobs/in-${countySlug}`} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-ink/[0.04] text-ink/70 border border-divider hover:bg-ink/[0.08] hover:text-ink transition-colors font-medium">
+              <MapPin className="w-3 h-3" />
+              Jobs in {job.county}
+            </Link>
+          )}
+        </div>
+        {/* Related Jobs */}
+        {relatedJobs.length > 0 && (
+          <div>
+            <h2 className="text-[13px] font-semibold text-ink uppercase tracking-wider mb-4">Related Jobs</h2>
+            <div className="divide-y divide-subtle border border-divider rounded-lg overflow-hidden">
+              {relatedJobs.map((rj) => {
+                const dl = rj.deadline ? Math.ceil((new Date(rj.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+                return (
+                  <Link key={rj.slug} href={`/jobs/${rj.slug}`} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-ink/[0.02] transition-colors group">
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-medium text-ink truncate group-hover:text-accent transition-colors">{rj.title}</p>
+                      <p className="text-[11px] text-muted mt-0.5">{rj.company?.name ?? "Unknown"}{rj.town ? ` · ${rj.town}` : ""}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11px] text-muted hidden sm:inline">{rj.employmentType || "Job"}</span>
+                      {dl !== null && <span className={`font-mono text-[11px] font-medium tabular-nums ${dl <= 3 && dl > 0 ? "text-accent" : "text-muted"}`}>{dl <= 0 ? "Closed" : `${dl}d`}</span>}
+                      <ChevronRight className="w-4 h-4 text-muted/50 group-hover:text-accent transition-colors" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         )}
         <div className="pt-4 border-t border-divider flex items-center justify-between gap-4">

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import SectionNumber from "./SectionNumber";
 import { useUpdateModal } from "./UpdateModalContext";
-import type { UpdateData } from "./UpdateModalContext";
 import {
   Rss,
   ChevronRight,
@@ -60,10 +59,25 @@ function getTypeIcon(type: string) {
   }
 }
 
-export default function JobUpdates() {
+interface InitialUpdate {
+  id: string;
+  slug: string;
+  title: string;
+  body?: string | null;
+  source: string;
+  updateType: string;
+  pdfUrl?: string | null;
+  imageUrl?: string | null;
+  listingSlug?: string | null;
+  postedBy: string;
+  date: string;
+  createdAt: string;
+}
+
+export default function JobUpdates({ initialUpdates }: { initialUpdates?: InitialUpdate[] }) {
   const { openUpdateBySlug } = useUpdateModal();
-  const [updates, setUpdates] = useState<UpdateData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [updates, setUpdates] = useState<InitialUpdate[]>(initialUpdates || []);
+  const [loading, setLoading] = useState(!initialUpdates || initialUpdates.length === 0);
 
   useEffect(() => {
     async function fetchUpdates() {
@@ -104,7 +118,7 @@ export default function JobUpdates() {
           Ministry postings, shortlisting results, recruitment announcements, and deadlines
         </p>
 
-        {loading ? (
+        {loading && updates.length === 0 ? (
           <div className="divide-y divide-subtle">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="py-3.5 animate-pulse">
@@ -126,10 +140,11 @@ export default function JobUpdates() {
         ) : (
           <div className="divide-y divide-subtle">
             {updates.map((item) => (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => openUpdateBySlug(item.slug)}
-                className="py-3.5 w-full text-left group hover:bg-surface -mx-2 px-2 rounded-lg transition-colors cursor-pointer"
+                href={`/updates/${item.slug}`}
+                onClick={(e) => { e.preventDefault(); openUpdateBySlug(item.slug); }}
+                className="py-3.5 w-full text-left group hover:bg-surface -mx-2 px-2 rounded-lg transition-colors cursor-pointer block"
               >
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 border border-divider rounded-lg flex items-center justify-center shrink-0 bg-ink/[0.02] mt-0.5">
@@ -160,7 +175,7 @@ export default function JobUpdates() {
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted/20 group-hover:text-muted/50 shrink-0 mt-2 transition-colors" />
                 </div>
-              </button>
+              </Link>
             ))}
           </div>
         )}

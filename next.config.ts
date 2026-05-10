@@ -38,9 +38,14 @@ const securityHeaders = [
     key: "Cross-Origin-Resource-Policy",
     value: "same-origin",
   },
+  {
+    key: "Content-Security-Policy",
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; frame-src https://pagead2.googlesyndication.com; base-uri 'self'; form-action 'self';",
+  },
 ];
 
 const nextConfig: NextConfig = {
+  turbopack: { root: "/home/z/my-project/jobready_website" },
   output: "standalone",
   poweredByHeader: false,
   trailingSlash: false,

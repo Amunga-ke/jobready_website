@@ -50,7 +50,7 @@ export default function Privacy_Page() {
               <p>
                 JobReady (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy.
                 This Privacy Policy explains how we collect, use, disclose, and safeguard your
-                information when you visit our website jobreadyke.co.ke (the &quot;Service&quot;). Please
+                information when you visit our website jobready.co.ke (the &quot;Service&quot;). Please
                 read this policy carefully. By using JobReady, you agree to the practices
                 described in this Privacy Policy.
               </p>
@@ -136,7 +136,7 @@ export default function Privacy_Page() {
                 <li>Lodge a complaint with the Office of the Data Protection Commissioner</li>
               </ul>
               <p className="mt-3">
-                To exercise any of these rights, contact us at privacy@jobreadyke.co.ke.
+                To exercise any of these rights, contact us at privacy@jobready.co.ke.
               </p>
             </section>
 
@@ -174,7 +174,7 @@ export default function Privacy_Page() {
               <h2 className="text-[16px] font-heading font-bold text-ink mb-3">11. Contact Us</h2>
               <p>
                 If you have any questions about this Privacy Policy, please contact us at
-                privacy@jobreadyke.co.ke or visit our contact page.
+                privacy@jobready.co.ke or visit our contact page.
               </p>
             </section>
           </div>

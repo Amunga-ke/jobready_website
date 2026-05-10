@@ -59,13 +59,13 @@ export async function generateMetadata({
         url: ogUrl,
         siteName: "JobReady",
         type: "website",
-        ...(company.logo && { images: [{ url: company.logo }] }),
+        images: [{ url: company.logo || `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: `${company.name} Jobs & Careers` }],
       },
       twitter: {
         card: "summary_large_image",
         title: `${company.name} Jobs & Careers`,
         description: `Explore ${jobCount} open positions at ${company.name}.`,
-        ...(company.logo && { images: [company.logo] }),
+        images: [company.logo || `${SITE_URL}/opengraph-image.png`],
       },
     };
   } catch {

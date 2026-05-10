@@ -17,9 +17,22 @@ import StickyNewsletter from '@/components/jobready/StickyNewsletter';
 import AdSlot from '@/components/jobready/AdSlot';
 import { WebSiteJsonLd, BreadcrumbJsonLd, FAQJsonLd } from '@/components/jobready/JsonLd';
 import type { Job } from '@/types';
-import type { Category, County } from '@prisma/client';
+import type { Category, County, JobUpdate } from '@prisma/client';
 import type { Metadata } from 'next';
 import { SITE_URL } from "@/lib/config";
+import prisma from "@/lib/prisma";
+
+function relativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / (1000 * 60));
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffMin < 60) return "Just now";
+  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return `${Math.floor(diffDay / 7)}w ago`;
+}
 import {
   getFeaturedJobs,
   getJustPosted,
@@ -70,6 +83,7 @@ export default async function Home() {
     opportunities,
     categories,
     counties,
+    recentUpdates,
   ] = await Promise.all([
     getFeaturedJobs().catch(() => [] as Job[]),
     getJustPosted().catch(() => [] as Job[]),
@@ -86,7 +100,28 @@ export default async function Home() {
     })),
     getCategories().catch(() => [] as Category[]),
     getCounties().catch(() => [] as County[]),
+    prisma.jobUpdate.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }).catch(() => [] as JobUpdate[]),
   ]);
+
+  // Map prisma JobUpdate objects to the shape expected by JobUpdates component
+  const updates = recentUpdates.map((u) => ({
+    id: u.id,
+    slug: u.slug,
+    title: u.title,
+    body: u.body,
+    source: u.source,
+    updateType: u.updateType,
+    pdfUrl: u.pdfUrl,
+    imageUrl: u.imageUrl,
+    listingSlug: u.listingSlug,
+    postedBy: u.postedBy,
+    date: relativeTime(u.createdAt),
+    createdAt: u.createdAt.toISOString(),
+  }));
 
   return (
     <main>
@@ -97,7 +132,7 @@ export default async function Home() {
         <AdSlot format="auto" style={{ display: 'block', minHeight: '90px' }} />
       </div>
       <TrustedBy />
-      <JobUpdates />
+      <JobUpdates initialUpdates={updates} />
       <ClosingSoon jobs={closingSoonJobs} />
       <Featured jobs={featuredJobs} />
       <TrendingMarquee />

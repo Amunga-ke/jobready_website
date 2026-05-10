@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Terms of Service",
     description: "Terms and conditions for using JobReady's services.",
+    images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
 
@@ -48,7 +49,7 @@ export default function Terms_Page() {
             <section>
               <h2 className="text-[16px] font-heading font-bold text-ink mb-3">1. Acceptance of Terms</h2>
               <p>
-                By accessing or using JobReady (jobreadyke.co.ke), you agree to be bound by
+                By accessing or using JobReady (jobready.co.ke), you agree to be bound by
                 these Terms of Service. If you do not agree with any part of these terms,
                 you must not use the Service. These terms apply to all users, including
                 job seekers, employers, and visitors.
@@ -178,7 +179,7 @@ export default function Terms_Page() {
             <section>
               <h2 className="text-[16px] font-heading font-bold text-ink mb-3">13. Contact</h2>
               <p>
-                For questions about these Terms, contact us at legal@jobreadyke.co.ke or visit
+                For questions about these Terms, contact us at legal@jobready.co.ke or visit
                 our contact page.
               </p>
             </section>
