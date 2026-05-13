@@ -2,14 +2,15 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import {
   User,
-  Upload,
   Loader2,
   Eye,
   EyeOff,
-  Check,
   Trash2,
+  ChevronRight,
+  Check,
 } from "lucide-react";
 import { KE_COUNTIES } from "@/lib/constants";
 
@@ -31,7 +32,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Form state
@@ -94,36 +94,6 @@ export default function ProfilePage() {
       showMessage("error", "Something went wrong");
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleUploadCV = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("cv", file);
-
-      const res = await fetch("/api/dashboard/profile/cv", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setProfile((prev) => prev ? { ...prev, cvUrl: data.cvUrl } : prev);
-        showMessage("success", "CV uploaded successfully");
-      } else {
-        const data = await res.json();
-        showMessage("error", data.error || "Failed to upload CV");
-      }
-    } catch {
-      showMessage("error", "Failed to upload CV");
-    } finally {
-      setUploading(false);
-      e.target.value = "";
     }
   };
 
@@ -292,38 +262,36 @@ export default function ProfilePage() {
         </form>
       </div>
 
-      {/* CV Upload */}
+      {/* CV / Resume Link */}
       <div className="bg-white rounded-xl border border-divider p-6">
-        <h2 className="text-[14px] font-heading font-semibold text-ink mb-1">CV / Resume</h2>
-        <p className="text-[12px] text-muted mb-4">Upload your CV to apply for jobs faster.</p>
-
-        {profile?.cvUrl ? (
-          <div className="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-600" />
-              <span className="text-[12px] text-emerald-700 font-medium">CV uploaded</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-ink/[0.04] flex items-center justify-center">
+              {profile?.cvUrl === "parsed" ? (
+                <Check className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <User className="w-4 h-4 text-muted" />
+              )}
             </div>
-            <label className="cursor-pointer">
-              <span className="text-[11px] text-emerald-600 hover:text-emerald-800 font-medium transition-colors">
-                Replace
-              </span>
-              <input type="file" accept=".pdf,.doc,.docx" onChange={handleUploadCV} className="hidden" />
-            </label>
+            <div>
+              <h2 className="text-[14px] font-heading font-semibold text-ink">CV / Resume</h2>
+              <p className="text-[12px] text-muted">
+                {profile?.cvUrl === "parsed" ? (
+                  <span className="text-emerald-600 font-medium">CV uploaded & parsed</span>
+                ) : (
+                  "Upload and manage your CV"
+                )}
+              </p>
+            </div>
           </div>
-        ) : (
-          <label className="flex flex-col items-center justify-center border-2 border-dashed border-divider rounded-lg py-8 cursor-pointer hover:border-accent/40 hover:bg-accent-bg/20 transition-all">
-            {uploading ? (
-              <Loader2 className="w-8 h-8 text-accent animate-spin mb-2" />
-            ) : (
-              <Upload className="w-8 h-8 text-muted/50 mb-2" />
-            )}
-            <p className="text-[12px] text-ink font-medium">
-              {uploading ? "Uploading..." : "Click to upload CV"}
-            </p>
-            <p className="text-[11px] text-muted mt-0.5">PDF, DOC, DOCX — max 5MB</p>
-            <input type="file" accept=".pdf,.doc,.docx" onChange={handleUploadCV} className="hidden" />
-          </label>
-        )}
+          <Link
+            href="/dashboard/cv"
+            className="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-[12px] font-medium text-ink border border-divider hover:bg-ink/[0.04] transition-colors"
+          >
+            {profile?.cvUrl === "parsed" ? "View CV" : "Upload CV"}
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
 
       {/* Change Password */}

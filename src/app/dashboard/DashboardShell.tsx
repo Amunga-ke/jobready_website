@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Bookmark,
   FileText,
+  FileUp,
   User,
   Bell,
   Settings,
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { label: "Saved Jobs", href: "/dashboard/saved-jobs", icon: Bookmark },
   { label: "Applications", href: "/dashboard/applications", icon: FileText },
   { label: "Profile", href: "/dashboard/profile", icon: User },
+  { label: "My CV", href: "/dashboard/cv", icon: FileUp },
   { label: "Alerts", href: "/dashboard/alerts", icon: Bell },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

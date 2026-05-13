@@ -243,6 +243,7 @@ model User {
   savedJobs     SavedJob[]
   applications  Application[]
   jobAlerts     JobAlert[]
+  cvData        CVData?
 }
 
 // ─── Saved Jobs ───
@@ -296,6 +297,42 @@ model JobAlert {
   lastTriggered DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── CV Parsed Data ───
+
+model CVData {
+  id              String   @id @default(cuid()) @db.VarChar(64)
+  userId          String   @unique @db.VarChar(64)
+  rawText         String?  @db.LongText
+
+  // Contact
+  phone           String?  @db.VarChar(50)
+  email           String?  @db.VarChar(191)
+  location        String?  @db.VarChar(191)
+  linkedin        String?  @db.VarChar(500)
+  portfolio       String?  @db.VarChar(500)
+
+  // Sections stored as JSON strings in Text columns
+  summary         String?  @db.Text
+  skills          String?  @db.Text  // JSON: string[]
+  strengths       String?  @db.Text  // JSON: { area: string, description: string }[]
+  experience      String?  @db.Text  // JSON: { title, company, location, duration, description }[]
+  projects        String?  @db.Text  // JSON: { name, role, year, technologies, description, achievements }[]
+  education       String?  @db.Text  // JSON: { degree, field, institution, year }[]
+  certifications  String?  @db.Text  // JSON: { name, issuer, year }[]
+  awards          String?  @db.Text  // JSON: { title, issuer, year }[]
+  research        String?  @db.Text  // JSON: { title, publisher, year, description }[]
+  volunteering    String?  @db.Text  // JSON: { organization, role, duration, responsibilities }[]
+  languages       String?  @db.Text  // JSON: { language, proficiency }[]
+  interests       String?  @db.Text  // JSON: string[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

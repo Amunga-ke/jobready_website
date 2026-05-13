@@ -45,7 +45,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  turbopack: { root: "/home/z/my-project/jobready_website" },
+  turbopack: {
+    root: "/home/z/my-project/jobready_website",
+    resolveAlias: {
+      canvas: "./src/lib/stubs/canvas.js",
+    },
+  },
+  serverExternalPackages: ["canvas"],
   output: "standalone",
   poweredByHeader: false,
   trailingSlash: false,
