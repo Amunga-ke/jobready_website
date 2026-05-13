@@ -84,7 +84,7 @@ const SECTIONS: SectionDef[] = [
   },
   {
     id: "certifications",
-    aliases: /^(certifications?\s*(&?\s*training)?|professional\s*(certifications?|training)|courses|licenses|credentials|professional\s*development|workshops|seminars|bootcamps|conferences|designations)/i,
+    aliases: /^(certifications?\s*(&?\s*training)?|professional\s*(certifications?|training|qualifications\s*&?\s*training)|courses|licenses|credentials|professional\s*development|workshops|seminars|bootcamps|conferences|designations)/i,
     category: "learning",
     priority: 88,
     active: "yes",
@@ -203,8 +203,85 @@ async function extractFromPDF(buffer: Buffer): Promise<string> {
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
-    const text = content.items.map((item: { str: string }) => item.str).join(" ");
-    pages.push(text);
+    const items = content.items as Array<{
+      str: string;
+      transform: number[];
+      hasEOL: boolean;
+      width: number;
+      height: number;
+    }>;
+
+    if (items.length === 0) continue;
+
+    // Use Y-coordinate (transform[5]) to detect line breaks.
+    // Items on the same Y are on the same line; a significant Y shift means a new line.
+    // PDF Y-axis goes bottom-to-top, so a smaller Y means further down the page.
+    const LINE_THRESHOLD = 2; // pixels tolerance for same-line detection
+    const lines: string[] = [];
+    let currentLine = "";
+    let lastY: number | null = null;
+    let lastX: number | null = null;
+    let lineHeight: number | null = null;
+
+    for (let j = 0; j < items.length; j++) {
+      const item = items[j];
+      const text = item.str;
+      if (!text) continue;
+
+      const y = item.transform[5];
+      const x = item.transform[4];
+      const h = item.height || 12;
+
+      // Detect line height from first multi-item line
+      if (lastY !== null && Math.abs(y - lastY) > LINE_THRESHOLD) {
+        const gap = Math.abs(y - lastY);
+        if (!lineHeight || gap < lineHeight * 3) {
+          lineHeight = gap > h ? gap : h;
+        }
+      }
+
+      if (lastY !== null) {
+        const yDiff = Math.abs(y - lastY);
+
+        if (yDiff > LINE_THRESHOLD) {
+          // Y changed — this is a new line
+          // Add extra newline for paragraph breaks (larger Y gaps)
+          const isParagraphBreak = lineHeight && yDiff > lineHeight * 1.8;
+          if (isParagraphBreak) {
+            currentLine = currentLine.trim();
+            if (currentLine) lines.push(currentLine);
+            lines.push(""); // blank line = paragraph break
+            currentLine = text;
+          } else {
+            currentLine = currentLine.trim();
+            if (currentLine) lines.push(currentLine);
+            currentLine = text;
+          }
+        } else {
+          // Same line — check if we need a space based on X gap
+          if (lastX !== null) {
+            const xGap = x - (lastX || 0);
+            // If there's a significant gap, add a space
+            // (handles cases where items should be separated)
+            if (xGap > 1) {
+              currentLine += " ";
+            }
+          }
+          currentLine += text;
+        }
+      } else {
+        currentLine = text;
+      }
+
+      lastY = y;
+      lastX = x + (item.width || 0);
+    }
+
+    // Push remaining text
+    currentLine = currentLine.trim();
+    if (currentLine) lines.push(currentLine);
+
+    pages.push(lines.join("\n"));
   }
 
   return pages.join("\n\n");
@@ -233,7 +310,20 @@ interface SectionContent {
 }
 
 function splitIntoSections(text: string): SectionContent[] {
-  const lines = text.split(/\r?\n/);
+  // Pre-processing: some PDFs produce text as one continuous string with no line breaks.
+  // We build a combined regex from all section aliases and insert newlines around
+  // inline section headers (those surrounded by spaces, not already on their own line).
+  // Important: strip the ^ anchor from each alias since we're matching inline, not at line start.
+  const allAliasParts = SECTIONS.map(s => `(?:${s.aliases.source.replace(/^\^/, "")})`).join("|");
+  const inlineSectionRe = new RegExp(`\\s{2,}(${allAliasParts})\\s{2,}`, "gi");
+  let normalized = text.replace(inlineSectionRe, "\n\n$1\n\n");
+
+  // Also handle the edge case where a section header is at start of a line already
+  // but without a trailing newline (header followed immediately by content text)
+  const headerAtStartRe = new RegExp(`^(${allAliasParts})\\s{2,}`, "gim");
+  normalized = normalized.replace(headerAtStartRe, "$1\n");
+
+  const lines = normalized.split(/\r?\n/);
   const sections: SectionContent[] = [];
   let currentSection: SectionContent | null = null;
   let preamble: string[] = [];
@@ -252,9 +342,10 @@ function splitIntoSections(text: string): SectionContent[] {
     // Skip empty lines
     if (!trimmed) continue;
 
-    // Check if this line is a section header (short lines only)
+    // Check if this line is a section header (short lines only — headers are rarely long)
     if (trimmed.length < 60) {
       // Check against all section aliases
+      let matched = false;
       for (const sec of SECTIONS) {
         if (sec.aliases.test(trimmed)) {
           pushCurrent();
@@ -266,15 +357,12 @@ function splitIntoSections(text: string): SectionContent[] {
             active: sec.active,
           };
           preamble = [];
+          matched = true;
           break;
         }
       }
 
-      // If we found a section header, skip to next line
-      if (currentSection && currentSection.content === "" && sections.length >= 0) {
-        const matched = SECTIONS.find(s => s.aliases.test(trimmed));
-        if (matched) continue;
-      }
+      if (matched) continue; // don't add the header line as content
     }
 
     // Append to current section or preamble
@@ -477,21 +565,22 @@ function extractStrengths(sections: SectionContent[]): { area: string; descripti
   if (!section) return [];
 
   const strengths: { area: string; description: string }[] = [];
+  const content = section.content;
 
-  // Try area: description format
-  const lines = section.content.split(/\r?\n/);
-  for (const line of lines) {
-    const trimmed = line.replace(/^[-•*·]\s*/, "").trim();
-    // Match patterns like "Area: Description" or "Area — Description" or "Area - Description"
-    const match = trimmed.match(/^(.+?)\s*[:—–-]\s*(.+)$/);
+  // Split by bullet markers (•) to handle both line-broken and blob text
+  const items = content.split(/[•]/).map(s => s.trim()).filter(Boolean);
+
+  for (const item of items) {
+    // Match patterns like "Area – Description" or "Area : Description" or "Area - Description"
+    const match = item.match(/^(.+?)\s*[—–:-]\s*(.+)$/);
     if (match) {
       strengths.push({
         area: match[1].trim(),
         description: match[2].trim(),
       });
-    } else if (trimmed.length > 0 && trimmed.length < 200) {
+    } else if (item.length > 0 && item.length < 200) {
       strengths.push({
-        area: trimmed,
+        area: item.replace(/^[-*·]\s*/, "").trim(),
         description: "",
       });
     }
@@ -507,110 +596,101 @@ function extractExperience(sections: SectionContent[]): ParsedCV["experience"] {
   if (!section) return [];
 
   const jobs: ParsedCV["experience"] = [];
-  const lines = section.content.split(/\r?\n/).filter(l => l.trim());
-  let current: Partial<ParsedCV["experience"][0]> | null = null;
-  const bullets: string[] = [];
+  const content = section.content;
 
-  // Date patterns
-  const datePattern = /(\d{4}|\w+ \d{4}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{0,4}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{4}\s*[-–—to]+\s*(?:present|current|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{0,4})|present|current|ongoing)/i;
-
-  function flushJob() {
-    if (current && (current.title || current.company)) {
-      jobs.push({
-        title: current.title || "",
-        company: current.company || "",
-        location: current.location || "",
-        duration: current.duration || "",
-        description: bullets.join("\n"),
-      });
+  // Pre-process: split blob text at job boundaries.
+  // Each job in a Kenyan CV typically follows this pattern:
+  //   Title – Subtitle | Month Year – Present  Company (Rating) – City  Key Contributions: • bullets
+  // We split on patterns like: capitalized word(s) followed by " | " and a date
+  const jobSplitRe = /(?=\b[A-Z][a-zA-Z\s&']{2,}(?:\s*[-–—]\s*[A-Z][a-zA-Z\s&']+)?\s*[|]\s*(?:[A-Za-z]{3}\s*\d{4}|\d{4}))/g;
+  const rawSegments = content.split(jobSplitRe).filter(s => s.trim().length > 5);
+  
+  // Process each segment
+  for (const segment of rawSegments) {
+    const trimmed = segment.trim();
+    
+    // Extract bullets from the segment
+    const bulletRe = /[•]\s*([^\n•]+?)(?=\s*[•]|$)/g;
+    const bullets: string[] = [];
+    let bMatch;
+    while ((bMatch = bulletRe.exec(trimmed)) !== null) {
+      const text = bMatch[1].trim();
+      if (text.length > 10) bullets.push(text);
     }
-    current = null;
-    bullets.length = 0;
-  }
 
-  // Pattern: "Title at Company (Date)" on single line
-  const singleLinePattern = /^(.+?)\s+(?:at|@|[-–—])\s+(.+?)\s*[\(（]?(.+?)[\)）]?\s*$/i;
+    // Remove bullets and "Key Contributions:" from the header part
+    const headerPart = trimmed.replace(/[•][^\n]*/g, "").replace(/\s*Key\s*Contributions?:?\s*/gi, " ").trim();
 
-  // Pattern: "Title — Company — Date"
-  const dashPattern = /^(.+?)\s*[-–—]\s*(.+?)\s*[-–—]\s*(.+)$/;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    // Skip empty or very short lines
-    if (!trimmed || trimmed.length < 2) continue;
-
-    // Check if it's a bullet point
-    const isBullet = /^[-•*·]\s/.test(trimmed);
-    const bulletText = trimmed.replace(/^[-•*·]\s*/, "").trim();
-
-    if (isBullet) {
-      if (current) {
-        bullets.push(bulletText);
+    // Try "Title | Date | Company – Location" pattern
+    const pipeMatch = headerPart.match(/^(.+?)\s*[|]\s*((?:[A-Za-z]{3}\s*\d{4}|\d{4})(?:\s*[-–—to]+\s*(?:Present|Current|\d{4}|[A-Za-z]{3}\s*\d{0,4}))?)\s+(.+)$/);
+    
+    if (pipeMatch) {
+      const title = pipeMatch[1].trim();
+      const duration = pipeMatch[2].trim();
+      let companyRemainder = pipeMatch[3].trim();
+      
+      // Clean remainder: remove trailing "Key Contributions" etc
+      companyRemainder = companyRemainder.replace(/\s*Key\s*Contributions?:?.*/i, "").trim();
+      
+      // Split company and location (last " – City" pattern)
+      let company = companyRemainder;
+      let location = "";
+      const locMatch = companyRemainder.match(/^(.+?)\s*[-–—]\s*([A-Z][a-zA-Z\s]{1,25})\s*$/);
+      if (locMatch) {
+        company = locMatch[1].trim();
+        location = locMatch[2].trim();
       }
-      continue;
-    }
 
-    // Try "Title at Company (Date)" pattern
-    const singleMatch = trimmed.match(singleLinePattern);
-    if (singleMatch && trimmed.length < 120) {
-      flushJob();
-      const datePart = singleMatch[3];
-      current = {
-        title: singleMatch[1].trim(),
-        company: singleMatch[2].trim(),
-        duration: datePattern.test(datePart) ? datePart : "",
-        location: "",
-      };
-      continue;
-    }
-
-    // Try "Title — Company — Date" pattern
-    const dashMatch = trimmed.match(dashPattern);
-    if (dashMatch && trimmed.length < 150) {
-      flushJob();
-      current = {
-        title: dashMatch[1].trim(),
-        company: dashMatch[2].trim(),
-        duration: dashMatch[3].trim(),
-        location: "",
-      };
-      continue;
-    }
-
-    // If current job exists and line has a date, it might be a new job entry
-    if (current && datePattern.test(trimmed)) {
-      flushJob();
-      current = { duration: trimmed };
-      continue;
-    }
-
-    // Heuristic: if line is short, uppercase-ish, or looks like a title
-    const isLikelyHeader = trimmed.length < 80 && (
-      /^[A-Z]/.test(trimmed) ||
-      !trimmed.includes(" ") ||
-      trimmed.length < 40
-    );
-
-    if (isLikelyHeader && !current) {
-      current = { title: trimmed };
-    } else if (isLikelyHeader && current && !current.company) {
-      // Second short line might be company
-      current.company = trimmed;
-    } else if (isLikelyHeader && current && !current.location) {
-      // Third short line might be location
-      current.location = trimmed;
-    } else if (current && trimmed.length > 10) {
-      // Longer text is description/responsibility
-      bullets.push(trimmed);
-    } else if (isLikelyHeader) {
-      // Looks like a new job
-      flushJob();
-      current = { title: trimmed };
+      jobs.push({ title, company, location, duration, description: bullets.join("\n") });
     }
   }
 
-  flushJob();
+  // Fallback: if no jobs found with pipe pattern, try line-by-line
+  if (jobs.length === 0) {
+    const lines = content.split(/\r?\n/).filter(l => l.trim());
+    let current: Partial<ParsedCV["experience"][0]> | null = null;
+    const bullets: string[] = [];
+    const datePattern = /(\d{4}|\w+ \d{4})/i;
+
+    function flushJob() {
+      if (current && (current.title || current.company)) {
+        jobs.push({
+          title: current.title || "", company: current.company || "",
+          location: current.location || "", duration: current.duration || "",
+          description: bullets.join("\n"),
+        });
+      }
+      current = null; bullets.length = 0;
+    }
+
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t || t.length < 2) continue;
+      if (/^(key\s*contributions?|responsibilities?|duties?):/i.test(t)) continue;
+
+      if (/^[-•*·]\s/.test(t)) {
+        if (current) bullets.push(t.replace(/^[-•*·]\s*/, "").trim());
+        continue;
+      }
+
+      const dashMatch = t.match(/^(.+?)\s*[-–—]\s*(.+?)\s*[-–—]\s*(.+)$/);
+      if (dashMatch && t.length < 150) {
+        flushJob();
+        current = { title: dashMatch[1].trim(), company: dashMatch[2].trim(), duration: dashMatch[3].trim(), location: "" };
+        continue;
+      }
+
+      if (current && datePattern.test(t)) { flushJob(); current = { duration: t }; continue; }
+
+      const isHeader = t.length < 80 && /^[A-Z]/.test(t);
+      if (isHeader && !current) current = { title: t };
+      else if (isHeader && current && !current.company) current.company = t;
+      else if (current && t.length > 10) bullets.push(t);
+      else if (isHeader) { flushJob(); current = { title: t }; }
+    }
+    flushJob();
+  }
+
   return jobs.slice(0, 20);
 }
 
@@ -938,46 +1018,33 @@ function extractLanguages(sections: SectionContent[]): ParsedCV["languages"] {
   const langs: ParsedCV["languages"] = [];
   const content = section.content;
 
-  // Try various formats: "English — Fluent", "English: Native", "English (Fluent)"
-  const patterns = [
-    /^(.+?)\s*[-–—|]\s*(.+)$/gm,
-    /^(.+?)\s*[:]\s*(.+)$/gm,
-    /^(.+?)\s*[\(（](.+?)[\)）]$/gm,
-  ];
+  // First, split by bullet markers to handle blob text like "• English – Proficient  • Swahili – Native"
+  const items = content.split(/[•]/).map(s => s.trim()).filter(Boolean);
 
-  const lines = content.split(/\r?\n/).filter(l => l.trim());
-
-  for (const line of lines) {
-    const trimmed = line.replace(/^[-•*·]\s*/, "").trim();
-    if (!trimmed) continue;
-
-    let match: RegExpExecArray | null = null;
-    for (const pattern of patterns) {
-      pattern.lastIndex = 0;
-      match = pattern.exec(trimmed);
-      if (match) break;
-    }
-
+  for (const item of items) {
+    // Try various formats: "English — Fluent", "English: Native", "English (Fluent)"
+    const match = item.match(/^(.+?)\s*[-–—|:]\s*(.+)$/);
     if (match) {
       langs.push({
         language: match[1].trim(),
         proficiency: match[2].trim(),
       });
-    } else if (trimmed.length < 40) {
-      // Just a language name without proficiency
-      langs.push({
-        language: trimmed,
-        proficiency: "",
-      });
+    } else if (item.length < 40) {
+      langs.push({ language: item, proficiency: "" });
     }
   }
 
-  // Also try comma-separated in a single line
+  // Fallback: try line-by-line if no items found
   if (langs.length === 0) {
-    const parts = content.split(/[,;•]/).map(s => s.trim()).filter(Boolean);
-    for (const part of parts) {
-      if (part.length < 40) {
-        langs.push({ language: part, proficiency: "" });
+    const lines = content.split(/\r?\n/).filter(l => l.trim());
+    for (const line of lines) {
+      const trimmed = line.replace(/^[-•*·]\s*/, "").trim();
+      if (!trimmed) continue;
+      const match = trimmed.match(/^(.+?)\s*[-–—|:]\s*(.+)$/);
+      if (match) {
+        langs.push({ language: match[1].trim(), proficiency: match[2].trim() });
+      } else if (trimmed.length < 40) {
+        langs.push({ language: trimmed, proficiency: "" });
       }
     }
   }
