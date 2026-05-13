@@ -158,7 +158,7 @@ export default function CVPage() {
         if (cvRes.ok) setCvData(await cvRes.json());
       } else {
         const data = await res.json();
-        showMessage("error", data.error || "Failed to process CV");
+        showMessage("error", data.detail ? `${data.error}\n${data.detail}` : (data.error || "Failed to process CV"));
       }
     } catch {
       showMessage("error", "Failed to upload CV");

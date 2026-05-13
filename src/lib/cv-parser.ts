@@ -151,22 +151,53 @@ export async function extractTextFromCV(file: File): Promise<string> {
 }
 
 async function extractFromPDF(buffer: Buffer): Promise<string> {
-  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.js");
-  const workerPath = path.join(
-    process.cwd(),
-    "node_modules",
-    "pdfjs-dist",
-    "legacy",
-    "build",
-    "pdf.worker.js"
-  );
+  const pdfjsLib: any = await import("pdfjs-dist/legacy/build/pdf.js");
 
-  // Set worker
-  const pdfjsLib = pdfjs as unknown as { getDocument: (params: { data: Buffer; workerSrc: string }) => { promise: Promise<{ numPages: number; getPage: (n: number) => Promise<{ getTextContent: () => Promise<{ items: Array<{ str: string }> }> }> }> } };
-  const doc = await pdfjsLib.getDocument({
-    data: buffer,
-    workerSrc: workerPath,
-  }).promise;
+  // Resolve worker path — try multiple strategies for Vercel serverless compatibility
+  let workerPath: string | null = null;
+  const candidates = [
+    // Strategy 1: require.resolve (works in Node.js runtime, not during Turbopack build)
+    () => { try { return require.resolve("pdfjs-dist/legacy/build/pdf.worker.js"); } catch { return null; } },
+    // Strategy 2: process.cwd() + node_modules
+    () => path.join(process.cwd(), "node_modules", "pdfjs-dist", "legacy", "build", "pdf.worker.js"),
+    // Strategy 3: __dirname based (for standalone builds)
+    () => path.join(__dirname, "..", "..", "..", "..", "node_modules", "pdfjs-dist", "legacy", "build", "pdf.worker.js"),
+  ];
+
+  for (const getCandidate of candidates) {
+    try {
+      const candidate = getCandidate();
+      if (candidate && require("fs").existsSync(candidate)) {
+        workerPath = candidate;
+        break;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  if (workerPath) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = workerPath;
+  }
+
+  // Suppress font-related warnings that don't affect text extraction
+  const params: Record<string, unknown> = {
+    data: new Uint8Array(buffer),
+    useWorkerFetch: false,
+    isEvalSupported: false,
+    isPureFetch: false,
+    disableFontFace: true,
+    verbosity: 0, // Suppress warnings
+  };
+
+  // If we couldn't find the worker file, explicitly disable worker
+  if (!workerPath) {
+    params["disableWorker"] = true;
+    // Alternative: pass an empty handler to avoid worker creation errors
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "";
+  }
+
+  const doc = await pdfjsLib.getDocument(params).promise;
 
   const pages: string[] = [];
   for (let i = 1; i <= doc.numPages; i++) {

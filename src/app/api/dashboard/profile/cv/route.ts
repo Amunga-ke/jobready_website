@@ -66,10 +66,14 @@ export async function POST(req: Request) {
     let rawText: string;
     try {
       rawText = await extractTextFromCV(file);
-    } catch (extractError) {
-      console.error("CV text extraction error:", extractError);
+    } catch (extractError: unknown) {
+      const errMsg = extractError instanceof Error ? extractError.message : String(extractError);
+      console.error("CV text extraction error:", errMsg, extractError);
       return NextResponse.json(
-        { error: "Failed to extract text from CV. Please ensure the file is not password-protected or corrupt." },
+        {
+          error: "Failed to extract text from CV. Please ensure the file is not password-protected or corrupt.",
+          detail: errMsg,
+        },
         { status: 400 }
       );
     }
