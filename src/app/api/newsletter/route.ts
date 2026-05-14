@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, source } = body;
@@ -14,14 +14,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already subscribed
-    const existing = await db.newsletterSubscription.findUnique({
+    const existing = await prisma.newsletterSubscription.findUnique({
       where: { email },
     });
 
     if (existing) {
-      // If unsubscribed before, reactivate
       if (!existing.isActive) {
-        await db.newsletterSubscription.update({
+        await prisma.newsletterSubscription.update({
           where: { email },
           data: {
             isActive: true,
@@ -34,18 +33,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Already subscribed' });
     }
 
-    await db.newsletterSubscription.create({
+    await prisma.newsletterSubscription.create({
       data: {
         email,
+        source: source || null,
         isActive: true,
-        // source is optional — we don't have a source column in DB, so skip it
       },
     });
 
     return NextResponse.json({ message: 'Subscribed successfully' }, { status: 201 });
-  } catch (error: any) {
-    // Prisma unique constraint violation
-    if (error?.code === 'P2002') {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && (error as { code: string }).code === 'P2002') {
       return NextResponse.json({ message: 'Already subscribed' });
     }
     console.error('[POST /api/newsletter] Error:', error);

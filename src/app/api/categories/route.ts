@@ -1,34 +1,33 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { mapToCategories } from '@/lib/data-mapper';
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
-    // Fetch root categories (no parent) with type JOB, ordered by listing count.
-    // Include their subcategories (children) for the hierarchical structure.
-    const categories = await db.category.findMany({
-      where: {
-        parentId: null,
-        isActive: true,
-        type: 'JOB',
-      },
+    const categories = await prisma.category.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: 'asc' },
       include: {
-        children: {
-          where: { isActive: true },
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            listingCount: true,
-          },
-          orderBy: { listingCount: 'desc' },
+        subcategories: {
+          where: { active: true },
+          select: { id: true, name: true, slug: true },
+          orderBy: { sortOrder: 'asc' },
+        },
+        _count: {
+          select: { listings: { where: { status: 'ACTIVE' } } },
         },
       },
-      orderBy: { listingCount: 'desc' },
     });
 
     return NextResponse.json({
-      categories: mapToCategories(categories as any),
+      categories: categories.map(c => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        icon: c.icon,
+        sortOrder: c.sortOrder,
+        listingCount: c._count.listings,
+        subcategories: c.subcategories,
+      })),
     });
   } catch (error) {
     console.error('[GET /api/categories] Error:', error);
