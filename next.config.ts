@@ -42,7 +42,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     // TODO: Replace 'unsafe-inline' with nonce-based approach for script-src once Next.js supports
     // stable nonce generation. See: https://github.com/vercel/next.js/discussions/39430
-    value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://vda7300.is.cc; frame-src https://pagead2.googlesyndication.com; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; report-uri /api/csp-report;",
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://da27.host-ww.net; frame-src https://pagead2.googlesyndication.com; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; report-uri /api/csp-report;",
   },
 ];
 

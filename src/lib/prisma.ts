@@ -8,13 +8,13 @@ function buildDatabaseUrl(): string {
   if (base.includes("connection_limit")) return base;
   const sep = base.includes("?") ? "&" : "?";
   // Vercel serverless: keep pool small to avoid exhausting shared MySQL max_user_connections
-  return `${base}${sep}connection_limit=3&pool_timeout=15`;
+  return `${base}${sep}connection_limit=3&pool_timeout=30&connect_timeout=30`;
 }
 
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    log: ["warn", "error"],
     datasources: {
       db: {
         url: buildDatabaseUrl(),
