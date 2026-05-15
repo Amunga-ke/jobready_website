@@ -29,6 +29,7 @@ model Company {
   updatedAt   DateTime  @updatedAt
 
   listings Listing[]
+  socialAccounts SocialAccount[]
 }
 
 // ─── Job Categories ───
@@ -144,6 +145,7 @@ model Listing {
   cvMatchScores    CvMatchScore[]
   listingTests     ListingTest[]
   skillTestResults SkillTestResult[]
+  socialPosts      SocialPost[]
 
   @@index([listingType])
   @@index([categoryId])
@@ -252,6 +254,7 @@ model User {
   cvMatchScores      CvMatchScore[]
   skillTestResults   SkillTestResult[]
   salarySubmissions  SalarySubmission[]
+  socialAccounts      SocialAccount[]
 }
 
 // ─── Saved Jobs ───
@@ -478,6 +481,68 @@ model SkillTestResult {
   @@index([listingId])
   @@index([applicationId])
   @@unique([userId, testId, listingId])
+}
+
+// ─── Social Accounts (connected social media accounts) ───
+
+model SocialAccount {
+  id                String   @id @default(cuid()) @db.VarChar(64)
+  userId            String   @db.VarChar(64)
+  companyId         String?  @db.VarChar(64) // null = admin account, set = employer account
+  platform          String   @db.VarChar(30) // FACEBOOK, INSTAGRAM, LINKEDIN, TWITTER, WHATSAPP_CHANNEL
+  platformUserId    String?  @db.VarChar(191) // user ID on the platform
+  platformUsername  String?  @db.VarChar(191) // username/handle
+  accessToken       String?  @db.Text // encrypted access token
+  refreshToken      String?  @db.Text // encrypted refresh token
+  tokenExpiresAt    DateTime?
+  pageId            String?  @db.VarChar(191) // FB Page ID or LinkedIn Org ID
+  pageName          String?  @db.VarChar(300) // FB Page name or LinkedIn Org name
+  pageAccessToken   String?  @db.Text // Page-specific access token
+  isActive          Boolean  @default(true)
+  autoPost          Boolean  @default(false) // auto-post when job published
+  autoPostJobTypes  String?  @db.Text // JSON array of listingTypes to auto-post (e.g. ["JOB","OPPORTUNITY"])
+  lastPostedAt      DateTime?
+  metadata          String?  @db.Text // JSON for extra data
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company    Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  socialPosts SocialPost[]
+
+  @@unique([userId, platform, companyId])
+  @@index([platform])
+  @@index([companyId])
+  @@index([isActive])
+}
+
+// ─── Social Posts (tracking social media posts) ───
+
+model SocialPost {
+  id              String   @id @default(cuid()) @db.VarChar(64)
+  accountId       String   @db.VarChar(64)
+  listingId       String?  @db.VarChar(64)
+  platform        String   @db.VarChar(30) // FACEBOOK, INSTAGRAM, LINKEDIN, TWITTER, WHATSAPP_CHANNEL
+  platformPostId  String?  @db.VarChar(191) // post ID on the platform
+  platformUrl     String?  @db.VarChar(500) // URL of the post
+  caption         String   @db.Text // post caption/text
+  posterUrl       String?  @db.VarChar(500) // path to generated poster image
+  status          String   @default("PENDING") @db.VarChar(20) // PENDING, POSTED, FAILED, DELETED
+  postType        String   @default("JOB_POSTER") @db.VarChar(30) // JOB_POSTER, ARTICLE, ANNOUNCEMENT
+  errorMessage    String?  @db.Text
+  metadata        String?  @db.Text // JSON
+  postedAt        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  account SocialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  listing Listing?       @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  @@index([accountId])
+  @@index([listingId])
+  @@index([platform])
+  @@index([status])
+  @@index([createdAt])
 }
 
 // ─── Salary Submissions (salary benchmarking data) ───

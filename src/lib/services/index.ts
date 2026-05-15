@@ -24,3 +24,19 @@ export {
   dispatchJobAlert,
   processJobAlerts,
 } from "./notifications";
+
+// ─── Social Media Services ───
+
+export {
+  postToListingPlatforms,
+  generateJobCaption,
+} from "./social-media-service";
+
+export type { PostResult, PostToListingPlatformsParams } from "./social-media-service";
+
+export {
+  generateJobPoster,
+  getPosterUrl,
+} from "./poster-generator";
+
+export type { ListingData, PosterTemplate } from "./poster-generator";
