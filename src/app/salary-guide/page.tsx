@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { SITE_URL } from "@/lib/config";
+import SalaryGuideClient from "./SalaryGuideClient";
 
 export const metadata: Metadata = {
-  title: "Salary Guide — Kenya Salary Benchmarks",
+  title: "Kenya Salary Guide 2025 — Real Salary Benchmarks",
   description:
-    "Explore salary benchmarks and compensation insights across industries in Kenya. Compare salaries by role, experience, and location.",
+    "Explore real salary data shared by professionals across Kenya. Compare compensation by role, experience, location, and industry. Anonymous salary benchmarks for 2025.",
   robots: { index: false, follow: true },
   alternates: { canonical: `${SITE_URL}/salary-guide` },
   openGraph: {
-    title: "Salary Guide — Kenya Salary Benchmarks",
+    title: "Kenya Salary Guide 2025 — Real Salary Benchmarks",
     description:
-      "Salary benchmarks and compensation insights across Kenyan industries.",
+      "Explore real salary data shared by professionals across Kenya. Compare compensation by role, experience, location, and industry.",
     url: `${SITE_URL}/salary-guide`,
     siteName: "JobReady",
     type: "website",
@@ -20,15 +20,15 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image.png`,
         width: 1200,
         height: 630,
-        alt: "Kenya Salary Guide — JobReady",
+        alt: "Kenya Salary Guide 2025 — JobReady",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Salary Guide — Kenya Salary Benchmarks",
+    title: "Kenya Salary Guide 2025 — Real Salary Benchmarks",
     description:
-      "Salary benchmarks and compensation insights across Kenyan industries.",
+      "Explore real salary data shared by professionals across Kenya.",
     images: [`${SITE_URL}/opengraph-image.png`],
   },
 };
@@ -36,16 +36,7 @@ export const metadata: Metadata = {
 export default function SalaryGuide_Page() {
   return (
     <main className="bg-surface">
-      <div className="max-w-2xl mx-auto px-5 py-20 text-center">
-        <h1 className="text-2xl font-heading font-bold text-ink mb-3">Salary Guide</h1>
-        <p className="text-[14px] text-muted mb-6">Explore salary benchmarks and compensation insights across industries in Kenya.</p>
-        <Link
-          href="/jobs"
-          className="inline-flex items-center text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
-        >
-          ← Browse Jobs
-        </Link>
-      </div>
+      <SalaryGuideClient />
     </main>
   );
 }

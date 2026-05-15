@@ -16,6 +16,10 @@ import {
   Menu,
   X,
   ChevronRight,
+  Brain,
+  DollarSign,
+  FileCheck,
+  BellRing,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -25,6 +29,10 @@ const NAV_ITEMS = [
   { label: "Profile", href: "/dashboard/profile", icon: User },
   { label: "My CV", href: "/dashboard/cv", icon: FileUp },
   { label: "Alerts", href: "/dashboard/alerts", icon: Bell },
+  { label: "Notifications", href: "/dashboard/notifications", icon: BellRing },
+  { label: "CV Matching", href: "/dashboard/cv-matching", icon: Brain },
+  { label: "Salary Benchmark", href: "/dashboard/salary", icon: DollarSign },
+  { label: "Skills Tests", href: "/dashboard/skills-tests", icon: FileCheck },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
