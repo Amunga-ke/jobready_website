@@ -151,17 +151,13 @@ export async function extractTextFromCV(file: File): Promise<string> {
 }
 
 async function extractFromPDF(buffer: Buffer): Promise<string> {
-  const pdfjsLib: any = await import("pdfjs-dist/legacy/build/pdf.js");
+  const pdfjsLib: any = await import("pdfjs-dist/legacy/build/pdf.mjs");
 
-  // Resolve worker path — try multiple strategies for Vercel serverless compatibility
+  // Resolve worker path for pdfjs-dist v5 (uses .mjs extension)
   let workerPath: string | null = null;
   const candidates = [
-    // Strategy 1: require.resolve (works in Node.js runtime, not during Turbopack build)
-    () => { try { return require.resolve("pdfjs-dist/legacy/build/pdf.worker.js"); } catch { return null; } },
-    // Strategy 2: process.cwd() + node_modules
-    () => path.join(process.cwd(), "node_modules", "pdfjs-dist", "legacy", "build", "pdf.worker.js"),
-    // Strategy 3: __dirname based (for standalone builds)
-    () => path.join(__dirname, "..", "..", "..", "..", "node_modules", "pdfjs-dist", "legacy", "build", "pdf.worker.js"),
+    () => path.join(process.cwd(), "node_modules", "pdfjs-dist", "legacy", "build", "pdf.worker.mjs"),
+    () => path.join(__dirname, "..", "..", "..", "..", "node_modules", "pdfjs-dist", "legacy", "build", "pdf.worker.mjs"),
   ];
 
   for (const getCandidate of candidates) {
@@ -187,13 +183,12 @@ async function extractFromPDF(buffer: Buffer): Promise<string> {
     isEvalSupported: false,
     isPureFetch: false,
     disableFontFace: true,
-    verbosity: 0, // Suppress warnings
+    verbosity: 0,
   };
 
   // If we couldn't find the worker file, explicitly disable worker
   if (!workerPath) {
     params["disableWorker"] = true;
-    // Alternative: pass an empty handler to avoid worker creation errors
     pdfjsLib.GlobalWorkerOptions.workerSrc = "";
   }
 

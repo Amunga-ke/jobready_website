@@ -21,13 +21,13 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ platform: string }> }
 ) {
+  const { platform } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { platform } = await params;
     const searchParams = request.nextUrl.searchParams;
 
     // For now, this endpoint is informational.
@@ -56,13 +56,13 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ platform: string }> }
 ) {
+  const { platform } = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { platform } = await params;
     const body = await request.json();
 
     const {

@@ -27,7 +27,7 @@ interface JobListing {
 
 interface SendJobAlertEmailParams {
   to: string;
-  name: string;
+  name?: string;
   jobs: JobListing[];
 }
 

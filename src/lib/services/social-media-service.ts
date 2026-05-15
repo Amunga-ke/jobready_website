@@ -38,7 +38,7 @@ async function postToFacebook(
 
   try {
     const formData = new FormData();
-    formData.append("source", new Blob([imageBuffer], { type: "image/png" }), "poster.png");
+    formData.append("source", new Blob([new Uint8Array(imageBuffer)], { type: "image/png" }), "poster.png");
     formData.append("message", caption);
     formData.append("access_token", pageAccessToken);
 
@@ -87,7 +87,7 @@ async function postToInstagram(
   try {
     // Step 1: Upload image as media item to the page (get a reusable media ID)
     const uploadForm = new FormData();
-    uploadForm.append("source", new Blob([imageBuffer], { type: "image/png" }), "poster.png");
+    uploadForm.append("source", new Blob([new Uint8Array(imageBuffer)], { type: "image/png" }), "poster.png");
     uploadForm.append("access_token", pageAccessToken);
 
     const uploadRes = await fetch(`${META_GRAPH_URL}/${pageId}/photos`, {
@@ -224,7 +224,7 @@ async function postToLinkedIn(
       headers: {
         "Content-Type": "image/png",
       },
-      body: imageBuffer,
+      body: new Uint8Array(imageBuffer),
     });
 
     if (!uploadRes.ok) {
@@ -322,7 +322,7 @@ async function postToWhatsApp(
   try {
     // Step 1: Upload the image media
     const mediaForm = new FormData();
-    mediaForm.append("file", new Blob([imageBuffer], { type: "image/png" }), "poster.png");
+    mediaForm.append("file", new Blob([new Uint8Array(imageBuffer)], { type: "image/png" }), "poster.png");
     mediaForm.append("messaging_product", "whatsapp");
     mediaForm.append("type", "image");
 
