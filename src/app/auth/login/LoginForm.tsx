@@ -128,7 +128,13 @@ export default function LoginForm() {
       <p className="text-[12px] text-muted text-center mt-5">
         Don&apos;t have an account?{" "}
         <Link href="/auth/register" className="text-accent hover:text-accent-dark font-medium transition-colors">
-          Create one
+          Sign up as Job Seeker
+        </Link>
+      </p>
+      <p className="text-[12px] text-muted text-center mt-1">
+        Want to post jobs?{" "}
+        <Link href="/auth/register-employer" className="text-accent hover:text-accent-dark font-medium transition-colors">
+          Create Employer Account
         </Link>
       </p>
     </div>

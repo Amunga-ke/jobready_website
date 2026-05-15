@@ -30,6 +30,7 @@ model Company {
 
   listings Listing[]
   socialAccounts SocialAccount[]
+  users     User[]
 }
 
 // ─── Job Categories ───
@@ -239,7 +240,8 @@ model User {
   bio           String?   @db.Text
   cvUrl         String?   @db.VarChar(500)
   avatarUrl     String?   @db.VarChar(500)
-  role          String    @default("SEEKER") @db.VarChar(20)
+  role          String    @default("SEEKER") @db.VarChar(20) // SEEKER, EMPLOYER, ADMIN
+  companyId     String?   @db.VarChar(64) // set for EMPLOYER role
   resetToken     String?   @db.VarChar(255)
   resetTokenExpiry DateTime?
   emailVerified Boolean   @default(false)
@@ -258,6 +260,10 @@ model User {
   salarySubmissions  SalarySubmission[]
   socialAccounts      SocialAccount[]
   cvData             CVData?
+  company            Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([role])
 }
 
 // ─── CV Data (parsed CV storage) ───

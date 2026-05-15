@@ -51,8 +51,8 @@ function isRateLimited(ip: string): boolean {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Protect dashboard routes — redirect unauthenticated users
-  if (pathname.startsWith("/dashboard")) {
+  // Protect dashboard & employer routes — redirect unauthenticated users
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/employer")) {
     const token = request.cookies.get("next-auth.session-token")
       || request.cookies.get("__Secure-next-auth.session-token");
     if (!token) {
@@ -89,5 +89,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/:path*"],
+  matcher: ["/dashboard/:path*", "/employer/:path*", "/api/:path*"],
 };
