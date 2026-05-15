@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { SITE_URL } from "@/lib/config";
-import ForgotPasswordForm from "./ForgotPasswordForm";
+import ResetPasswordForm from "./ResetPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Reset Your JobReady Password",
+  title: "Set New Password — JobReady",
   description:
-    "Reset your JobReady password securely via email. Follow the link sent to your registered address.",
+    "Choose a new password for your JobReady account. Enter your new password below.",
   robots: { index: false, follow: false },
-  alternates: { canonical: `${SITE_URL}/auth/forgot-password` },
+  alternates: { canonical: `${SITE_URL}/auth/reset-password` },
 };
 
-export default function ForgotPasswordPage() {
+export default function ResetPasswordPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-5 py-12">
       <div className="w-full max-w-sm">
@@ -25,10 +25,10 @@ export default function ForgotPasswordPage() {
             JOB<span className="text-accent">READY</span>
           </Link>
           <h1 className="text-xl font-heading font-bold text-ink mb-2">
-            Reset Your Password
+            Set New Password
           </h1>
           <p className="text-[13px] text-muted mt-2">
-            Enter your email and we&apos;ll send you a reset link.
+            Enter your new password below.
           </p>
         </div>
 
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
             </div>
           }
         >
-          <ForgotPasswordForm />
+          <ResetPasswordForm />
         </Suspense>
       </div>
     </div>

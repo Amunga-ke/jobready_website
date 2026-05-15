@@ -49,34 +49,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function UpdateSlugPage({ params }: Props) {
   const { slug } = await params;
 
-  let update = null;
   try {
-    update = await prisma.jobUpdate.findUnique({
+    const update = await prisma.jobUpdate.findUnique({
       where: { slug, status: "PUBLISHED" },
     });
+
+    if (!update) {
+      notFound();
+    }
+
+    return (
+      <>
+        <BreadcrumbJsonLd items={[
+          { name: "Home", url: `${SITE_URL}/` },
+          { name: "Updates", url: `${SITE_URL}/updates` },
+          { name: update.title, url: `${SITE_URL}/updates/${slug}` },
+        ]} />
+        <ArticleJsonLd
+          title={update.title}
+          description={update.body || undefined}
+          url={`${SITE_URL}/updates/${slug}`}
+          datePublished={update.createdAt?.toISOString() || ""}
+          author={update.postedBy === "admin" ? "JobReady" : update.postedBy}
+        />
+        <UpdateDetailPage update={update} />
+      </>
+    );
   } catch (error) {
     console.error("[UpdateSlugPage] DB error:", error);
-  }
-
-  if (!update) {
     notFound();
   }
-
-  return (
-    <>
-      <BreadcrumbJsonLd items={[
-        { name: "Home", url: `${SITE_URL}/` },
-        { name: "Updates", url: `${SITE_URL}/updates` },
-        { name: update.title, url: `${SITE_URL}/updates/${slug}` },
-      ]} />
-      <ArticleJsonLd
-        title={update.title}
-        description={update.body || undefined}
-        url={`${SITE_URL}/updates/${slug}`}
-        datePublished={update.createdAt?.toISOString() || ""}
-        author={update.postedBy === "admin" ? "JobReady" : update.postedBy}
-      />
-      <UpdateDetailPage update={update} />
-    </>
-  );
 }

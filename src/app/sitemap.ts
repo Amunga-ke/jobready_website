@@ -75,13 +75,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const allCounties = await prisma.county
     .findMany({ select: { name: true, slug: true } })
     .catch(() => []);
-  const countyNameToSlug = new Map(allCounties.map((c) => [c.name, c.slug]));
+  const countyNameToSlug = new Map(allCounties.map((c) => [c.name, c.slug] as [string, string]));
 
   // Fetch category IDs for slug lookup
   const allCategories = await prisma.category
     .findMany({ select: { id: true, slug: true } })
     .catch(() => []);
-  const catIdMap = new Map(allCategories.map((c) => [c.id, c.slug]));
+  const catIdMap = new Map(allCategories.map((c) => [c.id, c.slug] as [string, string]));
 
   const now = new Date();
   const catCountyThreshold = SEO_THRESHOLDS.CAT_COUNTY.minListings; // 3

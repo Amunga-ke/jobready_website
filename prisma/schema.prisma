@@ -93,9 +93,11 @@ model User {
   cvUrl         String?   @db.VarChar(500)
   avatarUrl     String?   @db.VarChar(500)
   role          String    @default("SEEKER") @db.VarChar(20)
-  emailVerified Boolean   @default(false)
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
+  emailVerified    Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  resetToken       String?   @db.VarChar(255)
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   savedJobs        SavedJob[]
@@ -108,6 +110,7 @@ model User {
   receivedMessages Message[]             @relation("UserReceived")
   notifications    Notification[]
   payments         Payment[]
+  cvData           CVData?
 }
 
 // ─── Subscription Plans ───
@@ -442,7 +445,8 @@ model ListingTag {
   @@id([listingId, tagId])
 }
 
-// ─── Users (already defined above, keeping for reference) ───
+// ─── Users (defined above with dashboard relations) ───
+// resetToken & resetTokenExpiry added for password reset functionality
 
 // ─── Saved Jobs ───
 
@@ -496,6 +500,37 @@ model JobAlert {
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   lastTriggered DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── CV Data (parsed CV content per user) ───
+
+model CVData {
+  id              String   @id @default(cuid()) @db.VarChar(64)
+  userId          String   @unique @db.VarChar(64)
+  rawText         String?  @db.LongText
+  phone           String?  @db.VarChar(30)
+  email           String?  @db.VarChar(191)
+  location        String?  @db.VarChar(191)
+  linkedin        String?  @db.VarChar(500)
+  portfolio       String?  @db.VarChar(500)
+  summary         String?  @db.Text
+  skills          String?  @db.Text
+  strengths       String?  @db.Text
+  experience      String?  @db.Text
+  projects        String?  @db.Text
+  education       String?  @db.Text
+  certifications  String?  @db.Text
+  awards          String?  @db.Text
+  research        String?  @db.Text
+  volunteering    String?  @db.Text
+  languages       String?  @db.Text
+  interests       String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

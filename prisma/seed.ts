@@ -124,8 +124,8 @@ interface ListingTemplate {
   workMode: "ONSITE" | "REMOTE" | "HYBRID";
   town: string;
   county: string;
-  salaryMin: number | null;
-  salaryMax: number | null;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
   salaryPeriod?: string;
   description: string;
   requirements?: string;
@@ -1045,7 +1045,7 @@ async function main() {
       companyId,
       categoryId,
       subcategoryId,
-      town: t.location,
+      town: t.town,
       county: t.county,
       employmentType: t.employmentType,
       experienceLevel: t.experienceLevel,

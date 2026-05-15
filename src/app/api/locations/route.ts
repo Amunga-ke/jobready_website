@@ -20,14 +20,14 @@ export async function GET() {
       })
       .catch(() => []);
 
-    const countMap = new Map(counts.map((c) => [c.county, c._count]));
+    const countMap = new Map(counts.map((c) => [c.county, c._count] as [string, number]));
 
     return NextResponse.json({
       locations: counties.map((county) => ({
         id: county.id,
         name: county.name,
         slug: county.slug,
-        type: 'COUNTY',
+        type: 'COUNTY' as const,
         _count: { listings: countMap.get(county.name) || 0 },
       })),
     });

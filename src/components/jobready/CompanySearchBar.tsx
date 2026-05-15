@@ -1,36 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function CompanySearchBar({ initialQuery = "" }: { initialQuery?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [inputValue, setInputValue] = useState(initialQuery);
 
+  // Debounce the input value to avoid rapid navigation on every keystroke
+  const debouncedQuery = useDebounce(inputValue, 400);
+
+  // Build the search URL helper
+  const buildSearchUrl = useCallback(
+    (q: string) => {
+      const industry = searchParams.get("industry");
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (industry) params.set("industry", industry);
+      const qs = params.toString();
+      return qs ? `/companies?${qs}` : "/companies";
+    },
+    [searchParams]
+  );
+
+  // Navigate automatically when the debounced query changes
+  useEffect(() => {
+    // Only auto-navigate if the debounced value differs from the initial URL query
+    const urlQuery = searchParams.get("q") || "";
+    if (debouncedQuery !== initialQuery || debouncedQuery !== urlQuery) {
+      // Navigate to debounced search URL
+      const url = buildSearchUrl(debouncedQuery.trim());
+      router.replace(url);
+    }
+  }, [debouncedQuery]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = inputValue.trim();
-    // Preserve industry param if present
-    const industry = searchParams.get("industry");
-    if (q) {
-      router.push(`/companies?q=${encodeURIComponent(q)}${industry ? `&industry=${encodeURIComponent(industry)}` : ""}`);
-    } else if (industry) {
-      router.push(`/companies?industry=${encodeURIComponent(industry)}`);
-    } else {
-      router.push("/companies");
-    }
+    const url = buildSearchUrl(q);
+    router.push(url);
   };
 
   const clearSearch = () => {
     setInputValue("");
-    const industry = searchParams.get("industry");
-    if (industry) {
-      router.push(`/companies?industry=${encodeURIComponent(industry)}`);
-    } else {
-      router.push("/companies");
-    }
+    const url = buildSearchUrl("");
+    router.push(url);
   };
 
   return (

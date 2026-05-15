@@ -314,7 +314,7 @@ export default async function ArticleDetailPage({
         description={article.excerpt}
         url={articleUrl}
         image={article.coverImage}
-        datePublished={article.publishedAt ? article.publishedAt.toISOString() : undefined}
+        datePublished={article.publishedAt ? article.publishedAt.toISOString() : ""}
         dateModified={article.updatedAt ? article.updatedAt.toISOString() : undefined}
         author={article.author || "JobReady"}
       />

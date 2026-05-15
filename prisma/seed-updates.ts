@@ -170,6 +170,7 @@ async function main() {
       },
       create: {
         id: `${update.source.split(" ")[0].toLowerCase()}-${update.updateType.toLowerCase()}-${update.daysAgo}`,
+        slug: `${update.source.split(" ")[0].toLowerCase()}-${update.updateType.toLowerCase()}-${update.daysAgo}`,
         title: update.title,
         body: update.body,
         source: update.source,

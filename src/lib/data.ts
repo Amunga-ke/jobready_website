@@ -179,7 +179,7 @@ export async function getCounties() {
     })
     .catch(() => []);
 
-  const countMap = new Map(counts.map((c) => [c.county, c._count]));
+  const countMap = new Map(counts.map((c) => [c.county, c._count] as [string, number]));
 
   return counties.map((c) => ({
     ...c,

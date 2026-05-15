@@ -14,6 +14,7 @@ export interface UpdateData {
   listingSlug?: string | null;
   postedBy: string;
   createdAt: string;
+  date?: string;
 }
 
 interface UpdateModalContextType {

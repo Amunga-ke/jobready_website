@@ -98,8 +98,8 @@ export default async function Home() {
       scholarshipCount: 0,
       entryLevelCount: 0,
     })),
-    getCategories().catch(() => [] as Category[]),
-    getCounties().catch(() => [] as County[]),
+    getCategories().catch(() => [] as (Category & { _count: { listings: number } })[]),
+    getCounties().catch(() => [] as (County & { _count: { listings: number } })[]),
     prisma.jobUpdate.findMany({
       where: { status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },

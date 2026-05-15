@@ -855,8 +855,6 @@ async function seedListings(companyMap: Map<string, string>) {
         slug: slugify(listing.title) + "-" + Math.random().toString(36).slice(2, 6),
         title: listing.title,
         description: listing.description,
-        requirements: listing.requirements || null,
-        instructions: listing.instructions || null,
         listingType: listing.listingType,
         governmentLevel: listing.governmentLevel || null,
         opportunityType: listing.opportunityType || null,
