@@ -1,5 +1,6 @@
 // ─── JobReady Database Schema ───
 // Provider: mysql (production via Vercel)
+// Shared between main website and company dashboard
 
 generator client {
   provider = "prisma-client-js"
@@ -28,9 +29,14 @@ model Company {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  listings Listing[]
-  socialAccounts SocialAccount[]
-  users     User[]
+  listings           Listing[]
+  socialAccounts     SocialAccount[]
+  users               User[]
+  employerProfiles    EmployerProfile[]
+  teamMembers         TeamMember[]
+  subscriptions       CompanySubscription[]
+  jobCredit           JobCredit?
+  featuredBoosts      FeaturedBoost[]
 }
 
 // ─── Job Categories ───
@@ -64,12 +70,11 @@ model Subcategory {
 // ─── Counties ───
 
 model County {
-  id        String   @id @default(cuid()) @db.VarChar(64)
-  slug      String   @unique @db.VarChar(191)
-  name      String   @db.VarChar(100)
-  code      String?  @db.VarChar(10)
-  active    Boolean  @default(true)
-
+  id     String  @id @default(cuid()) @db.VarChar(64)
+  slug   String  @unique @db.VarChar(191)
+  name   String  @db.VarChar(100)
+  code   String? @db.VarChar(10)
+  active Boolean @default(true)
 }
 
 // ─── Tags ───
@@ -140,13 +145,14 @@ model Listing {
   updatedAt       DateTime     @updatedAt
 
   // Relations
-  tags             ListingTag[]
-  savedJobs        SavedJob[]
-  applications     Application[]
-  cvMatchScores    CvMatchScore[]
-  listingTests     ListingTest[]
+  tags           ListingTag[]
+  savedJobs      SavedJob[]
+  applications   Application[]
+  cvMatchScores  CvMatchScore[]
+  listingTests   ListingTest[]
   skillTestResults SkillTestResult[]
-  socialPosts      SocialPost[]
+  socialPosts    SocialPost[]
+  featuredBoosts FeaturedBoost[]
 
   @@index([listingType])
   @@index([categoryId])
@@ -165,7 +171,7 @@ model Listing {
   @@index([listingType, county])
 }
 
-// ─── Job Updates (official announcements from ministries, employers) ───
+// ─── Job Updates ───
 
 model JobUpdate {
   id          String   @id @default(cuid()) @db.VarChar(64)
@@ -188,7 +194,7 @@ model JobUpdate {
   @@index([slug])
 }
 
-// ─── Articles (Career blog posts, guides, resources) ───
+// ─── Articles ───
 
 model Article {
   id          String   @id @default(cuid()) @db.VarChar(64)
@@ -216,7 +222,7 @@ model Article {
   @@index([featured])
 }
 
-// ─── Listing ↔ Tag junction ───
+// ─── ListingTag ───
 
 model ListingTag {
   listingId String @db.VarChar(64)
@@ -258,15 +264,18 @@ model User {
   cvMatchScores      CvMatchScore[]
   skillTestResults   SkillTestResult[]
   salarySubmissions  SalarySubmission[]
-  socialAccounts      SocialAccount[]
+  socialAccounts     SocialAccount[]
   cvData             CVData?
   company            Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  employerProfile    EmployerProfile?
+  employerSettings   EmployerSettings?
+  teamMemberships    TeamMember[]
 
   @@index([companyId])
   @@index([role])
 }
 
-// ─── CV Data (parsed CV storage) ───
+// ─── CV Data ───
 
 model CVData {
   id              String   @id @default(cuid()) @db.VarChar(64)
@@ -295,20 +304,6 @@ model CVData {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ─── Newsletter Subscription ───
-
-model NewsletterSubscription {
-  id              String    @id @default(cuid()) @db.VarChar(64)
-  email           String    @unique @db.VarChar(191)
-  source          String?   @db.VarChar(100)
-  isActive        Boolean   @default(true)
-  subscribedAt    DateTime  @default(now())
-  unsubscribedAt  DateTime?
-
-  @@index([isActive])
-  @@index([subscribedAt])
-}
-
 // ─── Saved Jobs ───
 
 model SavedJob {
@@ -335,7 +330,10 @@ model Application {
   status      String   @default("DRAFT") @db.VarChar(20)
   coverLetter String?  @db.Text
   cvUrl       String?  @db.VarChar(500)
+  notes       String?  @db.Text
+  score       Int?
   appliedAt   DateTime @default(now())
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -364,29 +362,27 @@ model JobAlert {
   @@index([userId])
 }
 
-// ─── Premium Features ───
-
-// ─── Seeker Subscriptions (candidate premium plans) ───
+// ─── Seeker Subscriptions ───
 
 model SeekerSubscription {
   id                String   @id @default(cuid()) @db.VarChar(64)
   userId            String   @unique @db.VarChar(64)
-  plan              String   @default("FREE") @db.VarChar(20) // FREE, PREMIUM_SMS, PREMIUM_ALL
-  status            String   @default("ACTIVE") @db.VarChar(20) // ACTIVE, CANCELLED, EXPIRED
+  plan              String   @default("FREE") @db.VarChar(20)
+  status            String   @default("ACTIVE") @db.VarChar(20)
   mpesaRef          String?  @db.VarChar(191)
   amount            Int      @default(0)
   currency          String   @default("KES") @db.VarChar(10)
   paymentMethod     String?  @db.VarChar(30)
   currentPeriodStart DateTime @default(now())
   currentPeriodEnd   DateTime
-  features          String   @db.Text // JSON array of enabled features
+  features          String   @db.Text
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ─── SMS Log (track all SMS sent) ───
+// ─── SMS Log ───
 
 model SmsLog {
   id          String   @id @default(cuid()) @db.VarChar(64)
@@ -394,11 +390,11 @@ model SmsLog {
   phone       String   @db.VarChar(20)
   message     String   @db.Text
   senderId    String   @default("TALK-SASA") @db.VarChar(50)
-  status      String   @default("PENDING") @db.VarChar(20) // PENDING, SENT, FAILED, DELIVERED
+  status      String   @default("PENDING") @db.VarChar(20)
   providerRef String?  @db.VarChar(191)
   cost        Float?   @db.Double
-  type        String   @default("JOB_ALERT") @db.VarChar(30) // JOB_ALERT, VERIFICATION, MARKETING
-  metadata    String?  @db.Text // JSON
+  type        String   @default("JOB_ALERT") @db.VarChar(30)
+  metadata    String?  @db.Text
   createdAt   DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -409,16 +405,16 @@ model SmsLog {
   @@index([createdAt])
 }
 
-// ─── Email Log (track all emails sent) ───
+// ─── Email Log ───
 
 model EmailLog {
   id          String   @id @default(cuid()) @db.VarChar(64)
   userId      String?  @db.VarChar(64)
   to          String   @db.VarChar(191)
   subject     String   @db.VarChar(500)
-  status      String   @default("PENDING") @db.VarChar(20) // PENDING, SENT, FAILED, BOUNCED
+  status      String   @default("PENDING") @db.VarChar(20)
   template    String?  @db.VarChar(100)
-  metadata    String?  @db.Text // JSON
+  metadata    String?  @db.Text
   createdAt   DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -428,16 +424,16 @@ model EmailLog {
   @@index([status])
 }
 
-// ─── CV Match Score (AI CV matching results) ───
+// ─── CV Match Score ───
 
 model CvMatchScore {
   id            String   @id @default(cuid()) @db.VarChar(64)
   userId        String   @db.VarChar(64)
   listingId     String   @db.VarChar(64)
   applicationId String?  @db.VarChar(64)
-  score         Int // 0-100
-  breakdown     String   @db.Text // JSON with skills, experience, education scores
-  aiAnalysis    String?  @db.Text // Full AI analysis text
+  score         Int
+  breakdown     String   @db.Text
+  aiAnalysis    String?  @db.Text
   modelUsed     String   @default("glm-4") @db.VarChar(50)
   createdAt     DateTime @default(now())
 
@@ -449,18 +445,18 @@ model CvMatchScore {
   @@index([score])
 }
 
-// ─── Skill Tests (skills assessment tests) ───
+// ─── Skill Tests ───
 
 model SkillTest {
   id                String   @id @default(cuid()) @db.VarChar(64)
   title             String   @db.VarChar(300)
   description       String?  @db.Text
-  category          String   @default("GENERAL") @db.VarChar(50) // CODING, APTITUDE, ENGLISH, MATH, TECHNICAL, GENERAL
+  category          String   @default("GENERAL") @db.VarChar(50)
   durationMinutes   Int      @default(15)
-  passingScore      Int      @default(60) // percentage
+  passingScore      Int      @default(60)
   questionCount     Int      @default(10)
   isActive          Boolean  @default(true)
-  pricePerCandidate Int      @default(50) // KES per test
+  pricePerCandidate Int      @default(50)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -469,14 +465,12 @@ model SkillTest {
   results   SkillTestResult[]
 }
 
-// ─── Skill Test Questions (questions for tests) ───
-
 model SkillTestQuestion {
   id            String   @id @default(cuid()) @db.VarChar(64)
   testId        String   @db.VarChar(64)
   question      String   @db.Text
-  questionType  String   @default("MULTIPLE_CHOICE") @db.VarChar(30) // MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER
-  options       String   @db.Text // JSON array of options
+  questionType  String   @default("MULTIPLE_CHOICE") @db.VarChar(30)
+  options       String   @db.Text
   correctAnswer String   @db.VarChar(500)
   explanation   String?  @db.Text
   sortOrder     Int      @default(0)
@@ -488,14 +482,12 @@ model SkillTestQuestion {
   @@index([testId])
 }
 
-// ─── Listing Tests (attach test to listing) ───
-
 model ListingTest {
   id          String   @id @default(cuid()) @db.VarChar(64)
   listingId   String   @db.VarChar(64)
   testId      String   @db.VarChar(64)
   isRequired  Boolean  @default(true)
-  minScore    Int      @default(60) // minimum pass percentage
+  minScore    Int      @default(60)
   createdAt   DateTime @default(now())
 
   listing Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
@@ -506,20 +498,18 @@ model ListingTest {
   @@index([testId])
 }
 
-// ─── Skill Test Results (candidate test results) ───
-
 model SkillTestResult {
   id               String    @id @default(cuid()) @db.VarChar(64)
   testId           String    @db.VarChar(64)
   userId           String    @db.VarChar(64)
   listingId        String?   @db.VarChar(64)
   applicationId    String?   @db.VarChar(64)
-  score            Int // percentage 0-100
+  score            Int
   totalPoints      Int       @default(0)
   maxPoints        Int       @default(0)
-  answers          String    @db.Text // JSON array of {questionId, answer, isCorrect}
+  answers          String    @db.Text
   timeTakenSeconds Int       @default(0)
-  status           String    @default("COMPLETED") @db.VarChar(20) // IN_PROGRESS, COMPLETED, TIMED_OUT
+  status           String    @default("COMPLETED") @db.VarChar(20)
   passed           Boolean   @default(false)
   createdAt        DateTime  @default(now())
   completedAt      DateTime?
@@ -535,26 +525,26 @@ model SkillTestResult {
   @@unique([userId, testId, listingId])
 }
 
-// ─── Social Accounts (connected social media accounts) ───
+// ─── Social Accounts ───
 
 model SocialAccount {
   id                String   @id @default(cuid()) @db.VarChar(64)
   userId            String   @db.VarChar(64)
-  companyId         String?  @db.VarChar(64) // null = admin account, set = employer account
-  platform          String   @db.VarChar(30) // FACEBOOK, INSTAGRAM, LINKEDIN, TWITTER, WHATSAPP_CHANNEL
-  platformUserId    String?  @db.VarChar(191) // user ID on the platform
-  platformUsername  String?  @db.VarChar(191) // username/handle
-  accessToken       String?  @db.Text // encrypted access token
-  refreshToken      String?  @db.Text // encrypted refresh token
+  companyId         String?  @db.VarChar(64)
+  platform          String   @db.VarChar(30)
+  platformUserId    String?  @db.VarChar(191)
+  platformUsername  String?  @db.VarChar(191)
+  accessToken       String?  @db.Text
+  refreshToken      String?  @db.Text
   tokenExpiresAt    DateTime?
-  pageId            String?  @db.VarChar(191) // FB Page ID or LinkedIn Org ID
-  pageName          String?  @db.VarChar(300) // FB Page name or LinkedIn Org name
-  pageAccessToken   String?  @db.Text // Page-specific access token
+  pageId            String?  @db.VarChar(191)
+  pageName          String?  @db.VarChar(300)
+  pageAccessToken   String?  @db.Text
   isActive          Boolean  @default(true)
-  autoPost          Boolean  @default(false) // auto-post when job published
-  autoPostJobTypes  String?  @db.Text // JSON array of listingTypes to auto-post (e.g. ["JOB","OPPORTUNITY"])
+  autoPost          Boolean  @default(false)
+  autoPostJobTypes  String?  @db.Text
   lastPostedAt      DateTime?
-  metadata          String?  @db.Text // JSON for extra data
+  metadata          String?  @db.Text
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -568,21 +558,21 @@ model SocialAccount {
   @@index([isActive])
 }
 
-// ─── Social Posts (tracking social media posts) ───
+// ─── Social Posts ───
 
 model SocialPost {
   id              String   @id @default(cuid()) @db.VarChar(64)
   accountId       String   @db.VarChar(64)
   listingId       String?  @db.VarChar(64)
-  platform        String   @db.VarChar(30) // FACEBOOK, INSTAGRAM, LINKEDIN, TWITTER, WHATSAPP_CHANNEL
-  platformPostId  String?  @db.VarChar(191) // post ID on the platform
-  platformUrl     String?  @db.VarChar(500) // URL of the post
-  caption         String   @db.Text // post caption/text
-  posterUrl       String?  @db.VarChar(500) // path to generated poster image
-  status          String   @default("PENDING") @db.VarChar(20) // PENDING, POSTED, FAILED, DELETED
-  postType        String   @default("JOB_POSTER") @db.VarChar(30) // JOB_POSTER, ARTICLE, ANNOUNCEMENT
+  platform        String   @db.VarChar(30)
+  platformPostId  String?  @db.VarChar(191)
+  platformUrl     String?  @db.VarChar(500)
+  caption         String   @db.Text
+  posterUrl       String?  @db.VarChar(500)
+  status          String   @default("PENDING") @db.VarChar(20)
+  postType        String   @default("JOB_POSTER") @db.VarChar(30)
   errorMessage    String?  @db.Text
-  metadata        String?  @db.Text // JSON
+  metadata        String?  @db.Text
   postedAt        DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -597,7 +587,7 @@ model SocialPost {
   @@index([createdAt])
 }
 
-// ─── Salary Submissions (salary benchmarking data) ───
+// ─── Salary Submissions ───
 
 model SalarySubmission {
   id              String    @id @default(cuid()) @db.VarChar(64)
@@ -611,9 +601,9 @@ model SalarySubmission {
   salaryAmount    Int
   salaryPeriod    String    @default("MONTHLY") @db.VarChar(20)
   currency        String    @default("KES") @db.VarChar(10)
-  benefits        String?   @db.Text // JSON array of benefits
+  benefits        String?   @db.Text
   isVerified      Boolean   @default(false)
-  source          String    @default("USER_SUBMISSION") @db.VarChar(30) // USER_SUBMISSION, LISTING_EXTRACTED, ADMIN
+  source          String    @default("USER_SUBMISSION") @db.VarChar(30)
   createdAt       DateTime  @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -626,3 +616,203 @@ model SalarySubmission {
   @@index([salaryAmount])
   @@index([createdAt])
 }
+
+// ─── Newsletter Subscription ───
+
+model NewsletterSubscription {
+  id              String    @id @default(cuid()) @db.VarChar(64)
+  email           String    @unique @db.VarChar(191)
+  source          String?   @db.VarChar(100)
+  isActive        Boolean   @default(true)
+  subscribedAt    DateTime  @default(now())
+  unsubscribedAt  DateTime?
+
+  @@index([isActive])
+  @@index([subscribedAt])
+}
+
+// ─── Dashboard-Specific Models (shared with company dashboard) ───
+
+model EmployerProfile {
+  id         String   @id @default(cuid()) @db.VarChar(64)
+  userId     String   @unique @db.VarChar(64)
+  companyId  String   @db.VarChar(64)
+  role       String   @default("ADMIN") @db.VarChar(30)
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model TeamMember {
+  id        String   @id @default(cuid()) @db.VarChar(64)
+  companyId String   @db.VarChar(64)
+  userId    String   @db.VarChar(64)
+  role      String   @default("MEMBER") @db.VarChar(20)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+}
+
+model EmployerSettings {
+  id          String   @id @default(cuid()) @db.VarChar(64)
+  userId      String   @unique @db.VarChar(64)
+  preferences String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SubscriptionPlan {
+  id                String   @id @default(cuid()) @db.VarChar(64)
+  name              String   @unique @db.VarChar(50)
+  slug              String   @unique @db.VarChar(50)
+  description       String?  @db.Text
+  priceMonthly      Int      @default(0)
+  priceYearly       Int      @default(0)
+  currency          String   @default("KES") @db.VarChar(10)
+  maxListings       Int      @default(3)
+  maxFeatured       Int      @default(0)
+  maxCvSearches     Int      @default(0)
+  maxTeamMembers    Int      @default(1)
+  maxMessagesPerDay Int      @default(10)
+  isActive          Boolean  @default(true)
+  sortOrder         Int      @default(0)
+  features          String   @db.Text
+
+  subscriptions       CompanySubscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CompanySubscription {
+  id                 String    @id @default(cuid()) @db.VarChar(64)
+  companyId          String    @db.VarChar(64)
+  planId             String    @db.VarChar(64)
+  status             String    @default("ACTIVE") @db.VarChar(20)
+  billingCycle       String    @default("MONTHLY") @db.VarChar(20)
+  currentPeriodStart DateTime  @default(now())
+  currentPeriodEnd   DateTime
+  cancelledAt        DateTime?
+  trialEndsAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  company Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan    SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@unique([companyId, planId])
+}
+
+model Payment {
+  id              String    @id @default(cuid()) @db.VarChar(64)
+  subscriptionId  String?   @db.VarChar(64)
+  boostId         String?   @db.VarChar(64)
+  companyId       String    @db.VarChar(64)
+  userId          String    @db.VarChar(64)
+  amount          Int
+  currency        String    @default("KES") @db.VarChar(10)
+  status          String    @default("PENDING") @db.VarChar(20)
+  paymentMethod   String    @db.VarChar(30)
+  paymentRef      String?   @db.VarChar(191)
+  itemType        String    @db.VarChar(30)
+  itemId          String?   @db.VarChar(64)
+  description     String    @db.VarChar(500)
+  metadata        String?   @db.Text
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([boostId])
+  @@index([companyId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model JobCredit {
+  id              String   @id @default(cuid()) @db.VarChar(64)
+  companyId       String   @unique @db.VarChar(64)
+  balance         Int      @default(0)
+  totalPurchased  Int      @default(0)
+  totalUsed       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model JobCreditTransaction {
+  id           String   @id @default(cuid()) @db.VarChar(64)
+  creditId     String   @db.VarChar(64)
+  type         String   @db.VarChar(20)
+  amount       Int
+  balanceAfter Int
+  description  String   @db.VarChar(500)
+  listingId    String?  @db.VarChar(64)
+  paymentId    String?  @db.VarChar(64)
+  createdAt    DateTime @default(now())
+
+  @@index([creditId, createdAt])
+}
+
+model FeaturedBoost {
+  id            String    @id @default(cuid()) @db.VarChar(64)
+  companyId     String    @db.VarChar(64)
+  listingId     String    @db.VarChar(64)
+  status        String    @default("PENDING") @db.VarChar(20)
+  startedAt     DateTime?
+  expiresAt     DateTime?
+  durationDays  Int      @default(7)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+  @@index([listingId])
+}
+
+model Message {
+  id                String   @id @default(cuid()) @db.VarChar(64)
+  senderId          String   @db.VarChar(64)
+  recipientId       String?  @db.VarChar(64)
+  senderCompanyId   String?  @db.VarChar(64)
+  recipientCompanyId String? @db.VarChar(64)
+  senderType        String   @db.VarChar(20)
+  recipientType     String   @db.VarChar(20)
+  subject           String?  @db.VarChar(300)
+  body              String   @db.Text
+  isRead            Boolean  @default(false)
+  parentId          String?  @db.VarChar(64)
+  listingId         String?  @db.VarChar(64)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([senderId, createdAt])
+  @@index([recipientId, createdAt])
+  @@index([senderCompanyId, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid()) @db.VarChar(64)
+  userId    String   @db.VarChar(64)
+  type      String   @db.VarChar(50)
+  title     String   @db.VarChar(300)
+  body      String?  @db.Text
+  link      String?  @db.VarChar(500)
+  isRead    Boolean  @default(false)
+  metadata  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead, createdAt])
+}
+
