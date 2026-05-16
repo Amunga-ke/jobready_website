@@ -1,6 +1,7 @@
 // ─── JobReady Database Schema ───
 // Provider: mysql (production via Vercel)
 // Shared between main website and company dashboard
+// UNIFIED — both projects must keep this identical
 
 generator client {
   provider = "prisma-client-js"
@@ -29,14 +30,17 @@ model Company {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  listings           Listing[]
-  socialAccounts     SocialAccount[]
+  listings            Listing[]
+  socialAccounts      SocialAccount[]
   users               User[]
   employerProfiles    EmployerProfile[]
   teamMembers         TeamMember[]
   subscriptions       CompanySubscription[]
   jobCredit           JobCredit?
   featuredBoosts      FeaturedBoost[]
+  payments            Payment[]
+  sentMessages        Message[]            @relation("CompanySent")
+  receivedMessages    Message[]            @relation("CompanyReceived")
 }
 
 // ─── Job Categories ───
@@ -145,14 +149,15 @@ model Listing {
   updatedAt       DateTime     @updatedAt
 
   // Relations
-  tags           ListingTag[]
-  savedJobs      SavedJob[]
-  applications   Application[]
-  cvMatchScores  CvMatchScore[]
-  listingTests   ListingTest[]
+  tags             ListingTag[]
+  savedJobs        SavedJob[]
+  applications     Application[]
+  cvMatchScores    CvMatchScore[]
+  listingTests     ListingTest[]
   skillTestResults SkillTestResult[]
-  socialPosts    SocialPost[]
-  featuredBoosts FeaturedBoost[]
+  socialPosts      SocialPost[]
+  featuredBoosts   FeaturedBoost[]
+  messages         Message[]
 
   @@index([listingType])
   @@index([categoryId])
@@ -270,6 +275,10 @@ model User {
   employerProfile    EmployerProfile?
   employerSettings   EmployerSettings?
   teamMemberships    TeamMember[]
+  sentMessages       Message[]             @relation("UserSent")
+  receivedMessages   Message[]             @relation("UserReceived")
+  notifications      Notification[]
+  payments           Payment[]
 
   @@index([companyId])
   @@index([role])
@@ -688,7 +697,7 @@ model SubscriptionPlan {
   sortOrder         Int      @default(0)
   features          String   @db.Text
 
-  subscriptions       CompanySubscription[]
+  subscriptions CompanySubscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -707,8 +716,9 @@ model CompanySubscription {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
-  company Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  plan    SubscriptionPlan @relation(fields: [planId], references: [id])
+  company  Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan     SubscriptionPlan @relation(fields: [planId], references: [id])
+  payments Payment[]
 
   @@unique([companyId, planId])
 }
@@ -732,6 +742,11 @@ model Payment {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  subscription  CompanySubscription? @relation(fields: [subscriptionId], references: [id])
+  company       Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user          User                 @relation(fields: [userId], references: [id])
+  featuredBoost FeaturedBoost?       @relation(fields: [boostId], references: [id])
+
   @@unique([boostId])
   @@index([companyId, createdAt])
   @@index([userId, createdAt])
@@ -746,7 +761,8 @@ model JobCredit {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company     Company                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transactions JobCreditTransaction[]
 }
 
 model JobCreditTransaction {
@@ -759,6 +775,8 @@ model JobCreditTransaction {
   listingId    String?  @db.VarChar(64)
   paymentId    String?  @db.VarChar(64)
   createdAt    DateTime @default(now())
+
+  credit JobCredit @relation(fields: [creditId], references: [id], onDelete: Cascade)
 
   @@index([creditId, createdAt])
 }
@@ -776,6 +794,7 @@ model FeaturedBoost {
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  payment Payment?
 
   @@index([companyId, status])
   @@index([listingId])
@@ -797,6 +816,14 @@ model Message {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  senderUser       User?     @relation("UserSent", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientUser    User?     @relation("UserReceived", fields: [recipientId], references: [id], onDelete: SetNull)
+  senderCompany    Company?  @relation("CompanySent", fields: [senderCompanyId], references: [id], onDelete: Cascade)
+  recipientCompany Company?  @relation("CompanyReceived", fields: [recipientCompanyId], references: [id], onDelete: SetNull)
+  parent           Message?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies          Message[] @relation("MessageReplies")
+  listing          Listing?  @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
   @@index([senderId, createdAt])
   @@index([recipientId, createdAt])
   @@index([senderCompanyId, createdAt])
@@ -813,6 +840,7 @@ model Notification {
   metadata  String?  @db.Text
   createdAt DateTime @default(now())
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId, isRead, createdAt])
 }
-
