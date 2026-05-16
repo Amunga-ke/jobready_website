@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Job Updates — Shortlists, Interviews & Announcements",
   description:
     "Official job updates from Kenyan employers. Shortlisting results, interview schedules, deadline announcements and recruitment news.",
-  alternates: { canonical: `${SITE_URL}/updates` },
+  alternates: { canonical: `${SITE_URL}/updates`, languages: { 'en-KE': `${SITE_URL}/updates`, 'x-default': `${SITE_URL}/updates` } },
   openGraph: {
     title: "Job Updates — Shortlists, Interviews & Announcements",
     description:

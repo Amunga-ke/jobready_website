@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Post your job openings to thousands of qualified candidates across Kenya. Reach top talent with JobReady's verified job board — free and premium plans available.",
   robots: { index: false, follow: true },
-  alternates: { canonical: `${SITE_URL}/post-job` },
+  alternates: { canonical: `${SITE_URL}/post-job`, languages: { 'en-KE': `${SITE_URL}/post-job`, 'x-default': `${SITE_URL}/post-job` } },
   openGraph: {
     title: "Post a Job in Kenya — Reach Thousands of Candidates",
     description:

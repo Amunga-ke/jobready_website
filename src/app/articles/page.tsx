@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "Career Resources & Articles",
   description:
     "Expert career advice for Kenyan job seekers. CV writing tips, interview preparation, salary negotiation guides and career growth strategies.",
-  alternates: { canonical: `${SITE_URL}/articles` },
+  alternates: { canonical: `${SITE_URL}/articles`, languages: { 'en-KE': `${SITE_URL}/articles`, 'x-default': `${SITE_URL}/articles` } },
   openGraph: {
     title: "Career Resources & Articles",
     description:

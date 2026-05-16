@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "Casual & Part-Time Jobs in Kenya",
   description:
     "Find daily-wage, weekend and flexible part-time jobs across Kenya. Browse casual positions in Nairobi, Mombasa, Kisumu and all 47 counties.",
-  alternates: { canonical: `${SITE_URL}/casual` },
+  alternates: { canonical: `${SITE_URL}/casual`, languages: { 'en-KE': `${SITE_URL}/casual`, 'x-default': `${SITE_URL}/casual` } },
   openGraph: {
     title: "Casual & Part-Time Jobs in Kenya",
     description:

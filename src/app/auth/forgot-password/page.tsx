@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description:
     "Reset your JobReady password securely via email. Follow the link sent to your registered address.",
   robots: { index: false, follow: false },
-  alternates: { canonical: `${SITE_URL}/auth/forgot-password` },
+  alternates: { canonical: `${SITE_URL}/auth/forgot-password`, languages: { 'en-KE': `${SITE_URL}/auth/forgot-password`, 'x-default': `${SITE_URL}/auth/forgot-password` } },
 };
 
 export default function ForgotPasswordPage() {

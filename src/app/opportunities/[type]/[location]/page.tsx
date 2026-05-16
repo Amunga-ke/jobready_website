@@ -114,6 +114,10 @@ export async function generateMetadata({
       robots,
       alternates: {
         canonical: `${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}`,
+        languages: {
+          'en-KE': `${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}`,
+          'x-default': `${SITE_URL}/opportunities/${typeSlug}/in-${countySlug}`,
+        },
       },
       openGraph: {
         title: `${opp.label} in ${county}`,

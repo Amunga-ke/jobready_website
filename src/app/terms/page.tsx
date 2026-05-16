@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/jobready/JsonLd";
 import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "Read the terms and conditions governing the use of JobReady's job board services, employer accounts, and job listings.",
-  alternates: { canonical: `${SITE_URL}/terms` },
+  alternates: { canonical: `${SITE_URL}/terms`, languages: { 'en-KE': `${SITE_URL}/terms`, 'x-default': `${SITE_URL}/terms` } },
   openGraph: {
     title: "Terms of Service",
     description: "Terms and conditions for using JobReady's services.",
@@ -31,6 +31,7 @@ export default function Terms_Page() {
         { name: "Home", url: `${SITE_URL}/` },
         { name: "Terms of Service", url: `${SITE_URL}/terms` },
       ]} />
+      <WebPageJsonLd name="Terms of Service" description="Read the terms and conditions governing the use of JobReady's job board services, employer accounts, and job listings." url={`${SITE_URL}/terms`} />
       <div className="max-w-3xl mx-auto px-5 py-16 md:py-20">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-[12px] text-muted mb-8">

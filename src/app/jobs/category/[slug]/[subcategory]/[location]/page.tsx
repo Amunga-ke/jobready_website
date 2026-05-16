@@ -52,7 +52,7 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/${subSlug}/in-${countySlug}` },
+      alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/${subSlug}/in-${countySlug}`, languages: { 'en-KE': `${SITE_URL}/jobs/category/${slug}/${subSlug}/in-${countySlug}`, 'x-default': `${SITE_URL}/jobs/category/${slug}/${subSlug}/in-${countySlug}` } },
       openGraph: { title, description, siteName: "JobReady", type: "website", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
       twitter: { card: "summary_large_image", title, description, images: [`${SITE_URL}/opengraph-image.png`] },
       robots: getRobotsMeta(count, "SUBCAT_COUNTY"),

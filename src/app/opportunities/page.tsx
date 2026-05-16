@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "Opportunities — Scholarships, Internships & More",
   description:
     "Browse scholarships, internships, fellowships, grants, bursaries and training opportunities from top organizations across Kenya.",
-  alternates: { canonical: `${SITE_URL}/opportunities` },
+  alternates: { canonical: `${SITE_URL}/opportunities`, languages: { 'en-KE': `${SITE_URL}/opportunities`, 'x-default': `${SITE_URL}/opportunities` } },
   openGraph: {
     title: "Opportunities — Scholarships, Internships & More",
     description:

@@ -44,7 +44,7 @@ export async function generateMetadata({
     title: `${label} Jobs in Kenya${count > 0 ? ` (${count} Openings)` : ""}`,
     description,
     robots,
-    alternates: { canonical: `${SITE_URL}/jobs/category/${slug}` },
+    alternates: { canonical: `${SITE_URL}/jobs/category/${slug}`, languages: { 'en-KE': `${SITE_URL}/jobs/category/${slug}`, 'x-default': `${SITE_URL}/jobs/category/${slug}` } },
     openGraph: {
       title: `${label} Jobs in Kenya`,
       description,
@@ -65,7 +65,10 @@ export async function generateMetadata({
   }
 }
 
-// No generateStaticParams — page uses ISR, all slugs handled at runtime
+export async function generateStaticParams() {
+  const categories = await prisma.category.findMany({ where: { active: true }, select: { slug: true } }).catch(() => []);
+  return categories.map((c) => ({ slug: c.slug }));
+}
 
 export default async function CategoryPage({
   params,

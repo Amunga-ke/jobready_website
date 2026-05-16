@@ -46,26 +46,27 @@ export async function generateMetadata({
 
     const ogUrl = `${SITE_URL}/companies/${slug}`;
     const jobCount = company._count.listings;
+    const ogImageUrl = `/api/og?title=${encodeURIComponent(company.name)}&description=${encodeURIComponent(`${jobCount} open positions`)}&type=company`;
 
     return {
       title: `${company.name} Jobs & Careers`,
       description: company.description
         ? `${company.description.slice(0, 155)}${company.description.length > 155 ? "..." : ""}`
         : `Explore ${jobCount} open positions at ${company.name}. Apply now on JobReady — Kenya's most trusted job board.`,
-      alternates: { canonical: ogUrl },
+      alternates: { canonical: ogUrl, languages: { 'en-KE': ogUrl, 'x-default': ogUrl } },
       openGraph: {
         title: `${company.name} Jobs & Careers`,
         description: `Explore ${jobCount} open positions at ${company.name}. Apply now on JobReady.`,
         url: ogUrl,
         siteName: "JobReady",
         type: "website",
-        images: [{ url: company.logo || `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: `${company.name} Jobs & Careers` }],
+        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: `${company.name} Jobs & Careers` }],
       },
       twitter: {
         card: "summary_large_image",
         title: `${company.name} Jobs & Careers`,
         description: `Explore ${jobCount} open positions at ${company.name}.`,
-        images: [company.logo || `${SITE_URL}/opengraph-image.png`],
+        images: [ogImageUrl],
       },
     };
   } catch {

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Create Your JobReady Account",
   description: "Create a free JobReady account to browse thousands of verified jobs, save listings, and get job alerts across Kenya.",
   robots: { index: false, follow: false },
-  alternates: { canonical: `${SITE_URL}/auth/register` },
+  alternates: { canonical: `${SITE_URL}/auth/register`, languages: { 'en-KE': `${SITE_URL}/auth/register`, 'x-default': `${SITE_URL}/auth/register` } },
 };
 
 export default function RegisterPage() {

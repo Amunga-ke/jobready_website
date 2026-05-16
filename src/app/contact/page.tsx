@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BreadcrumbJsonLd, FAQJsonLd } from "@/components/jobready/JsonLd";
+import { BreadcrumbJsonLd, FAQJsonLd, WebPageJsonLd } from "@/components/jobready/JsonLd";
 import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
     "Get in touch with the JobReady team for support, employer partnerships, advertising inquiries, or general questions about our job board services.",
-  alternates: { canonical: `${SITE_URL}/contact` },
+  alternates: { canonical: `${SITE_URL}/contact`, languages: { 'en-KE': `${SITE_URL}/contact`, 'x-default': `${SITE_URL}/contact` } },
   openGraph: {
     title: "Contact Us",
     description: "Reach the JobReady team for support and partnerships.",
@@ -31,6 +31,7 @@ export default function Contact_Page() {
         { name: "Home", url: `${SITE_URL}/` },
         { name: "Contact", url: `${SITE_URL}/contact` },
       ]} />
+      <WebPageJsonLd name="Contact Us" description="Get in touch with the JobReady team for support, employer partnerships, advertising inquiries, or general questions." url={`${SITE_URL}/contact`} />
       <div className="max-w-3xl mx-auto px-5 py-16 md:py-20">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-[12px] text-muted mb-8">

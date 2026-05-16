@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Find the right plan to advertise your job openings and reach top talent across Kenya. Affordable employer pricing for businesses of all sizes.",
   robots: { index: false, follow: true },
-  alternates: { canonical: `${SITE_URL}/pricing` },
+  alternates: { canonical: `${SITE_URL}/pricing`, languages: { 'en-KE': `${SITE_URL}/pricing`, 'x-default': `${SITE_URL}/pricing` } },
   openGraph: {
     title: "Pricing — Advertise Jobs on JobReady",
     description: "Affordable employer pricing to reach top Kenyan talent.",

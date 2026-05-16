@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Briefcase, ShieldCheck, Users, TrendingUp, Globe, Award } from "lucide-react";
-import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/jobready/JsonLd";
 import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "About JobReady — Kenya's Most Trusted Job Board",
   description:
     "Learn about JobReady, Kenya's fastest-growing job board connecting verified employers with job seekers across all 47 counties.",
-  alternates: { canonical: `${SITE_URL}/about` },
+  alternates: { canonical: `${SITE_URL}/about`, languages: { 'en-KE': `${SITE_URL}/about`, 'x-default': `${SITE_URL}/about` } },
   openGraph: {
     title: "About JobReady",
     description: "Kenya's most trusted job board connecting verified employers with talented job seekers.",
@@ -65,6 +65,7 @@ export default function About_Page() {
         { name: "Home", url: `${SITE_URL}/` },
         { name: "About", url: `${SITE_URL}/about` },
       ]} />
+      <WebPageJsonLd name="About JobReady" description="Learn about JobReady, Kenya's fastest-growing job board connecting verified employers with job seekers across all 47 counties." url={`${SITE_URL}/about`} />
       <div className="max-w-3xl mx-auto px-5 py-16 md:py-20">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-[12px] text-muted mb-8">

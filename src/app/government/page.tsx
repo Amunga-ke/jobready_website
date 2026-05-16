@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "Government Jobs in Kenya",
   description:
     "Browse national, county and state corporation jobs from the Kenya Gazette. TSC, PSC, KRA and all 47 county government positions.",
-  alternates: { canonical: `${SITE_URL}/government` },
+  alternates: { canonical: `${SITE_URL}/government`, languages: { 'en-KE': `${SITE_URL}/government`, 'x-default': `${SITE_URL}/government` } },
   openGraph: {
     title: "Government Jobs in Kenya",
     description:

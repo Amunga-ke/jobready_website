@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Search our database of qualified Kenyan professionals. Connect with skilled candidates across Nairobi, Mombasa, Kisumu and all 47 counties.",
   robots: { index: false, follow: true },
-  alternates: { canonical: `${SITE_URL}/cv-database` },
+  alternates: { canonical: `${SITE_URL}/cv-database`, languages: { 'en-KE': `${SITE_URL}/cv-database`, 'x-default': `${SITE_URL}/cv-database` } },
   openGraph: {
     title: "CV Database — Search Kenyan Professionals",
     description:

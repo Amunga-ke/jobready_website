@@ -55,7 +55,7 @@ export async function generateMetadata({
         title,
         description,
         robots,
-        alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/in-${countySlug}` },
+        alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/in-${countySlug}`, languages: { 'en-KE': `${SITE_URL}/jobs/category/${slug}/in-${countySlug}`, 'x-default': `${SITE_URL}/jobs/category/${slug}/in-${countySlug}` } },
         openGraph: { title, description, siteName: "JobReady", type: "website", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
         twitter: { card: "summary_large_image", title, description, images: [`${SITE_URL}/opengraph-image.png`] },
       };
@@ -82,7 +82,7 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/${seg}` },
+      alternates: { canonical: `${SITE_URL}/jobs/category/${slug}/${seg}`, languages: { 'en-KE': `${SITE_URL}/jobs/category/${slug}/${seg}`, 'x-default': `${SITE_URL}/jobs/category/${slug}/${seg}` } },
       openGraph: { title, description, siteName: "JobReady", type: "website", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
       twitter: { card: "summary_large_image", title, description, images: [`${SITE_URL}/opengraph-image.png`] },
     };

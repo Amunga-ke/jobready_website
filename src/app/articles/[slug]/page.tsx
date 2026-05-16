@@ -42,10 +42,12 @@ export async function generateMetadata({
 
     const ogUrl = `${SITE_URL}/articles/${slug}`;
 
+    const ogImageUrl = `/api/og?title=${encodeURIComponent(article.title)}&description=${encodeURIComponent(article.category || "")}&type=article`;
+
     return {
       title: `${article.title}`,
       description: article.excerpt,
-      alternates: { canonical: ogUrl },
+      alternates: { canonical: ogUrl, languages: { 'en-KE': ogUrl, 'x-default': ogUrl } },
       openGraph: {
         title: article.title,
         description: article.excerpt,
@@ -54,13 +56,13 @@ export async function generateMetadata({
         type: "article",
         ...(article.publishedAt && { publishedTime: article.publishedAt.toISOString() }),
         section: article.category,
-        images: [{ url: article.coverImage || `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: article.title }],
+        images: [{ url: ogImageUrl, width: 1200, height: 630, alt: article.title }],
       },
       twitter: {
         card: "summary_large_image",
         title: article.title,
         description: article.excerpt,
-        images: [article.coverImage || `${SITE_URL}/opengraph-image.png`],
+        images: [ogImageUrl],
       },
     };
   } catch {

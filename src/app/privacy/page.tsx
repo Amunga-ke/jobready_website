@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BreadcrumbJsonLd } from "@/components/jobready/JsonLd";
+import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/jobready/JsonLd";
 import { SITE_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Learn how JobReady collects, uses, and protects your personal information. Our privacy policy covers data handling, cookies, and your rights.",
-  alternates: { canonical: `${SITE_URL}/privacy` },
+  alternates: { canonical: `${SITE_URL}/privacy`, languages: { 'en-KE': `${SITE_URL}/privacy`, 'x-default': `${SITE_URL}/privacy` } },
   openGraph: {
     title: "Privacy Policy",
     description: "How JobReady handles and protects your personal data.",
@@ -30,6 +30,7 @@ export default function Privacy_Page() {
         { name: "Home", url: `${SITE_URL}/` },
         { name: "Privacy Policy", url: `${SITE_URL}/privacy` },
       ]} />
+      <WebPageJsonLd name="Privacy Policy" description="Learn how JobReady collects, uses, and protects your personal information. Our privacy policy covers data handling, cookies, and your rights." url={`${SITE_URL}/privacy`} />
       <div className="max-w-3xl mx-auto px-5 py-16 md:py-20">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-[12px] text-muted mb-8">

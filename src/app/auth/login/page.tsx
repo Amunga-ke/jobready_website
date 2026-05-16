@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Sign In to Your JobReady Account",
   description: "Sign in securely to your JobReady account to manage job applications, saved jobs, and alerts.",
   robots: { index: false, follow: false },
-  alternates: { canonical: `${SITE_URL}/auth/login` },
+  alternates: { canonical: `${SITE_URL}/auth/login`, languages: { 'en-KE': `${SITE_URL}/auth/login`, 'x-default': `${SITE_URL}/auth/login` } },
 };
 
 export default function LoginPage() {

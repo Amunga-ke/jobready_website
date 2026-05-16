@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Enhance your employer brand and attract top talent with JobReady's branding solutions. Showcase your company culture to Kenyan job seekers.",
   robots: { index: false, follow: true },
-  alternates: { canonical: `${SITE_URL}/branding` },
+  alternates: { canonical: `${SITE_URL}/branding`, languages: { 'en-KE': `${SITE_URL}/branding`, 'x-default': `${SITE_URL}/branding` } },
   openGraph: {
     title: "Employer Branding in Kenya — Attract Top Talent",
     description:

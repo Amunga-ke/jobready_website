@@ -18,6 +18,17 @@ import prisma from "@/lib/prisma";
 
 export const revalidate = 300;
 
+export async function generateStaticParams() {
+  const [jobs, counties] = await Promise.all([
+    prisma.listing.findMany({ where: { status: "ACTIVE" }, select: { slug: true }, take: 500 }).catch(() => []),
+    prisma.county.findMany({ where: { active: true }, select: { slug: true } }).catch(() => []),
+  ]);
+  return [
+    ...jobs.map((j) => ({ slug: j.slug })),
+    ...counties.map((c) => ({ slug: `in-${c.slug}` })),
+  ];
+}
+
 const COUNTY_PREFIX = "in-";
 
 // ─── Dynamic metadata for SEO ───
@@ -40,7 +51,7 @@ export async function generateMetadata({
         title: `Jobs in ${countyName}, Kenya (${count || ""} Openings)`,
         description: getCountyIntro(countyName),
         robots,
-        alternates: { canonical: `${SITE_URL}/jobs/in-${countySlug}` },
+        alternates: { canonical: `${SITE_URL}/jobs/in-${countySlug}`, languages: { 'en-KE': `${SITE_URL}/jobs/in-${countySlug}`, 'x-default': `${SITE_URL}/jobs/in-${countySlug}` } },
         openGraph: { title: `Jobs in ${countyName}`, description: getCountyIntro(countyName), url: `${SITE_URL}/jobs/in-${countySlug}`, type: "website", siteName: "JobReady", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
         twitter: { card: "summary_large_image", title: `Jobs in ${countyName}`, description: getCountyIntro(countyName), images: [`${SITE_URL}/opengraph-image.png`] },
       };
@@ -50,12 +61,13 @@ export async function generateMetadata({
     if (!job) return { title: "Job Not Found" };
 
     const jobUrl = `${SITE_URL}/jobs/${slug}`;
+    const ogImageUrl = `/api/og?title=${encodeURIComponent(job.title)}&description=${encodeURIComponent(job.companyName)}&type=job`;
     return {
       title: `${job.title} at ${job.companyName}`,
       description: `Apply for ${job.title} at ${job.companyName} in ${job.location}. ${job.listingType === "JOB" ? "Job" : "Opportunity"} posted on JobReady — Kenya's most trusted job board.`,
-      alternates: { canonical: jobUrl },
-      openGraph: { title: `${job.title} at ${job.companyName}`, description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`, url: jobUrl, type: "website", siteName: "JobReady", images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }] },
-      twitter: { card: "summary_large_image", title: `${job.title} at ${job.companyName}`, description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`, images: [`${SITE_URL}/opengraph-image.png`] },
+      alternates: { canonical: jobUrl, languages: { 'en-KE': jobUrl, 'x-default': jobUrl } },
+      openGraph: { title: `${job.title} at ${job.companyName}`, description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`, url: jobUrl, type: "website", siteName: "JobReady", images: [{ url: ogImageUrl, width: 1200, height: 630, alt: job.title }] },
+      twitter: { card: "summary_large_image", title: `${job.title} at ${job.companyName}`, description: `Apply for ${job.title} at ${job.companyName} in ${job.location} on JobReady`, images: [ogImageUrl] },
     };
   } catch {
     return { title: "Not Found" };
@@ -353,7 +365,7 @@ export default async function SlugPage({
           {job.applicationUrl ? (
             <a href={job.applicationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-ink text-white text-[14px] font-medium hover:bg-ink/90 transition-colors">Apply Now <ExternalLink className="w-4 h-4" /></a>
           ) : (
-            <button className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-ink text-white text-[14px] font-medium hover:bg-ink/90 transition-colors">Apply Now <ExternalLink className="w-4 h-4" /></button>
+            <button type="button" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-ink text-white text-[14px] font-medium hover:bg-ink/90 transition-colors">Apply Now <ExternalLink className="w-4 h-4" /></button>
           )}
         </div>
       </article>

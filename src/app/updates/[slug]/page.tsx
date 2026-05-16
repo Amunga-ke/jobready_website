@@ -5,10 +5,15 @@ import UpdateDetailPage from "./UpdateDetailPage";
 import { BreadcrumbJsonLd, ArticleJsonLd } from "@/components/jobready/JsonLd";
 import { SITE_URL } from "@/lib/config";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const updates = await prisma.jobUpdate.findMany({ where: { status: "PUBLISHED" }, select: { slug: true }, take: 200 }).catch(() => []);
+  return updates.map((u) => ({ slug: u.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -24,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${update.title}`,
     description: `${update.updateType} from ${update.source} — read the full announcement and details on JobReady Kenya.`,
-    alternates: { canonical: `${SITE_URL}/updates/${slug}` },
+    alternates: { canonical: `${SITE_URL}/updates/${slug}`, languages: { 'en-KE': `${SITE_URL}/updates/${slug}`, 'x-default': `${SITE_URL}/updates/${slug}` } },
     openGraph: {
       title: update.title,
       description: `${update.updateType} from ${update.source}`,
@@ -32,13 +37,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       siteName: "JobReady",
       publishedTime: update.createdAt.toISOString(),
-      images: [{ url: `${SITE_URL}/opengraph-image.png`, width: 1200, height: 630, alt: "JobReady" }],
+      images: [{ url: `/api/og?title=${encodeURIComponent(update.title)}&description=${encodeURIComponent(update.updateType || "")}&type=article`, width: 1200, height: 630, alt: update.title }],
     },
     twitter: {
       card: "summary_large_image",
       title: update.title,
       description: `${update.updateType} from ${update.source}`,
-      images: [`${SITE_URL}/opengraph-image.png`],
+      images: [`/api/og?title=${encodeURIComponent(update.title)}&description=${encodeURIComponent(update.updateType || "")}&type=article`],
     },
   };
   } catch {

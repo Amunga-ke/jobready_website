@@ -66,11 +66,44 @@ export function OrganizationJsonLd() {
         logo: `${SITE_URL}/logo.svg`,
         description:
           "Kenya's most trusted job board connecting job seekers with verified employers across all 47 counties.",
-        contactPoint: {
-          "@type": "ContactPoint",
-          contactType: "customer service",
-          url: `${SITE_URL}/contact`,
+        foundingDate: "2024",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Nairobi",
+          addressRegion: "Nairobi County",
+          addressCountry: "KE",
         },
+        contactPoint: [
+          {
+            "@type": "ContactPoint",
+            contactType: "customer service",
+            email: "info@jobready.co.ke",
+            url: `${SITE_URL}/contact`,
+          },
+          {
+            "@type": "ContactPoint",
+            contactType: "employer partnerships",
+            email: "partnerships@jobready.co.ke",
+            url: `${SITE_URL}/contact`,
+          },
+        ],
+        sameAs: [
+          "https://x.com/jobreadyke",
+          "https://linkedin.com/company/jobreadyke",
+          "https://facebook.com/jobreadyke",
+        ],
+        areaServed: {
+          "@type": "Country",
+          name: "Kenya",
+        },
+        slogan: "Kenya's Most Trusted Job Board",
+        knowsAbout: [
+          "Jobs in Kenya",
+          "Government Jobs Kenya",
+          "Internships Kenya",
+          "Scholarships Kenya",
+          "Career Development",
+        ],
       }}
     />
   );
@@ -220,6 +253,24 @@ export function CollectionPageJsonLd({ name, description, url, numberOfItems }: 
         url,
         isPartOf: { "@type": "WebSite", name: "JobReady", url: `${SITE_URL}` },
         ...(numberOfItems !== undefined && { numberOfItems }),
+      }}
+    />
+  );
+}
+
+/** WebPage — for static pages (about, contact, privacy, terms) */
+export function WebPageJsonLd({ name, description, url }: {
+  name: string; description?: string; url: string;
+}) {
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name,
+        description,
+        url,
+        isPartOf: { "@type": "WebSite", name: "JobReady", url: `${SITE_URL}` },
       }}
     />
   );

@@ -51,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "JobReady — Jobs for Kenyans — Real Jobs from Verified Employers",
     description:
       "Kenya's most trusted job board. Browse verified jobs across Nairobi, Mombasa, Kisumu & all 47 counties. Government, private sector & internships.",
-    alternates: { canonical: `${SITE_URL}/` },
+    alternates: { canonical: `${SITE_URL}/`, languages: { 'en-KE': `${SITE_URL}/`, 'x-default': `${SITE_URL}/` } },
     openGraph: {
       title: "JobReady — Jobs for Kenyans",
       description:

@@ -35,6 +35,14 @@ const GOV_LEVELS = [
   },
 ] as const;
 
+export function generateStaticParams() {
+  return [
+    { level: "national" },
+    { level: "county" },
+    { level: "state-corporations" },
+  ];
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -50,6 +58,10 @@ export async function generateMetadata({
       description: gov.description,
       alternates: {
         canonical: `${SITE_URL}/government/${level}`,
+        languages: {
+          'en-KE': `${SITE_URL}/government/${level}`,
+          'x-default': `${SITE_URL}/government/${level}`,
+        },
       },
       openGraph: {
         title: `${gov.label} Jobs`,

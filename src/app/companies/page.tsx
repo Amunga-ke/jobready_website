@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: "Verified Employers & Companies in Kenya",
   description:
     "Browse verified companies and employers hiring in Kenya. Explore open positions, company profiles, and apply directly. Over 500+ trusted employers on JobReady.",
-  alternates: { canonical: `${SITE_URL}/companies` },
+  alternates: { canonical: `${SITE_URL}/companies`, languages: { 'en-KE': `${SITE_URL}/companies`, 'x-default': `${SITE_URL}/companies` } },
   openGraph: {
     title: "Verified Employers & Companies in Kenya",
     description: "Browse verified companies and employers hiring in Kenya. Explore open positions and company profiles on JobReady.",

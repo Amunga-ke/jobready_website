@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Explore real salary data shared by professionals across Kenya. Compare compensation by role, experience, location, and industry. Anonymous salary benchmarks for 2025.",
   robots: { index: false, follow: true },
-  alternates: { canonical: `${SITE_URL}/salary-guide` },
+  alternates: { canonical: `${SITE_URL}/salary-guide`, languages: { 'en-KE': `${SITE_URL}/salary-guide`, 'x-default': `${SITE_URL}/salary-guide` } },
   openGraph: {
     title: "Kenya Salary Guide 2025 — Real Salary Benchmarks",
     description:

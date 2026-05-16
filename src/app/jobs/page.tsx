@@ -47,7 +47,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   return {
     title,
     description,
-    alternates: { canonical: `${SITE_URL}/jobs` },
+    alternates: { canonical: `${SITE_URL}/jobs`, languages: { 'en-KE': `${SITE_URL}/jobs`, 'x-default': `${SITE_URL}/jobs` } },
     robots: q ? { index: false, follow: true } : undefined,
     openGraph: {
       title,

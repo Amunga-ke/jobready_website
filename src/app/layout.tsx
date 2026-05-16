@@ -91,8 +91,14 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
   },
-  // verification: { google: "YOUR_GOOGLE_SEARCH_CONSOLE_CODE" }, // TODO: Add real GSC verification code
-  alternates: { canonical: `${SITE_URL}/` },
+  verification: { google: "GSC_VERIFICATION_CODE" }, // Replace with your actual Google Search Console verification code
+  alternates: {
+    canonical: `${SITE_URL}/`,
+    languages: {
+      'en-KE': `${SITE_URL}/`,
+      'x-default': `${SITE_URL}/`,
+    },
+  },
   category: "employment",
 };
 
@@ -141,6 +147,22 @@ export default function RootLayout({
             <UpdateDetailSheet />
           </UpdateModalProvider>
         </JobModalProvider>
+        <noscript>
+          <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif', background: '#f8fafc', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>JobReady — Jobs for Kenyans</h1>
+              <p style={{ color: '#64748b' }}>Please enable JavaScript to use JobReady. Browse our <a href="/jobs" style={{ color: '#2563eb' }}>job listings</a> or <a href="/about" style={{ color: '#2563eb' }}>learn more about us</a>.</p>
+              <nav style={{ marginTop: '1rem' }}>
+                <a href="/" style={{ marginRight: '1rem' }}>Home</a>
+                <a href="/jobs" style={{ marginRight: '1rem' }}>Jobs</a>
+                <a href="/companies" style={{ marginRight: '1rem' }}>Companies</a>
+                <a href="/government" style={{ marginRight: '1rem' }}>Government</a>
+                <a href="/about" style={{ marginRight: '1rem' }}>About</a>
+                <a href="/contact">Contact</a>
+              </nav>
+            </div>
+          </div>
+        </noscript>
         </Providers>
         <AdSenseScript />
       </body>

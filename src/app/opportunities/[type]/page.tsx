@@ -97,6 +97,10 @@ export async function generateMetadata({
       robots,
       alternates: {
         canonical: `${SITE_URL}/opportunities/${typeSlug}`,
+        languages: {
+          'en-KE': `${SITE_URL}/opportunities/${typeSlug}`,
+          'x-default': `${SITE_URL}/opportunities/${typeSlug}`,
+        },
       },
       openGraph: {
         title: `${opp.label} in Kenya`,
@@ -118,7 +122,9 @@ export async function generateMetadata({
   }
 }
 
-// No generateStaticParams — page uses ISR, all types handled at runtime
+export function generateStaticParams() {
+  return OPPORTUNITY_TYPES.map((t) => ({ type: t.slug }));
+}
 
 export default async function OpportunityTypePage({
   params,
